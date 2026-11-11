@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Project Description
 ===================
 The Employee Training & Performance Management System is an application used to manage employee training programs, trainee details, attendance, assessments, performance evaluations and training reports.
@@ -16,8 +15,20 @@ The application should provide the following functionalities:
 10. Authentication and Authorization
 
 
+Commands for creating the environment/execution:
+=================================================
 
-=======
-# PythonTeam2026_Emp_Training_Performance_MgtSystem
-The Employee Training &amp; Performance Management System is a collaborative project which is used to manage employee training programs, trainee details, attendance, assessments, performance evaluations and training reports to demonstrate team work.
->>>>>>> 400ffa0160e86404987a45c7538ffb12a5d40042
+> python -m venv .venv
+
+Activate it:
+
+> .\.venv\Scripts\Activate.ps1
+
+You should see:
+
+(.venv) PS D:\...\..> python -m uvicorn main:app --reload
+
+> python -m pip install -r requirements.txt
+
+
+
