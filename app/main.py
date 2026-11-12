@@ -4,6 +4,7 @@ from app.core.config import get_settings
 from app.api.routers.health import router as health_router
 from app.api.routers.employee import router as employee_router
 from app.exceptions.exception_handlers import register_exception_handlers
+from app.api.routers.auth_router import router as auth_router
 
 # Load application settings
 settings = get_settings()
@@ -19,3 +20,4 @@ app.include_router(health_router)
 app.include_router(employee_router)
 
 register_exception_handlers(app)
+app.include_router(auth_router)
