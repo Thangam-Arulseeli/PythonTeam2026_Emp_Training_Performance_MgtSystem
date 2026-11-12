@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 
 from app.core.config import get_settings
-from app.routers.health import router as health_router
+from app.api.routers.health import router as health_router
+from app.api.routers.employee import router as employee_router
+from app.exceptions.exception_handlers import register_exception_handlers
 
 # Load application settings
 settings = get_settings()
@@ -14,3 +16,6 @@ app = FastAPI(
 )
 
 app.include_router(health_router)
+app.include_router(employee_router)
+
+register_exception_handlers(app)

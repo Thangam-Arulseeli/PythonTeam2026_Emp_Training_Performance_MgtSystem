@@ -55,7 +55,7 @@ class EmployeeBase(BaseModel):
         if value is not None and value > date.today():
             raise ValueError(
                 "Date of birth cannot be in the future"
-            )
+            )  
 
         return value
 
