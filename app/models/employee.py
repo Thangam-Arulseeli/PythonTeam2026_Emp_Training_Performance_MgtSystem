@@ -81,6 +81,11 @@ class EmployeeData(Base):
                                                 nullable=False
                                                 )
 
+    modified_at :Mapped[datetime] = mapped_column(DateTime,
+                                                    server_default=text("NOW()"),
+                                                    nullable=False
+                                                    )
+    
 
     documents: Mapped[list["EmployeeDocument"]] = relationship( 
                                                                 "EmployeeDocument", 
