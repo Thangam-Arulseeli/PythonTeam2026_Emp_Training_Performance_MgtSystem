@@ -16,8 +16,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
-if TYPE_CHECKING:
-    from app.models.trainer_resume import TrainerResume
+from app.models.trainer_resume import TrainerResume
 
 
 class Trainer(Base):
