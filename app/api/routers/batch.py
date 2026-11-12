@@ -2,7 +2,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.api.dependency.deps import get_batch_service
+from app.api.dependencies.auth import get_current_user, require_roles
+from app.api.dependencies.service_dependencies import get_batch_service
 from app.schema.batchSchema import (
     BatchCreate,
     BatchListResponse,
@@ -25,6 +26,7 @@ router = APIRouter(
 )
 async def create_batch(
     payload: BatchCreate,
+    current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.create_batch(payload)
@@ -38,6 +40,7 @@ async def create_batch(
 async def list_batches(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Items per page"),
+    current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.list_batches(page=page, size=size)
@@ -50,6 +53,7 @@ async def list_batches(
 )
 async def get_batches_by_course(
     course_id: int,
+    current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.get_batches_by_course(course_id)
@@ -62,6 +66,7 @@ async def get_batches_by_course(
 )
 async def get_batches_by_trainer(
     trainer_id: int,
+    current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.get_batches_by_trainer(trainer_id)
@@ -74,6 +79,7 @@ async def get_batches_by_trainer(
 )
 async def get_batch(
     batch_id: int,
+    current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.get_batch(batch_id)
@@ -87,6 +93,7 @@ async def get_batch(
 async def update_batch(
     batch_id: int,
     payload: BatchUpdate,
+    current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.update_batch(batch_id, payload)
@@ -99,6 +106,7 @@ async def update_batch(
 )
 async def delete_batch(
     batch_id: int,
+    current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ):
     await service.delete_batch(batch_id)

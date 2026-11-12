@@ -2,7 +2,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.api.dependency.deps import get_course_service
+from app.api.dependencies.auth import get_current_user, require_roles
+from app.api.dependencies.service_dependencies import get_course_service
 from app.schema.courseSchema import (
     CourseCreate,
     CourseListResponse,
@@ -25,6 +26,7 @@ router = APIRouter(
 )
 async def create_course(
     payload: CourseCreate,
+    current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ):
     return await service.create_course(payload)
@@ -41,6 +43,7 @@ async def list_courses(
     search: Optional[str] = Query(
         None, description="Search term for course name or description"
     ),
+    current_user=Depends(get_current_user),
     service: CourseService = Depends(get_course_service),
 ):
     return await service.list_courses(page=page, size=size, search=search)
@@ -53,6 +56,7 @@ async def list_courses(
 )
 async def get_course(
     course_id: int,
+    current_user=Depends(get_current_user),
     service: CourseService = Depends(get_course_service),
 ):
     return await service.get_course(course_id)
@@ -66,6 +70,7 @@ async def get_course(
 async def update_course(
     course_id: int,
     payload: CourseUpdate,
+    current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ):
     return await service.update_course(course_id, payload)
@@ -78,6 +83,7 @@ async def update_course(
 )
 async def delete_course(
     course_id: int,
+    current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ):
     await service.delete_course(course_id)

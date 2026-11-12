@@ -18,7 +18,7 @@ async def main() ->None:
         raise SystemExit("Passwords do not match")
 
     if not 8 <= len(password) <= 50:
-        raise SystemExit("Password must between 10 and 50 characters")
+        raise SystemExit("Password must be between 8 and 50 characters")
     async with SessionLocal() as db:
         result = await db.execute(
             select(User).where(

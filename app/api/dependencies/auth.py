@@ -1,6 +1,7 @@
 import jwt
 from fastapi import Depends,HTTPException,status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token
 from app.database.session import get_session
@@ -13,8 +14,8 @@ auth_scheme = OAuth2PasswordBearer(
 user_repository = UserRepository()
 
 async def get_current_user(
-  token = Depends(auth_scheme),
-  db=Depends(get_session)  
+  token: str = Depends(auth_scheme),
+  db: AsyncSession = Depends(get_session)
 ):
     try:
         payload=decode_token(token)
