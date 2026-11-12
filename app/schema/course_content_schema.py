@@ -1,0 +1,19 @@
+from typing import List
+
+from pydantic import BaseModel, ConfigDict
+
+
+class CourseContentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    course_id: int
+    filename: str
+    file_path: str
+
+
+class CourseContentListResponse(BaseModel):
+    items: List[CourseContentResponse]
+    total: int
+    page: int
+    size: int
