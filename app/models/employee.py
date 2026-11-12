@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -14,7 +15,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
-from app.models.employee_document import EmployeeDocument
+
+if TYPE_CHECKING:
+    from app.models.employee_document import EmployeeDocument
 
 class EmployeeData(Base):
 

@@ -30,5 +30,18 @@ You should see:
 
 > python -m pip install -r requirements.txt
 
+Database migrations
+===================
+
+Apply all migrations to the PostgreSQL database configured in `.env`:
+
+> python -m alembic upgrade head
+
+After changing SQLAlchemy models, create a migration and review the generated file:
+
+> python -m alembic revision --autogenerate -m "describe the schema change"
+
+Run migrations with the async PostgreSQL driver configured by `DATABASE_URL` settings.
+
 
 

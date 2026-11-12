@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.core.config import get_settings
-from app.routers.health import router as health_router
+from app.api.routers.health import router as health_router
 
 # Load application settings
 settings = get_settings()
@@ -10,7 +10,7 @@ settings = get_settings()
 app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
-    description="Employee Training and Performance Management System API"
+    description="Employee Training and Performance Management System API",
 )
 
 app.include_router(health_router)
