@@ -8,7 +8,7 @@ MAX_DURATION_DAYS = 1000
 class CourseCreate(BaseModel):
     course_name: str
     description: Optional[str] = None
-    course_contents: Optional[str] = None
+    course_contents: Optional[list[str]] = None
     duration: int
 
     @field_validator("course_name")
@@ -33,7 +33,7 @@ class CourseCreate(BaseModel):
 class CourseUpdate(BaseModel):
     course_name: Optional[str] = None
     description: Optional[str] = None
-    course_contents: Optional[str] = None
+    course_contents: Optional[list[str]] = None
     duration: Optional[int] = None
 
     @field_validator("course_name")
@@ -67,7 +67,7 @@ class CourseResponse(BaseModel):
     id: int
     course_name: str
     description: Optional[str] = None
-    course_contents: Optional[str] = None
+    course_contents: Optional[list[str]] = None
     duration: int
 
 

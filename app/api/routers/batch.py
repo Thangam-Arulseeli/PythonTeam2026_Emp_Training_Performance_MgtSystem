@@ -68,18 +68,6 @@ async def get_batches_by_trainer(
 
 
 @router.get(
-    "/my-batches",
-    response_model=BatchListResponse,
-    summary="Get batches for the logged-in trainer",
-)
-async def get_my_batches(
-    user_id: int = Query(..., description="User ID of the trainer (temporary until auth dependency is attached)"),
-    service: BatchService = Depends(get_batch_service),
-):
-    return await service.get_my_batches(user_id)
-
-
-@router.get(
     "/{batch_id}",
     response_model=BatchResponse,
     summary="Get a batch by ID",

@@ -149,14 +149,3 @@ class BatchService:
         batches = await self.batch_repo.get_by_trainer(trainer_id)
         return self.format_batch_list(batches)
 
-    async def get_my_batches(self, user_id: int) -> BatchListResponse:
-        trainer_id = await self.batch_repo.get_trainer_id_by_user_id(user_id)
-
-        if trainer_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Trainer profile not found for this user",
-            )
-
-        batches = await self.batch_repo.get_by_trainer(trainer_id)
-        return self.format_batch_list(batches)

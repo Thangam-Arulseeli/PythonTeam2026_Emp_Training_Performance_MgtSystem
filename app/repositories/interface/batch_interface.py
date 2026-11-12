@@ -40,6 +40,3 @@ class BatchInterface(ABC):
     async def trainer_exists(self, trainer_id: int) -> bool:
         pass
 
-    @abstractmethod
-    async def get_trainer_id_by_user_id(self, user_id: int) -> Optional[int]:
-        pass

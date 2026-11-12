@@ -71,12 +71,3 @@ class BatchRepository(BatchInterface):
         res = await self.db.execute(stmt)
         return bool(res.scalar())
 
-    async def get_trainer_id_by_user_id(self, user_id: int) -> Optional[int]:
-        if hasattr(Trainer, "user_id"):
-            stmt = select(Trainer.trainer_id).where(getattr(Trainer, "user_id") == user_id)
-            res = await self.db.execute(stmt)
-            return res.scalar_one_or_none()
-        # Fallback to direct trainer_id match until auth user_id is linked
-        stmt = select(Trainer.trainer_id).where(Trainer.trainer_id == user_id)
-        res = await self.db.execute(stmt)
-        return res.scalar_one_or_none()
