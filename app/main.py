@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.core.config import get_settings
+from app.api.routers.auth_router import router as auth_router
 from app.api.routers.health import router as health_router
 from app.api.routers.course import router as course_router
 from app.api.routers.batch import router as batch_router
@@ -20,6 +21,7 @@ app = FastAPI(
 app.add_exception_handler(AppException, app_exception_handler)
 
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(course_router)
 app.include_router(batch_router)
 app.include_router(course_content_router)
