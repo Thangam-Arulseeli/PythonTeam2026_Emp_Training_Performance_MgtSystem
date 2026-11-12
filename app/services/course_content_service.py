@@ -3,12 +3,17 @@ import uuid
 from pathlib import Path
 from typing import Tuple
 
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile
 
 from app.repositories.interface.course_content_interface import (
     CourseContentInterface,
 )
 from app.repositories.interface.course_interface import CourseInterface
+from app.exceptions import (
+    BadRequestException,
+    NotFoundException,
+    PayloadTooLargeException,
+)
 from app.schema.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
@@ -33,28 +38,21 @@ class CourseContentService:
         content = await self.content_repo.get_by_id(content_id)
 
         if not content:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course content not found",
-            )
+            raise NotFoundException("Course content not found")
 
         return content
 
     async def upload(self, course_id: int, file: UploadFile) -> CourseContentResponse:
 
         if not await self.course_repo.get_by_id(course_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found",
-            )
+            raise NotFoundException("Course not found")
 
         filename = os.path.basename(file.filename or "")
         extension = Path(filename).suffix.lower()
 
         if not filename or extension not in ALLOWED_EXTENSIONS:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unsupported file type. Allowed: {sorted(ALLOWED_EXTENSIONS)}",
+            raise BadRequestException(
+                f"Unsupported file type. Allowed: {sorted(ALLOWED_EXTENSIONS)}"
             )
 
         course_dir = UPLOAD_DIR / str(course_id)
@@ -69,9 +67,8 @@ class CourseContentService:
                     size += len(chunk)
 
                     if size > MAX_FILE_SIZE:
-                        raise HTTPException(
-                            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                            detail="File too large. Maximum size is 50 MB",
+                        raise PayloadTooLargeException(
+                            "File too large. Maximum size is 50 MB"
                         )
 
                     output.write(chunk)
@@ -92,10 +89,7 @@ class CourseContentService:
     async def list_for_course(self, course_id: int) -> CourseContentListResponse:
 
         if not await self.course_repo.get_by_id(course_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found",
-            )
+            raise NotFoundException("Course not found")
 
         items = await self.content_repo.get_by_course(course_id)
 
@@ -112,10 +106,7 @@ class CourseContentService:
         file_path = content.file_path
 
         if not os.path.exists(file_path):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="File not found on server",
-            )
+            raise NotFoundException("File not found on server")
 
         return file_path, content.filename
 

@@ -1,7 +1,11 @@
 import os
 from typing import Optional
 
-from fastapi import HTTPException, status
+from app.exceptions import (
+    ConflictException,
+    NotFoundException,
+    UnprocessableEntityException,
+)
 
 from app.repositories.interface.course_interface import CourseInterface
 from app.schema.courseSchema import (
@@ -19,13 +23,13 @@ class CourseService:
     async def _get_or_404(self, course_id: int):
         course = await self.course_repo.get_by_id(course_id)
         if not course:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Course not found")
+            raise NotFoundException("Course not found")
         return course
 
     async def create_course(self, payload: CourseCreate) -> CourseResponse:
         existing = await self.course_repo.get_by_name(payload.course_name)
         if existing:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Course name already exists")
+            raise ConflictException("Course name already exists")
         created = await self.course_repo.create(payload.model_dump())
         return CourseResponse.model_validate(created)
 
@@ -51,29 +55,21 @@ class CourseService:
         course = await self._get_or_404(course_id)
         data = payload.model_dump(exclude_unset=True)
         if "course_name" in data and data["course_name"] is None:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY, "course_name cannot be null"
-            )
+            raise UnprocessableEntityException("course_name cannot be null")
         if "duration" in data and data["duration"] is None:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY, "duration cannot be null"
-            )
+            raise UnprocessableEntityException("duration cannot be null")
         new_name = data.get("course_name")
         if new_name:
             existing = await self.course_repo.get_by_name(new_name)
             if existing and existing.id != course_id:
-                raise HTTPException(
-                    status.HTTP_409_CONFLICT, "Course name already exists"
-                )
+                raise ConflictException("Course name already exists")
         updated = await self.course_repo.update(course, data)
         return CourseResponse.model_validate(updated)
 
     async def delete_course(self, course_id: int) -> None:
         course = await self._get_or_404(course_id)
         if await self.course_repo.has_batches(course_id):
-            raise HTTPException(
-                status.HTTP_409_CONFLICT, "Cannot delete a course that has batches"
-            )
+            raise ConflictException("Cannot delete a course that has batches")
         file_paths = await self.course_repo.get_content_file_paths(course_id)
         await self.course_repo.delete(course)
         for path in file_paths:

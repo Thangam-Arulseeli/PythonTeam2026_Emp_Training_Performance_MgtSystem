@@ -1,6 +1,9 @@
 from typing import List, Optional
 
-from fastapi import HTTPException, status
+from app.exceptions import (
+    NotFoundException,
+    UnprocessableEntityException,
+)
 
 from app.repositories.interface.batch_interface import BatchInterface
 from app.repositories.interface.course_interface import CourseInterface
@@ -26,33 +29,21 @@ class BatchService:
         batch = await self.batch_repo.get_by_id(batch_id)
 
         if not batch:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Batch not found",
-            )
+            raise NotFoundException("Batch not found")
 
         return batch
 
     async def validate_relations(self, course_id=None, trainer_id=None):
         if course_id is not None and not await self.course_repo.get_by_id(course_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found",
-            )
+            raise NotFoundException("Course not found")
 
         if trainer_id is not None and not await self.batch_repo.trainer_exists(trainer_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Trainer not found",
-            )
+            raise NotFoundException("Trainer not found")
 
     @staticmethod
     def validate_dates(start_date, end_date):
         if end_date <= start_date:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="End date must be after start date",
-            )
+            raise UnprocessableEntityException("End date must be after start date")
 
     @staticmethod
     def format_batch_list(
@@ -94,10 +85,7 @@ class BatchService:
         data = payload.model_dump(exclude_unset=True)
 
         if not data:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="No fields provided for update",
-            )
+            raise UnprocessableEntityException("No fields provided for update")
 
         for field in (
             "batch_name",
@@ -107,10 +95,7 @@ class BatchService:
             "end_date",
         ):
             if field in data and data[field] is None:
-                raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"{field} cannot be null",
-                )
+                raise UnprocessableEntityException(f"{field} cannot be null")
 
         await self.validate_relations(
             data.get("course_id"),
@@ -131,20 +116,14 @@ class BatchService:
 
     async def get_batches_by_course(self, course_id: int) -> BatchListResponse:
         if not await self.course_repo.get_by_id(course_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Course not found",
-            )
+            raise NotFoundException("Course not found")
 
         batches = await self.batch_repo.get_by_course(course_id)
         return self.format_batch_list(batches)
 
     async def get_batches_by_trainer(self, trainer_id: int) -> BatchListResponse:
         if not await self.batch_repo.trainer_exists(trainer_id):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Trainer not found",
-            )
+            raise NotFoundException("Trainer not found")
 
         batches = await self.batch_repo.get_by_trainer(trainer_id)
         return self.format_batch_list(batches)
