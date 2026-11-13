@@ -1,5 +1,12 @@
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 
 from app.utils.duration import DurationUnit, duration_to_standard_units
 
@@ -80,6 +87,12 @@ class CourseResponse(BaseModel):
     course_contents: list[str] | None = None
     duration_value: int
     duration_unit: DurationUnit
+
+    @computed_field
+    @property
+    def duration(self) -> str:
+        """Format the duration value and unit for display in API responses."""
+        return f"{self.duration_value} {self.duration_unit.value}"
 
 
 class CourseListResponse(BaseModel):
