@@ -1,11 +1,10 @@
-import logging
 import time
 import uuid
 from collections.abc import Awaitable, Callable
 
 from fastapi import Request, Response
 
-logger = logging.getLogger(__name__)
+from app.utils.logger import logger
 
 
 async def log_requests(
@@ -27,21 +26,31 @@ async def log_requests(
         correlation_id,
     )
 
-    response = await call_next(request)
-    process_time = time.perf_counter() - start_time
+    try:
+        response = await call_next(request)
+        process_time = time.perf_counter() - start_time
 
-    response.set_cookie(key="example", value="value")
-    response.headers["X-Process-Time"] = str(process_time)
-    response.headers["X-Correlation-ID"] = correlation_id
+        response.headers["X-Process-Time"] = f"{process_time:.4f}s"
+        response.headers["X-Correlation-ID"] = correlation_id
 
-    logger.info(
-        "Request completed: %s %s | Status: %s | Time: %.4f seconds | "
-        "Correlation ID: %s",
-        request.method,
-        request.url.path,
-        response.status_code,
-        process_time,
-        correlation_id,
-    )
+        logger.info(
+            "Request completed: %s %s | Status: %s | Time: %.4f seconds | Correlation ID: %s",
+            request.method,
+            request.url.path,
+            response.status_code,
+            process_time,
+            correlation_id,
+        )
 
-    return response
+        return response
+    except Exception as exc:
+        process_time = time.perf_counter() - start_time
+        logger.exception(
+            "Request failed: %s %s | Time: %.4f seconds | Correlation ID: %s | Error: %s",
+            request.method,
+            request.url.path,
+            process_time,
+            correlation_id,
+            str(exc),
+        )
+        raise exc

@@ -6,6 +6,10 @@ from app.exceptions.custom_exceptions import (
     PayloadTooLargeException,
     UnprocessableEntityException,
 )
+from app.exceptions.handlers import (
+    app_exception_handler,
+    global_exception_handler,
+)
 
 __all__ = [
     "AppException",
@@ -14,4 +18,6 @@ __all__ = [
     "NotFoundException",
     "PayloadTooLargeException",
     "UnprocessableEntityException",
+    "app_exception_handler",
+    "global_exception_handler",
 ]

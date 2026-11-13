@@ -4,7 +4,6 @@ from app.exceptions import (
     NotFoundException,
     UnprocessableEntityException,
 )
-
 from app.repositories.interface.batch_interface import BatchInterface
 from app.repositories.interface.course_interface import CourseInterface
 from app.schema.batchSchema import (
@@ -13,6 +12,7 @@ from app.schema.batchSchema import (
     BatchResponse,
     BatchUpdate,
 )
+from app.utils.logger import logger
 
 
 class BatchService:
@@ -29,15 +29,18 @@ class BatchService:
         batch = await self.batch_repo.get_by_id(batch_id)
 
         if not batch:
+            logger.warning("Batch not found: batch_id=%s", batch_id)
             raise NotFoundException("Batch not found")
 
         return batch
 
     async def validate_relations(self, course_id=None, trainer_id=None):
         if course_id is not None and not await self.course_repo.get_by_id(course_id):
+            logger.warning("Relation validation failed: Course not found id=%s", course_id)
             raise NotFoundException("Course not found")
 
         if trainer_id is not None and not await self.batch_repo.trainer_exists(trainer_id):
+            logger.warning("Relation validation failed: Trainer not found id=%s", trainer_id)
             raise NotFoundException("Trainer not found")
 
     @staticmethod
@@ -73,6 +76,7 @@ class BatchService:
         self.validate_dates(payload.start_date, payload.end_date)
 
         batch = await self.batch_repo.create(payload.model_dump())
+        logger.info("Batch created successfully: id=%s, name='%s'", batch.id, batch.batch_name)
         return BatchResponse.model_validate(batch)
 
     async def get_batch(self, batch_id: int) -> BatchResponse:
@@ -108,14 +112,17 @@ class BatchService:
         self.validate_dates(start_date, end_date)
 
         updated_batch = await self.batch_repo.update(batch, data)
+        logger.info("Batch updated successfully: id=%s", batch_id)
         return BatchResponse.model_validate(updated_batch)
 
     async def delete_batch(self, batch_id: int) -> None:
         batch = await self.get_batch_or_404(batch_id)
         await self.batch_repo.delete(batch)
+        logger.info("Batch deleted successfully: id=%s", batch_id)
 
     async def get_batches_by_course(self, course_id: int) -> BatchListResponse:
         if not await self.course_repo.get_by_id(course_id):
+            logger.warning("get_batches_by_course failed: Course not found id=%s", course_id)
             raise NotFoundException("Course not found")
 
         batches = await self.batch_repo.get_by_course(course_id)
@@ -123,8 +130,8 @@ class BatchService:
 
     async def get_batches_by_trainer(self, trainer_id: int) -> BatchListResponse:
         if not await self.batch_repo.trainer_exists(trainer_id):
+            logger.warning("get_batches_by_trainer failed: Trainer not found id=%s", trainer_id)
             raise NotFoundException("Trainer not found")
 
         batches = await self.batch_repo.get_by_trainer(trainer_id)
         return self.format_batch_list(batches)
-

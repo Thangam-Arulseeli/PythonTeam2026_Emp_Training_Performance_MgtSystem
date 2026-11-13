@@ -5,19 +5,20 @@ from typing import Tuple
 
 from fastapi import UploadFile
 
-from app.repositories.interface.course_content_interface import (
-    CourseContentInterface,
-)
-from app.repositories.interface.course_interface import CourseInterface
 from app.exceptions import (
     BadRequestException,
     NotFoundException,
     PayloadTooLargeException,
 )
+from app.repositories.interface.course_content_interface import (
+    CourseContentInterface,
+)
+from app.repositories.interface.course_interface import CourseInterface
 from app.schema.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
 )
+from app.utils.logger import logger
 
 UPLOAD_DIR = Path("uploads/course_content")
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt"}
@@ -38,6 +39,7 @@ class CourseContentService:
         content = await self.content_repo.get_by_id(content_id)
 
         if not content:
+            logger.warning("Course content not found: content_id=%s", content_id)
             raise NotFoundException("Course content not found")
 
         return content
@@ -45,12 +47,14 @@ class CourseContentService:
     async def upload(self, course_id: int, file: UploadFile) -> CourseContentResponse:
 
         if not await self.course_repo.get_by_id(course_id):
+            logger.warning("Upload failed: Course not found course_id=%s", course_id)
             raise NotFoundException("Course not found")
 
         filename = os.path.basename(file.filename or "")
         extension = Path(filename).suffix.lower()
 
         if not filename or extension not in ALLOWED_EXTENSIONS:
+            logger.warning("Upload rejected: unsupported file extension '%s'", extension)
             raise BadRequestException(
                 f"Unsupported file type. Allowed: {sorted(ALLOWED_EXTENSIONS)}"
             )
@@ -67,6 +71,7 @@ class CourseContentService:
                     size += len(chunk)
 
                     if size > MAX_FILE_SIZE:
+                        logger.warning("Upload rejected: file size %s exceeds %s", size, MAX_FILE_SIZE)
                         raise PayloadTooLargeException(
                             "File too large. Maximum size is 50 MB"
                         )
@@ -79,16 +84,20 @@ class CourseContentService:
                 file_path=str(file_path),
             )
 
+            logger.info("Course content uploaded successfully: id=%s for course=%s", content.id, course_id)
             return CourseContentResponse.model_validate(content)
 
-        except Exception:
+        except Exception as exc:
             if file_path.exists():
                 file_path.unlink()
+            if not isinstance(exc, (BadRequestException, NotFoundException, PayloadTooLargeException)):
+                logger.exception("Error uploading course content file: %s", exc)
             raise
 
     async def list_for_course(self, course_id: int) -> CourseContentListResponse:
 
         if not await self.course_repo.get_by_id(course_id):
+            logger.warning("list_for_course failed: Course not found id=%s", course_id)
             raise NotFoundException("Course not found")
 
         items = await self.content_repo.get_by_course(course_id)
@@ -106,8 +115,10 @@ class CourseContentService:
         file_path = content.file_path
 
         if not os.path.exists(file_path):
+            logger.error("Content file missing on disk: path=%s for content_id=%s", file_path, content_id)
             raise NotFoundException("File not found on server")
 
+        logger.info("Serving content file download: content_id=%s, filename='%s'", content_id, content.filename)
         return file_path, content.filename
 
     async def delete(self, content_id: int) -> None:
@@ -116,9 +127,11 @@ class CourseContentService:
         file_path = content.file_path
 
         await self.content_repo.delete(content)
+        logger.info("Content record deleted from database: content_id=%s", content_id)
 
         if os.path.exists(file_path):
             try:
                 os.remove(file_path)
-            except OSError:
-                pass
+                logger.info("Content file deleted from disk: %s", file_path)
+            except OSError as exc:
+                logger.error("Failed to delete content file from disk %s: %s", file_path, exc)

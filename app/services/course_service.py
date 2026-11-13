@@ -6,7 +6,6 @@ from app.exceptions import (
     NotFoundException,
     UnprocessableEntityException,
 )
-
 from app.repositories.interface.course_interface import CourseInterface
 from app.schema.courseSchema import (
     CourseCreate,
@@ -14,6 +13,7 @@ from app.schema.courseSchema import (
     CourseResponse,
     CourseUpdate,
 )
+from app.utils.logger import logger
 
 
 class CourseService:
@@ -23,14 +23,17 @@ class CourseService:
     async def _get_or_404(self, course_id: int):
         course = await self.course_repo.get_by_id(course_id)
         if not course:
+            logger.warning("Course not found: course_id=%s", course_id)
             raise NotFoundException("Course not found")
         return course
 
     async def create_course(self, payload: CourseCreate) -> CourseResponse:
         existing = await self.course_repo.get_by_name(payload.course_name)
         if existing:
+            logger.warning("Course creation conflict: name '%s' already exists", payload.course_name)
             raise ConflictException("Course name already exists")
         created = await self.course_repo.create(payload.model_dump())
+        logger.info("Course created successfully: id=%s, name='%s'", created.id, created.course_name)
         return CourseResponse.model_validate(created)
 
     async def get_course(self, course_id: int) -> CourseResponse:
@@ -62,19 +65,24 @@ class CourseService:
         if new_name:
             existing = await self.course_repo.get_by_name(new_name)
             if existing and existing.id != course_id:
+                logger.warning("Course update conflict: name '%s' already exists for another course", new_name)
                 raise ConflictException("Course name already exists")
         updated = await self.course_repo.update(course, data)
+        logger.info("Course updated successfully: id=%s", course_id)
         return CourseResponse.model_validate(updated)
 
     async def delete_course(self, course_id: int) -> None:
         course = await self._get_or_404(course_id)
         if await self.course_repo.has_batches(course_id):
+            logger.warning("Cannot delete course: id=%s has associated batches", course_id)
             raise ConflictException("Cannot delete a course that has batches")
         file_paths = await self.course_repo.get_content_file_paths(course_id)
         await self.course_repo.delete(course)
+        logger.info("Course deleted from database: id=%s", course_id)
         for path in file_paths:
             if os.path.exists(path):
                 try:
                     os.remove(path)
-                except OSError:
-                    pass
+                    logger.info("Deleted associated content file: %s", path)
+                except OSError as exc:
+                    logger.error("Failed to delete content file %s: %s", path, exc)

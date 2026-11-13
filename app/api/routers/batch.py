@@ -66,7 +66,7 @@ async def get_batches_by_course(
 )
 async def get_batches_by_trainer(
     trainer_id: int,
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_roles("admin", "trainer")),
     service: BatchService = Depends(get_batch_service),
 ):
     return await service.get_batches_by_trainer(trainer_id)

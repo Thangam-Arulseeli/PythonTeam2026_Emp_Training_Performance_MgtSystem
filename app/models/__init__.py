@@ -1,4 +1,4 @@
-"""Import all ORM models so their tables and relationships register with Base."""
+"""Import all ORM models so their relationships are registered with Base."""
 
 from app.models.batch import Batch
 from app.models.course import Course
