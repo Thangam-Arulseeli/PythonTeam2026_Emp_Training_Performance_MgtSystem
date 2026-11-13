@@ -23,6 +23,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return employee
 
+
     # GET ALL ACTIVE EMPLOYEES
     async def get_all_employees(
         self,
@@ -41,6 +42,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
         result = await self.db.execute(statement)
 
         return list(result.scalars().all())
+
 
     # GET ALL INACTIVE EMPLOYEES
     async def get_all_employees_inactive(
@@ -77,6 +79,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return result.scalar_one_or_none()
 
+
     # PATCH EMPLOYEE
     async def update_employee(
         self,
@@ -91,11 +94,11 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return employee
 
+
     # SOFT DELETE EMPLOYEE
     async def soft_delete_employee(self,employee: EmployeeData) -> EmployeeData:
 
         employee.is_active = False
-
         await self.db.flush()
 
         return employee
@@ -105,13 +108,12 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
     async def reactivate_employee( self,employee: EmployeeData,) -> EmployeeData:
         
         employee.is_active = True
-
         await self.db.flush()
 
         return employee
 
 
-    
+    #GET ALL INACTIVE EMPLOYEES BY ID 
     async def get_inactive_employee_by_id( self, employee_id: int,) -> EmployeeData | None:
        
 

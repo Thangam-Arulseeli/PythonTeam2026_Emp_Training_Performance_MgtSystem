@@ -20,7 +20,6 @@ DEPARTMENT = {
     "max_length": 30
 }
 
-ROLE = { "pattern": r"^(employee|trainee)$" }
 
 def validate_employee_age(value: date | None) -> date | None:
     if value is None:
@@ -69,7 +68,7 @@ class EmployeeBase(BaseModel):
 
     department: str = Field( default="Unassigned",**DEPARTMENT)
 
-    role: str = Field(default="employee",**ROLE)
+    role: str 
 
     date_of_birth: date | None = None
     joining_date: date | None = None
@@ -83,6 +82,16 @@ class EmployeeBase(BaseModel):
             raise ValueError("Field cannot be empty")
 
         return value
+    
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, value: str) -> str:
+        if value.strip().lower() != "employee":
+            raise ValueError(
+                "Role must be employee"
+            )
+
+        return "employee"
 
     
 class EmployeeCreate(EmployeeBase):
@@ -111,7 +120,7 @@ class EmployeeUpdate(BaseModel):
 
     department: str | None = Field( default=None, **DEPARTMENT )
 
-    role: str | None = Field( default=None, **ROLE )
+    role: str 
 
     date_of_birth: date | None = None
     
@@ -137,6 +146,16 @@ class EmployeeUpdate(BaseModel):
     @classmethod
     def validate_joining_date( cls,value: date | None,) -> date | None:
         return validate_employee_joining_date(value)
+
+    @field_validator("role")
+    @classmethod
+    def validate_role(cls, value: str) -> str:
+        if value.strip().lower() != "employee":
+            raise ValueError(
+                "Role must be employee"
+            )
+
+        return "employee"
 
 
 class EmployeeResponse(EmployeeBase):

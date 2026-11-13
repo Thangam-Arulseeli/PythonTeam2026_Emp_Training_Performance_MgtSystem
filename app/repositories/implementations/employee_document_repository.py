@@ -13,11 +13,13 @@ class EmployeeDocumentRepositoryImpl( EmployeeDocumentRepositoryInterface ):
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    # CREATE PROFILE PICTURE AND RESUME RECORDS
+    # UPLOAD PROFILE PICTURE OR RESUME RECORDS OR BOTH 
     async def create_documents(
         self,
         documents: list[EmployeeDocument]
     ) -> list[EmployeeDocument]:
+
+        """upload either profile pic or the resume or both"""
 
         self.db.add_all(documents)
 
@@ -30,6 +32,8 @@ class EmployeeDocumentRepositoryImpl( EmployeeDocumentRepositoryInterface ):
         self,
         employee_id: int
     ) -> list[EmployeeDocument]:
+
+        """Retrieve the uploaded documents of an employee."""
 
         statement = (
             select(EmployeeDocument)

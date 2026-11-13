@@ -22,9 +22,11 @@ from app.repositories.interfaces.employee_repository_interface import (
     EmployeeRepositoryInterface,
 )
 
+#CREATE THE UPLOAD DIR
 BASE_DIR = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = BASE_DIR / "uploads"
 
+#MAXIMUM FILE SIZE 
 IMAGE_MAX_SIZE = 2 * 1024 * 1024
 RESUME_MAX_SIZE = 5 * 1024 * 1024
 
@@ -44,6 +46,8 @@ class EmployeeDocumentService:
     # CHECK EMPLOYEE
     async def check_employee(self,employee_id: int,) -> None:
 
+        """Verify whether the employee exists and is active."""
+
         employee = ( await self.employee_repository.get_employee_by_id(employee_id) )
 
         if employee is None:
@@ -56,6 +60,9 @@ class EmployeeDocumentService:
         document_type: str,
     ) -> str:
 
+        """Validate and store an uploaded employee document"""
+
+        #Checks the file extension
         if document_type == "profile_picture":
             allowed_extensions = {".jpg", ".jpeg", ".png"}
             max_size = IMAGE_MAX_SIZE
@@ -70,11 +77,13 @@ class EmployeeDocumentService:
         if extension not in allowed_extensions:
             raise InvalidEmployeeDataException( f"Invalid file format for {document_type}")
 
+        #CHECK THE EMPTY FILE
         content = await file.read(max_size + 1)
 
         if not content:
             raise InvalidEmployeeDataException("Uploaded file cannot be empty")
 
+        #CHECK THE FILE SIZE 
         if len(content) > max_size:
             raise InvalidEmployeeDataException(f"{document_type} exceeds allowed file size")
 
@@ -88,6 +97,7 @@ class EmployeeDocumentService:
         elif extension == ".pdf":
             valid = content.startswith(b"%PDF-")
 
+        #saves the file
         else:
             try:
                 with zipfile.ZipFile(io.BytesIO(content)) as archive:
@@ -101,6 +111,7 @@ class EmployeeDocumentService:
         if not valid:
             raise InvalidEmployeeDataException(f"File content does not match {extension}")
 
+        #Creates the required upload directory if it does not exist
         directory = UPLOAD_DIR / folder
 
         await asyncio.to_thread(
@@ -116,8 +127,8 @@ class EmployeeDocumentService:
 
         return str(file_path)
 
-    # UPLOAD PROFILE PICTURE AND RESUME
 
+    # UPLOAD PROFILE PICTURE AND RESUME
     async def upload_documents(
         self,
         employee_id: int,
@@ -125,12 +136,16 @@ class EmployeeDocumentService:
         resume: UploadFile | None = None,
     ) -> list[EmployeeDocument]:
 
+        """Upload a profile picture, resume, or both for an active employee."""
+
+        # Verify that the employee exists and is active.
         await self.check_employee(employee_id)
 
+        # Reject the request if neither a profile picture nor a resume is provided.
         if profile_picture is None and resume is None:
             raise InvalidEmployeeDataException("Upload at least one document")
 
-
+        # Prepare a list containing only the documents provided in the request.
         files_to_upload = []
 
         if profile_picture is not None:
@@ -144,6 +159,7 @@ class EmployeeDocumentService:
         try:
             documents = []
 
+            # Validate and save each file, then prepare its database record.
             for document_type, file in files_to_upload:
                
                 path = await self.save_file( file,document_type,)
@@ -169,6 +185,7 @@ class EmployeeDocumentService:
 
             return documents
 
+        # Roll back the transaction and remove files saved during the failed request.
         except Exception as exc:
             await self.db.rollback()
 
@@ -193,6 +210,7 @@ class EmployeeDocumentService:
         employee_id: int,
     ) -> list[EmployeeDocument]:
 
+        #Verify that the employee exists and is active.
         await self.check_employee(employee_id)
 
         documents = (

@@ -6,16 +6,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_session
 
+#Configure the health router
 router = APIRouter(
     prefix="/health",
     tags=["Health"]
 )
 
-
+#CHECK TEH DB CONNECTION 
 @router.get("/")
 async def health_check(
     db: Annotated[AsyncSession, Depends(get_session)]
 ):
+    """
+    Check whether the database connection is successfully established
+    and verify that the database is functioning properly.
+    """
+
     try:
         result = await db.execute(text("SELECT 1"))
 

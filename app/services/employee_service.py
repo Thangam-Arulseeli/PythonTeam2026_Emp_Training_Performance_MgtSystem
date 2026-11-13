@@ -25,8 +25,11 @@ class EmployeeService:
         self.db = db
         self.repository = repository
 
+
     # CREATE EMPLOYEE
     async def create_employee( self, data: EmployeeCreate,) -> EmployeeData:
+
+        """create a new employee"""
 
         employee = EmployeeData( **data.model_dump() )
 
@@ -46,6 +49,7 @@ class EmployeeService:
 
             raise InvalidEmployeeDataException(str(exc)) from exc
 
+
     # DISPLAY ALL ACTIVE EMPLOYEES
     async def get_all_employees(
         self,
@@ -53,7 +57,10 @@ class EmployeeService:
         limit: int = 10,
     ) -> list[EmployeeData]:
 
+        """display all the active employee using pagination"""
+
         return await self.repository.get_all_employees( skip=skip, limit=limit, )
+
 
     # DISPLAY ALL INACTIVE EMPLOYEES
     async def get_all_employees_inactive(
@@ -62,11 +69,16 @@ class EmployeeService:
         limit: int = 10,
     ) -> list[EmployeeData]:
 
+        """display all the inactive employee using pagination"""
+
         return await self.repository.get_all_employees_inactive( skip=skip, limit=limit, )
+
 
 
     # DISPLAY EMPLOYEE BY ID
     async def get_employee_by_id( self, employee_id: int,) -> EmployeeData:
+
+        """display all the active employee using employee id"""
 
         employee = await self.repository.get_employee_by_id( employee_id)
 
@@ -75,17 +87,22 @@ class EmployeeService:
 
         return employee
 
-    # UPDATE EMPLOYEE USING PATCH
+
+    # UPDATE EMPLOYEE DETAILS USING PATCH
     async def update_employee(
         self,
         employee_id: int,
         data: EmployeeUpdate,
     ) -> EmployeeData:
 
+        """change the employee personal details"""
+
         employee = await self.get_employee_by_id(employee_id)
 
+        # Extract only the fields provided in the PATCH request.
         update_data = data.model_dump(exclude_unset=True)
 
+        # Define mandatory employee fields that cannot be set to null.
         required_fields = {
             "full_name",
             "email",
@@ -93,6 +110,7 @@ class EmployeeService:
             "role"
         }
 
+        # Validate that any provided mandatory field is not null.
         for field in required_fields:
             if (
                 field in update_data
@@ -117,15 +135,17 @@ class EmployeeService:
 
             raise InvalidEmployeeDataException(str(exc)) from exc
 
-    # SOFT DELETE EMPLOYEE
-    
+
+    # SOFT DELETE EMPLOYEE - MAKE EMPLOYEE INACTIVE
     async def delete_employee(self,employee_id: int,) -> dict:
+
+        """soft-delete an employee by changing the employee's status to inactive"""
        
         employee = await self.get_employee_by_id(employee_id)
 
         try:
-            # Find matching user using email and role
-            if employee.role in ("employee", "trainee"):
+            # Find matching user table using email and role
+            if employee.role == "employee":
 
                 #remove the authoriztion to login using user table as delete in employee
                 result = await self.db.execute(
@@ -156,21 +176,25 @@ class EmployeeService:
             await self.db.rollback()
             raise InvalidEmployeeDataException(str(exc)) from exc
 
-    
+
+    # UPDATE THE EMPLOYEE TO ACTIVE EMPLOYEE
     async def reactivate_employee(
         self,
         employee_id: int,
     ) -> EmployeeData:
 
-        employee = (
-            await self.repository.get_inactive_employee_by_id(employee_id)
-        )
+        """update the inactive employee to active employee"""
+
+        employee = ( await self.repository.get_inactive_employee_by_id(employee_id) )
 
         if employee is None:
             raise EmployeeNotFoundException()
 
         try:
-            if employee.role in ("employee", "trainee"):
+            # Find matching user table using email and role
+            if employee.role == "employee":
+
+                #add the authoriztion to login using user table as delete in employee
                 result = await self.db.execute(
                     select(User).where(
                         User.email == employee.email,
@@ -183,8 +207,10 @@ class EmployeeService:
                 if user is not None:
                     user.is_active = True
 
-            employee.is_active = True
+            # Reactivate employee through repository
+            employee = await self.repository.reactivate_employee(employee)
 
+            #Commit both changes
             await self.db.commit()
             await self.db.refresh(employee)
 

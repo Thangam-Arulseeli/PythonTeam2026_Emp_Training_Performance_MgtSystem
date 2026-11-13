@@ -9,16 +9,17 @@ from app.exceptions.exception_handlers import register_exception_handlers
 # Load application settings
 settings = get_settings()
 
-# Create FastAPI application
+# Initialize the FastAPI application with project metadata.
 app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
     description="Employee Training and Performance Management System API"
 )
 
-#the routers 
+#Register the routers  
 app.include_router(health_router)
 app.include_router(auth_router)
 app.include_router(employee_router)
 
+#Register centralized exception handlers
 register_exception_handlers(app)
