@@ -81,3 +81,8 @@ class EmployeeDocumentResponse(EmployeeDocumentBase):
     uploaded_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class EmployeeDocumentsListResponse(BaseModel):
+    message: str
+    employee_id: int
+    documents: list[EmployeeDocumentResponse]

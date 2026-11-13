@@ -25,7 +25,7 @@ from app.schemas.employee import (
     EmployeeResponse,
 )
 
-from app.schemas.employee_document import EmployeeDocumentResponse
+from app.schemas.employee_document import EmployeeDocumentResponse, EmployeeDocumentsListResponse
 
 
 router = APIRouter(
@@ -129,7 +129,7 @@ async def upload_employee_documents(
 # GET EMPLOYEE DOCUMENTS
 @router.get(
     "/{employee_id}/documents",
-    response_model=list[EmployeeDocumentResponse],
+    response_model=EmployeeDocumentsListResponse,
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(require_roles("admin"))],
 )
@@ -137,4 +137,20 @@ async def get_employee_documents(
     service: EmployeeDocumentServiceDep,
     employee_id: int = Path(gt=0),
 ):
-    return await service.get_documents(employee_id)
+    documents = await service.get_documents(employee_id)
+
+    if not documents:
+        return {
+            "message": "Employee exists but no documents uploaded",
+            "employee_id": employee_id,
+            "documents": [],
+        }
+
+    return {
+        "message": "Employee documents retrieved successfully",
+        "employee_id": employee_id,
+        "documents": [
+            EmployeeDocumentResponse.model_validate(doc)
+            for doc in documents
+        ],
+    }
