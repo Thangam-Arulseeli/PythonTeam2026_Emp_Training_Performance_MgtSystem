@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,15 +17,17 @@ from app.services.implementations.trainer_resume_service import (
 
 
 def get_trainer_resume_repository(
-    db: AsyncSession = Depends(get_session),
+    db: Annotated[AsyncSession, Depends(get_session)],
 ):
     return TrainerResumeRepositoryImpl(db)
 
 
 def get_trainer_resume_service(
-    trainer_repository: TrainerRepositoryImpl = Depends(get_trainer_repository),
-    resume_repository: TrainerResumeRepositoryImpl = Depends(
-        get_trainer_resume_repository
-    ),
+    trainer_repository: Annotated[
+        TrainerRepositoryImpl, Depends(get_trainer_repository)
+    ],
+    resume_repository: Annotated[
+        TrainerResumeRepositoryImpl, Depends(get_trainer_resume_repository)
+    ],
 ):
     return TrainerResumeServiceImpl(trainer_repository, resume_repository)
