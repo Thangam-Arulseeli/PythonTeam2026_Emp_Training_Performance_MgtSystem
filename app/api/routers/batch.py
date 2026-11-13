@@ -27,7 +27,7 @@ async def create_batch(
     payload: BatchCreate,
     current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
-):
+) -> BatchResponse:
     """Create a batch after validating its course and trainer; admin only."""
     return await service.create_batch(payload)
 
@@ -42,7 +42,7 @@ async def list_batches(
     size: int = Query(10, ge=1, le=100, description="Items per page"),
     current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
-):
+) -> BatchListResponse:
     """Return a paginated list of batches."""
     return await service.list_batches(page=page, size=size)
 
@@ -56,7 +56,7 @@ async def get_batches_by_course(
     course_id: int,
     current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
-):
+) -> BatchListResponse:
     """Return all batches assigned to the requested course."""
     return await service.get_batches_by_course(course_id)
 
@@ -70,7 +70,7 @@ async def get_batches_by_trainer(
     trainer_id: int,
     current_user=Depends(require_roles("admin", "trainer")),
     service: BatchService = Depends(get_batch_service),
-):
+) -> BatchListResponse:
     """Return batches assigned to a trainer; admins and trainers may access it."""
     return await service.get_batches_by_trainer(trainer_id)
 
@@ -84,7 +84,7 @@ async def get_batch(
     batch_id: int,
     current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
-):
+) -> BatchResponse:
     """Return the batch with the requested identifier."""
     return await service.get_batch(batch_id)
 
@@ -99,7 +99,7 @@ async def update_batch(
     payload: BatchUpdate,
     current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
-):
+) -> BatchResponse:
     """Update the supplied batch fields; access is restricted to administrators."""
     return await service.update_batch(batch_id, payload)
 
@@ -113,6 +113,6 @@ async def delete_batch(
     batch_id: int,
     current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
-):
+) -> None:
     """Delete the requested batch; access is restricted to administrators."""
     await service.delete_batch(batch_id)

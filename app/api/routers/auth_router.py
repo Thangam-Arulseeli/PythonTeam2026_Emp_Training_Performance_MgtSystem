@@ -34,7 +34,7 @@ async def register(
     data: RegisterRequest,
     service: AuthServiceDependency,
     db: AsyncSession = Depends(get_session)
-):
+) -> MessageResponse:
     """Register an employee or trainer account using an authorized staff email."""
     await service.register(db, data)
     return MessageResponse(
@@ -51,7 +51,7 @@ async def login(
     data: Annotated[OAuth2PasswordRequestForm,Depends()],
     service: AuthServiceDependency,
     db: AsyncSession = Depends(get_session)
-):
+) -> TokenResponse:
     """Verify submitted credentials and return access and refresh bearer tokens."""
     return await service.login(db,data.username, data.password)
 
@@ -65,7 +65,7 @@ async def refresh(
     data: RefreshRequest,
     service: AuthServiceDependency,
     db: AsyncSession = Depends(get_session)
-):
+) -> TokenResponse:
     """Exchange a valid refresh token for a new access and refresh token pair."""
     return await service.refresh_tokens(
         db,data.refresh_token
@@ -82,7 +82,7 @@ async def logout(
     service: AuthServiceDependency,
     db: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user)
-):
+) -> MessageResponse:
     """Revoke the supplied refresh token belonging to the authenticated user."""
     await service.logout(
         db,data.refresh_token,current_user.user_id
@@ -100,6 +100,6 @@ async def logout(
 )
 async def get_my_profile(
     current_user: User = Depends(get_current_user)
-):
+) -> UserProfileResponse:
     """Return the profile for the currently authenticated user."""
     return current_user

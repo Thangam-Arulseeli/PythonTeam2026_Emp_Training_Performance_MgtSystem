@@ -14,7 +14,7 @@ router = APIRouter(
 @router.get("/")
 async def health_check(
     session: AsyncSession = Depends(get_session)
-):
+) -> dict[str, str]:
     """Check that the API can execute a query against its configured database."""
     try:
         result = await session.execute(text("SELECT 1"))
