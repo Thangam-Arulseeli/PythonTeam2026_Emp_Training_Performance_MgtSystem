@@ -28,6 +28,10 @@ logs/
 # File uploads
 uploads/
 
+# Alembic configuration and migrations
+alembic.ini
+alembic/
+
 test/
 pyproject.toml
 .ruff_cache/
