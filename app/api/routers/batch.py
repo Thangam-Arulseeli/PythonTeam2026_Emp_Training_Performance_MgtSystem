@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.api.dependencies.service_dependencies import get_batch_service
-from app.schema.batchSchema import (
+from app.schemas.batchSchema import (
     BatchCreate,
     BatchListResponse,
     BatchResponse,

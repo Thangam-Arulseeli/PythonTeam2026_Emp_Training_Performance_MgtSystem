@@ -7,7 +7,7 @@ from app.exceptions import (
     UnprocessableEntityException,
 )
 from app.repositories.interface.course_interface import CourseInterface
-from app.schema.courseSchema import (
+from app.schemas.courseSchema import (
     CourseCreate,
     CourseListResponse,
     CourseResponse,

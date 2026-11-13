@@ -6,7 +6,7 @@ from app.exceptions import (
 )
 from app.repositories.interface.batch_interface import BatchInterface
 from app.repositories.interface.course_interface import CourseInterface
-from app.schema.batchSchema import (
+from app.schemas.batchSchema import (
     BatchCreate,
     BatchListResponse,
     BatchResponse,

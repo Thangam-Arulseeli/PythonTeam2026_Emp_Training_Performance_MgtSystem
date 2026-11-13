@@ -14,7 +14,7 @@ from app.repositories.interface.course_content_interface import (
     CourseContentInterface,
 )
 from app.repositories.interface.course_interface import CourseInterface
-from app.schema.course_content_schema import (
+from app.schemas.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
 )

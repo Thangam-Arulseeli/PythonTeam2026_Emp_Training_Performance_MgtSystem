@@ -3,7 +3,7 @@ from fastapi.responses import FileResponse
 
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.api.dependencies.service_dependencies import get_course_content_service
-from app.schema.course_content_schema import (
+from app.schemas.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
 )

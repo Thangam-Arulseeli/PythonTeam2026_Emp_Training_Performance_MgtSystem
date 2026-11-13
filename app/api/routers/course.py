@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.api.dependencies.service_dependencies import get_course_service
-from app.schema.courseSchema import (
+from app.schemas.courseSchema import (
     CourseCreate,
     CourseListResponse,
     CourseResponse,
