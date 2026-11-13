@@ -9,7 +9,6 @@ from pydantic import (
     field_validator,
 )
 
-
 DOCUMENT_TYPE = {"description": "Type of employee document"}
 
 FILE_PATH = {

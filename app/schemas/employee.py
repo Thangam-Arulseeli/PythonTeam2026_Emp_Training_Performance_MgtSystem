@@ -9,7 +9,6 @@ from pydantic import (
     field_validator,
 )
 
-
 FULL_NAME = { "min_length": 1, "max_length": 50}
 
 EMAIL = {"max_length": 300}
@@ -87,7 +86,6 @@ class EmployeeBase(BaseModel):
 
     
 class EmployeeCreate(EmployeeBase):
-    pass
 
     @field_validator("date_of_birth")
     @classmethod

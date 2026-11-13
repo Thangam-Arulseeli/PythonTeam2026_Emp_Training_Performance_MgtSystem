@@ -1,9 +1,7 @@
-from app.repositories.implementations.user_repository import (
-    UserRepository
-)
 from app.repositories.implementations.refresh_token_repository import (
-    RefreshTokenRepository
+    RefreshTokenRepository,
 )
+from app.repositories.implementations.user_repository import UserRepository
 from app.services.auth_service import AuthService
 
 

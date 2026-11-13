@@ -1,6 +1,9 @@
-from abc import ABC,abstractmethod
+from abc import ABC, abstractmethod
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.user import User
+
 
 class UserRepositoryInterface(ABC):
     @abstractmethod

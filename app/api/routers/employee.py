@@ -3,30 +3,30 @@ from typing import Annotated
 
 from fastapi import (
     APIRouter,
+    Depends,
     File,
     Path,
     Query,
     UploadFile,
     status,
-    Depends, 
-    HTTPException, 
 )
 
+from app.api.dependencies.auth import (
+    require_roles,
+)
 from app.api.dependencies.employee import (
-    EmployeeServiceDep,
     EmployeeDocumentServiceDep,
+    EmployeeServiceDep,
 )
-from app.api.dependencies.auth import (  require_roles,)
-
-
 from app.schemas.employee import (
     EmployeeCreate,
-    EmployeeUpdate,
     EmployeeResponse,
+    EmployeeUpdate,
 )
-
-from app.schemas.employee_document import EmployeeDocumentResponse, EmployeeDocumentsListResponse
-
+from app.schemas.employee_document import (
+    EmployeeDocumentResponse,
+    EmployeeDocumentsListResponse,
+)
 
 router = APIRouter(
     prefix="/api/employees",

@@ -5,9 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.employee import EmployeeData
-
 from app.repositories.interfaces.employee_repository_interface import (
-    EmployeeRepositoryInterface
+    EmployeeRepositoryInterface,
 )
 
 

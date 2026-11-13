@@ -1,11 +1,10 @@
 import jwt
-from fastapi import Depends,HTTPException,status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from app.core.security import decode_token
 from app.database.session import get_session
 from app.repositories.implementations.user_repository import UserRepository
-
 
 auth_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/auth/login"

@@ -5,15 +5,20 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_session
-
-from app.repositories.interfaces.employee_repository_interface import EmployeeRepositoryInterface
-from app.repositories.interfaces.employee_document_interface import EmployeeDocumentRepositoryInterface
-
+from app.repositories.implementations.employee_document_repository import (
+    EmployeeDocumentRepositoryImpl,
+)
 from app.repositories.implementations.employee_repository import EmployeeRepositoryImpl
-from app.repositories.implementations.employee_document_repository import EmployeeDocumentRepositoryImpl
-
+from app.repositories.interfaces.employee_document_interface import (
+    EmployeeDocumentRepositoryInterface,
+)
+from app.repositories.interfaces.employee_repository_interface import (
+    EmployeeRepositoryInterface,
+)
+from app.services.employee_document_service import (
+    EmployeeDocumentService,
+)
 from app.services.employee_service import EmployeeService
-from app.services.employee_document_service import (EmployeeDocumentService,)
 
 
 # EMPLOYEE REPOSITORY DEPENDENCY

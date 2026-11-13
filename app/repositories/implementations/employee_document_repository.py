@@ -3,9 +3,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.employee_document import EmployeeDocument
-
 from app.repositories.interfaces.employee_document_interface import (
-    EmployeeDocumentRepositoryInterface
+    EmployeeDocumentRepositoryInterface,
 )
 
 

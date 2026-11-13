@@ -1,3 +1,4 @@
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
@@ -13,10 +14,10 @@ router = APIRouter(
 
 @router.get("/")
 async def health_check(
-    session: AsyncSession = Depends(get_session)
+    db: Annotated[AsyncSession, Depends(get_session)]
 ):
     try:
-        result = await session.execute(text("SELECT 1"))
+        result = await db.execute(text("SELECT 1"))
 
         if result.scalar_one() == 1:
             return {
@@ -25,12 +26,9 @@ async def health_check(
                 "message": "Database connection successful"
             }
 
-    except Exception:
+    except Exception as exc:
         raise HTTPException(
             status_code=503,
-            detail={
-                "status": "unhealthy",
-                "database": "disconnected",
-                "message": "Database connection failed"
-            }
-        )
+            detail="Database unavailable",
+        ) from exc
+

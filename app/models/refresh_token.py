@@ -1,20 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import (
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    func
-)
+from sqlalchemy import DateTime, ForeignKey, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship
-)
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"

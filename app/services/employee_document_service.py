@@ -2,7 +2,6 @@
 import asyncio
 import io
 import zipfile
-
 from pathlib import Path
 from uuid import uuid4
 
@@ -10,20 +9,17 @@ from fastapi import UploadFile
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.employee_document import EmployeeDocument
-
-from app.repositories.interfaces.employee_repository_interface import (
-    EmployeeRepositoryInterface,
+from app.exceptions.exceptions import (
+    EmployeeAlreadyExistsException,
+    EmployeeNotFoundException,
+    InvalidEmployeeDataException,
 )
-
+from app.models.employee_document import EmployeeDocument
 from app.repositories.interfaces.employee_document_interface import (
     EmployeeDocumentRepositoryInterface,
 )
-
-from app.exceptions.exceptions import (
-    EmployeeNotFoundException,
-    InvalidEmployeeDataException,
-    EmployeeAlreadyExistsException,
+from app.repositories.interfaces.employee_repository_interface import (
+    EmployeeRepositoryInterface,
 )
 
 BASE_DIR = Path(__file__).resolve().parents[2]
