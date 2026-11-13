@@ -1,3 +1,6 @@
+"""
+Employee Management API Router.
+"""
 
 from typing import Annotated
 
@@ -34,7 +37,6 @@ router = APIRouter(
 )
 
 
-# CREATE EMPLOYEE
 @router.post(
     "/",
     response_model=EmployeeResponse,
@@ -44,11 +46,10 @@ router = APIRouter(
 async def create_employee(
     data: EmployeeCreate,
     service: EmployeeServiceDep,
-):
+)->EmployeeResponse:
     return await service.create_employee(data)
 
 
-# DISPLAY ALL ACTIVE EMPLOYEES
 @router.get(
     "/",
     response_model=list[EmployeeResponse],
@@ -59,11 +60,23 @@ async def get_all_employees(
     service: EmployeeServiceDep,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
-):
+)->list[EmployeeResponse]:
     return await service.get_all_employees( skip=skip,limit=limit,)
 
 
-# DISPLAY EMPLOYEE BY ID
+@router.get(
+    "/inactive_employee",
+    response_model=list[EmployeeResponse],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin", "employee", "trainer"))]
+)
+async def get_all_employees_inactive(
+    service: EmployeeServiceDep,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+)->list[EmployeeResponse]:
+    return await service.get_all_employees_inactive( skip=skip,limit=limit,)
+
 @router.get(
     "/{employee_id}",
     response_model=EmployeeResponse,
@@ -73,11 +86,10 @@ async def get_all_employees(
 async def get_employee_by_id( 
     service: EmployeeServiceDep,
     employee_id: int = Path(gt=0),
-):
+)->EmployeeResponse:
     return await service.get_employee_by_id(employee_id)
 
 
-# UPDATE EMPLOYEE USING PATCH
 @router.patch(
     "/{employee_id}",
     response_model=EmployeeResponse,
@@ -88,11 +100,9 @@ async def update_employee(
     data: EmployeeUpdate,
     service: EmployeeServiceDep,
     employee_id: int = Path(gt=0),
-):
+)->EmployeeResponse:
     return await service.update_employee( employee_id=employee_id, data=data,)
 
-
-# SOFT DELETE EMPLOYEE
 @router.delete(
     "/{employee_id}",
     status_code=status.HTTP_200_OK,
@@ -101,12 +111,24 @@ async def update_employee(
 async def delete_employee(
     service: EmployeeServiceDep,
     employee_id: int = Path(gt=0),
-):
+)->dict[str, str|int]:
     return await service.delete_employee(employee_id)
 
+# REACTIVATE INACTIVE EMPLOYEE
+@router.put(
+    "/{employee_id}/reactivate",
+    response_model=EmployeeResponse,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin"))],
+)
+async def reactivate_employee(
+    service: EmployeeServiceDep,
+    employee_id: int = Path(gt=0),
+)->EmployeeResponse:
+    
+    return await service.reactivate_employee(employee_id)
 
 
-# UPLOAD PROFILE PICTURE AND RESUME
 @router.post(
     "/{employee_id}/documents",
     response_model=list[EmployeeDocumentResponse],
@@ -118,7 +140,7 @@ async def upload_employee_documents(
     profile_picture: Annotated[UploadFile | None, File()]= None,
     resume: Annotated[UploadFile | None, File()]= None,
     employee_id: int = Path(gt=0),
-):
+)->list[EmployeeDocumentResponse]:
     return await service.upload_documents(
         employee_id=employee_id,
         profile_picture=profile_picture,
@@ -126,7 +148,6 @@ async def upload_employee_documents(
     )
 
 
-# GET EMPLOYEE DOCUMENTS
 @router.get(
     "/{employee_id}/documents",
     response_model=EmployeeDocumentsListResponse,
@@ -136,7 +157,7 @@ async def upload_employee_documents(
 async def get_employee_documents(
     service: EmployeeDocumentServiceDep,
     employee_id: int = Path(gt=0),
-):
+)->EmployeeDocumentsListResponse:
     documents = await service.get_documents(employee_id)
 
     if not documents:

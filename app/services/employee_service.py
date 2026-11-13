@@ -55,6 +55,16 @@ class EmployeeService:
 
         return await self.repository.get_all_employees( skip=skip, limit=limit, )
 
+    # DISPLAY ALL INACTIVE EMPLOYEES
+    async def get_all_employees_inactive(
+        self,
+        skip: int = 0,
+        limit: int = 10,
+    ) -> list[EmployeeData]:
+
+        return await self.repository.get_all_employees_inactive( skip=skip, limit=limit, )
+
+
     # DISPLAY EMPLOYEE BY ID
     async def get_employee_by_id( self, employee_id: int,) -> EmployeeData:
 
@@ -145,3 +155,41 @@ class EmployeeService:
         except Exception as exc:
             await self.db.rollback()
             raise InvalidEmployeeDataException(str(exc)) from exc
+
+    
+    async def reactivate_employee(
+        self,
+        employee_id: int,
+    ) -> EmployeeData:
+
+        employee = (
+            await self.repository.get_inactive_employee_by_id(employee_id)
+        )
+
+        if employee is None:
+            raise EmployeeNotFoundException()
+
+        try:
+            if employee.role in ("employee", "trainee"):
+                result = await self.db.execute(
+                    select(User).where(
+                        User.email == employee.email,
+                        User.role == "employee",
+                    )
+                )
+
+                user = result.scalar_one_or_none()
+
+                if user is not None:
+                    user.is_active = True
+
+            employee.is_active = True
+
+            await self.db.commit()
+            await self.db.refresh(employee)
+
+            return employee
+
+        except Exception:
+            await self.db.rollback()
+            raise

@@ -1,3 +1,11 @@
+"""
+Dependency injection configuration for Employee Management.
+
+Provides repository and service dependencies for employee
+and employee document operations using FastAPI Depends
+and SQLAlchemy AsyncSession.
+"""
+
 
 from typing import Annotated
 
@@ -22,6 +30,7 @@ from app.services.employee_service import EmployeeService
 
 
 # EMPLOYEE REPOSITORY DEPENDENCY
+#Provide the employee repository implementation
 def get_employee_repository(
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> EmployeeRepositoryInterface:
@@ -30,6 +39,7 @@ def get_employee_repository(
 
 
 # EMPLOYEE DOCUMENT REPOSITORY DEPENDENCY
+#    Provide the employee document repository implementation.
 def get_employee_document_repository(
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> EmployeeDocumentRepositoryInterface:
@@ -38,6 +48,7 @@ def get_employee_document_repository(
 
 
 # EMPLOYEE SERVICE DEPENDENCY
+#Provide the employee service with its dependencies.
 def get_employee_service(
     db: Annotated[AsyncSession, Depends(get_session)],
     repository: Annotated[  EmployeeRepositoryInterface, Depends(get_employee_repository), ],
@@ -47,6 +58,7 @@ def get_employee_service(
 
 
 # EMPLOYEE DOCUMENT SERVICE DEPENDENCY
+#Provide the employee document service with its dependencies.
 def get_employee_document_service(
     db: Annotated[AsyncSession, Depends(get_session)],
     employee_repository: Annotated[  EmployeeRepositoryInterface, Depends(get_employee_repository), ],

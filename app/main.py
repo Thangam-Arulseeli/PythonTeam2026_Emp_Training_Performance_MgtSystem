@@ -16,8 +16,9 @@ app = FastAPI(
     description="Employee Training and Performance Management System API"
 )
 
+#the routers 
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(employee_router)
 
 register_exception_handlers(app)
-app.include_router(auth_router)

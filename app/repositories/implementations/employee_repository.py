@@ -42,6 +42,26 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return list(result.scalars().all())
 
+    # GET ALL INACTIVE EMPLOYEES
+    async def get_all_employees_inactive(
+            self,
+            skip: int = 0,
+            limit: int = 10
+        ) -> list[EmployeeData]:
+
+        statement = (
+            select(EmployeeData)
+            .where(EmployeeData.is_active.is_(False))
+            .order_by(EmployeeData.employee_id)
+            .offset(skip)
+            .limit(limit)
+        )
+
+        result = await self.db.execute(statement)
+
+        return list(result.scalars().all())
+
+
     # GET EMPLOYEE BY ID
     async def get_employee_by_id( self, employee_id: int) -> EmployeeData | None:
 
@@ -79,3 +99,27 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
         await self.db.flush()
 
         return employee
+
+        
+    # REACTIVATE INACTIVE EMPLOYEE
+    async def reactivate_employee( self,employee: EmployeeData,) -> EmployeeData:
+        
+        employee.is_active = True
+
+        await self.db.flush()
+
+        return employee
+
+
+    
+    async def get_inactive_employee_by_id( self, employee_id: int,) -> EmployeeData | None:
+       
+
+        result = await self.db.execute(
+            select(EmployeeData).where(
+                EmployeeData.employee_id == employee_id,
+                EmployeeData.is_active.is_(False),
+            )
+        )
+
+        return result.scalar_one_or_none()
