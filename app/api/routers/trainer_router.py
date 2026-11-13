@@ -53,8 +53,6 @@ async def get_all_trainers(
     return trainers
 
 
-
-
 @router.get(
     "/me",
     response_model=TrainerResponse,
@@ -63,12 +61,9 @@ async def get_my_trainer_details(
     current_user=Depends(require_roles("trainer")),
     service: TrainerServiceImpl = Depends(get_trainer_service),
 ):
-    trainer = await service.get_my_trainer_details(
-        current_user.email
-    )
+    trainer = await service.get_my_trainer_details(current_user.email)
 
     return trainer
-
 
 
 @router.get(
@@ -135,5 +130,3 @@ async def activate_trainer(
     )
 
     return trainer
-
-

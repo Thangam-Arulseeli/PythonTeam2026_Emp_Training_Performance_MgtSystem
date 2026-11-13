@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.trainer import Trainer
-from app.models.trainer_resume import TrainerResume
 from app.models.user import User
 from app.repositories.interfaces.trainer_repository import TrainerRepository
 
@@ -110,7 +109,6 @@ class TrainerRepositoryImpl(TrainerRepository):
         if trainer is None:
             return None
         try:
-
             trainer.is_active = is_active
 
             result = await self.db.execute(
@@ -140,7 +138,6 @@ class TrainerRepositoryImpl(TrainerRepository):
         except Exception:
             await self.db.rollback()
             raise
-
 
     async def get_trainer_by_email(self, email: str) -> Trainer | None:
 
