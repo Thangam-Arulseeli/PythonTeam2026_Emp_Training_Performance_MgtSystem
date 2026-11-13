@@ -85,6 +85,10 @@ class EmployeeBase(BaseModel):
 
         return value
 
+    
+class EmployeeCreate(EmployeeBase):
+    pass
+
     @field_validator("date_of_birth")
     @classmethod
     def validate_dob(cls, value: date | None) -> date | None:
@@ -95,10 +99,6 @@ class EmployeeBase(BaseModel):
     def validate_joining_date( cls,value: date | None,) -> date | None:
         return validate_employee_joining_date(value)
 
-
-
-class EmployeeCreate(EmployeeBase):
-    pass
 
 
 class EmployeeUpdate(BaseModel):

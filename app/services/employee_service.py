@@ -1,9 +1,12 @@
 
+import select
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.employee import EmployeeData
 
+from app.models.user import User
 from app.schemas.employee import (
     EmployeeCreate,
     EmployeeUpdate,
@@ -87,8 +90,7 @@ class EmployeeService:
             "full_name",
             "email",
             "department",
-            "role",
-            "is_active",
+            "role"
         }
 
         for field in required_fields:
@@ -134,8 +136,26 @@ class EmployeeService:
         employee = await self.get_employee_by_id(employee_id)
 
         try:
-            await self.repository.soft_delete_employee( employee )
+            # Find matching user using email and role
+            if employee.role in ("employee", "trainee"):
 
+                result = await self.db.execute(
+                    select(User).where(
+                        User.email == employee.email,
+                        User.role == "employee",
+                    )
+                )
+
+                user = result.scalar_one_or_none()
+
+                # Deactivate matching user account
+                if user is not None:
+                    user.is_active = False
+
+            # Soft delete employee
+            await self.repository.soft_delete_employee(employee)
+
+            # Commit both changes together
             await self.db.commit()
 
         except Exception:

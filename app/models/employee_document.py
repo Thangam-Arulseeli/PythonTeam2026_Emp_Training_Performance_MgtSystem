@@ -30,6 +30,10 @@ class EmployeeDocument(Base):
         CheckConstraint("document_type IN ('profile_picture', 'resume')",
             name="ck_employee_document_type"
         ),
+        UniqueConstraint( "employee_id",
+                            "document_type",
+                            name="uq_employee_document_type",
+                        ),
 
         Index( "ix_employee_documents_employee_id",
             "employee_id"
