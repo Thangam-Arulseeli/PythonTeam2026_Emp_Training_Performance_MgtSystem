@@ -17,6 +17,7 @@ async def get_current_user(
   token: str = Depends(auth_scheme),
   db: AsyncSession = Depends(get_session)
 ):
+    """Decode the bearer access token and return its active user account."""
     try:
         payload=decode_token(token)
 
@@ -45,9 +46,11 @@ async def get_current_user(
 
 
 def require_roles(*allowed_roles:str):
+    """Create a dependency that allows only users with one of the supplied roles."""
     async def role_checker(
       current_user=Depends(get_current_user)  
     ):
+        """Check the authenticated user's role and return the user when allowed."""
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

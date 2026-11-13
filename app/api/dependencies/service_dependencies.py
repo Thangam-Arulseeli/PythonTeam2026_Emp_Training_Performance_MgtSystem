@@ -22,16 +22,19 @@ from app.services.auth_service import AuthService
 
 
 def get_course_repository(db: AsyncSession = Depends(get_session)) -> CourseInterface:
+    """Build a course repository using the request's async database session."""
     return CourseRepository(db)
 
 
 def get_course_service(
     course_repo: CourseInterface = Depends(get_course_repository),
 ) -> CourseService:
+    """Build the course service with its repository dependency."""
     return CourseService(course_repo)
 
 
 def get_batch_repository(db: AsyncSession = Depends(get_session)) -> BatchInterface:
+    """Build a batch repository using the request's async database session."""
     return BatchRepository(db)
 
 
@@ -39,12 +42,14 @@ def get_batch_service(
     batch_repo: BatchInterface = Depends(get_batch_repository),
     course_repo: CourseInterface = Depends(get_course_repository),
 ) -> BatchService:
+    """Build the batch service with batch and course repositories."""
     return BatchService(batch_repo, course_repo)
 
 
 def get_course_content_repository(
     db: AsyncSession = Depends(get_session),
 ) -> CourseContentInterface:
+    """Build a course-content repository using the request's async session."""
     return CourseContentRepository(db)
 
 
@@ -52,10 +57,12 @@ def get_course_content_service(
     content_repo: CourseContentInterface = Depends(get_course_content_repository),
     course_repo: CourseInterface = Depends(get_course_repository),
 ) -> CourseContentService:
+    """Build the course-content service with content and course repositories."""
     return CourseContentService(content_repo, course_repo)
 
 
 def get_auth_service() -> AuthService:
+    """Build the authentication service with user and refresh-token repositories."""
     return AuthService(
         user_repository=UserRepository(),
         refresh_token_repository=RefreshTokenRepository()
