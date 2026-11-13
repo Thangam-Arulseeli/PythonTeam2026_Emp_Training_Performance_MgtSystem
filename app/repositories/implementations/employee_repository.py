@@ -17,10 +17,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
         self.db = db
 
     # CREATE EMPLOYEE
-    async def create_employee(
-        self,
-        employee: EmployeeData
-    ) -> EmployeeData:
+    async def create_employee( self, employee: EmployeeData) -> EmployeeData:
 
         self.db.add(employee)
         await self.db.flush()
@@ -31,7 +28,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
     async def get_all_employees(
         self,
         skip: int = 0,
-        limit: int = 20
+        limit: int = 10
     ) -> list[EmployeeData]:
 
         statement = (
@@ -47,10 +44,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
         return list(result.scalars().all())
 
     # GET EMPLOYEE BY ID
-    async def get_employee_by_id(
-        self,
-        employee_id: int
-    ) -> EmployeeData | None:
+    async def get_employee_by_id( self, employee_id: int) -> EmployeeData | None:
 
         statement = (
             select(EmployeeData)
@@ -79,10 +73,7 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
         return employee
 
     # SOFT DELETE EMPLOYEE
-    async def soft_delete_employee(
-        self,
-        employee: EmployeeData
-    ) -> EmployeeData:
+    async def soft_delete_employee(self,employee: EmployeeData) -> EmployeeData:
 
         employee.is_active = False
 

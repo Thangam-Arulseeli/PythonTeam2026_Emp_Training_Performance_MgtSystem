@@ -26,3 +26,5 @@ htmlcov/
 # alembic
 alembic/
 alembic.ini
+
+uploads/

@@ -26,8 +26,8 @@ from app.exceptions.exceptions import (
     EmployeeAlreadyExistsException,
 )
 
-
-UPLOAD_DIR = Path("uploads")
+BASE_DIR = Path(__file__).resolve().parents[2]
+UPLOAD_DIR = BASE_DIR / "uploads"
 
 IMAGE_MAX_SIZE = 2 * 1024 * 1024
 RESUME_MAX_SIZE = 5 * 1024 * 1024
@@ -46,16 +46,9 @@ class EmployeeDocumentService:
         self.document_repository = document_repository
 
     # CHECK EMPLOYEE
-    async def check_employee(
-        self,
-        employee_id: int,
-    ) -> None:
+    async def check_employee(self,employee_id: int,) -> None:
 
-        employee = (
-            await self.employee_repository.get_employee_by_id(
-                employee_id
-            )
-        )
+        employee = ( await self.employee_repository.get_employee_by_id(employee_id) )
 
         if employee is None:
             raise EmployeeNotFoundException()
@@ -76,35 +69,25 @@ class EmployeeDocumentService:
             max_size = RESUME_MAX_SIZE
             folder = "resumes"
 
-        extension = Path(
-            file.filename or ""
-        ).suffix.lower()
+        extension = Path(file.filename or "").suffix.lower()
 
         if extension not in allowed_extensions:
-            raise InvalidEmployeeDataException(
-                f"Invalid file format for {document_type}"
-            )
+            raise InvalidEmployeeDataException( f"Invalid file format for {document_type}")
 
         content = await file.read(max_size + 1)
 
         if not content:
-            raise InvalidEmployeeDataException(
-                "Uploaded file cannot be empty"
-            )
+            raise InvalidEmployeeDataException("Uploaded file cannot be empty")
 
         if len(content) > max_size:
-            raise InvalidEmployeeDataException(
-                f"{document_type} exceeds allowed file size"
-            )
+            raise InvalidEmployeeDataException(f"{document_type} exceeds allowed file size")
 
         # Validate the file signature.
         if extension in {".jpg", ".jpeg"}:
             valid = content.startswith(b"\xff\xd8\xff")
 
         elif extension == ".png":
-            valid = content.startswith(
-                b"\x89PNG\r\n\x1a\n"
-            )
+            valid = content.startswith(b"\x89PNG\r\n\x1a\n")
 
         elif extension == ".pdf":
             valid = content.startswith(b"%PDF-")
@@ -120,9 +103,7 @@ class EmployeeDocumentService:
                 valid = False
 
         if not valid:
-            raise InvalidEmployeeDataException(
-                f"File content does not match {extension}"
-            )
+            raise InvalidEmployeeDataException(f"File content does not match {extension}")
 
         directory = UPLOAD_DIR / folder
 
@@ -135,15 +116,12 @@ class EmployeeDocumentService:
         filename = f"{uuid4().hex}{extension}"
         file_path = directory / filename
 
-        await asyncio.to_thread(
-            file_path.write_bytes,
-            content
-        )
+        await asyncio.to_thread(file_path.write_bytes,content)
 
         return str(file_path)
 
     # UPLOAD PROFILE PICTURE AND RESUME
-    
+
     async def upload_documents(
         self,
         employee_id: int,
@@ -154,37 +132,16 @@ class EmployeeDocumentService:
         await self.check_employee(employee_id)
 
         if profile_picture is None and resume is None:
-            raise InvalidEmployeeDataException(
-                "Upload at least one document"
-            )
+            raise InvalidEmployeeDataException("Upload at least one document")
 
-        existing_documents = (
-            await self.document_repository
-            .get_documents_by_employee_id(employee_id)
-        )
-
-        existing_types = {
-            doc.document_type
-            for doc in existing_documents
-        }
 
         files_to_upload = []
 
         if profile_picture is not None:
-            files_to_upload.append(
-                ("profile_picture", profile_picture)
-            )
+            files_to_upload.append(("profile_picture", profile_picture))
 
         if resume is not None:
-            files_to_upload.append(
-                ("resume", resume)
-            )
-
-        for document_type, _ in files_to_upload:
-            if document_type in existing_types:
-                raise EmployeeAlreadyExistsException(
-                    document_type
-                )
+            files_to_upload.append(("resume", resume))
 
         saved_paths = []
 
@@ -192,10 +149,8 @@ class EmployeeDocumentService:
             documents = []
 
             for document_type, file in files_to_upload:
-                path = await self.save_file(
-                    file,
-                    document_type,
-                )
+               
+                path = await self.save_file( file,document_type,)
 
                 saved_paths.append(path)
 
@@ -208,8 +163,7 @@ class EmployeeDocumentService:
                 )
 
             documents = (
-                await self.document_repository
-                .create_documents(documents)
+                await self.document_repository.create_documents(documents)
             )
 
             await self.db.commit()
@@ -233,9 +187,7 @@ class EmployeeDocumentService:
                 and getattr(exc.orig, "sqlstate", None)
                 == "23505"
             ):
-                raise EmployeeAlreadyExistsException(
-                    "documents"
-                ) from exc
+                raise EmployeeAlreadyExistsException( "documents" ) from exc
 
             raise
 
@@ -248,6 +200,5 @@ class EmployeeDocumentService:
         await self.check_employee(employee_id)
 
         return (
-            await self.document_repository
-            .get_documents_by_employee_id(employee_id)
+            await self.document_repository.get_documents_by_employee_id(employee_id)
         )

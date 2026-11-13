@@ -7,7 +7,7 @@ class AppException(Exception):
 
 class EmployeeNotFoundException(AppException):
     def __init__(self):
-        super().__init__("Employee not found")
+        super().__init__("Employee not found or not active")
 
 
 class EmployeeAlreadyExistsException(AppException):
