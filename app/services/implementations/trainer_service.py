@@ -10,7 +10,6 @@ from app.services.interfaces.trainer_service import TrainerService
 
 
 class TrainerServiceImpl(TrainerService):
-
     def __init__(self, repository: TrainerRepository):
         self.repository = repository
 
@@ -19,15 +18,46 @@ class TrainerServiceImpl(TrainerService):
         trainer_data: TrainerCreate,
     ) -> TrainerResponse:
 
-        trainer = await self.repository.create_trainer(
-            trainer_data.model_dump()
+        existing_email = await self.repository.get_trainer_by_email(trainer_data.email)
+
+        if existing_email:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already exists",
+            )
+
+        existing_phone = await self.repository.get_trainer_by_phone(
+            trainer_data.phone_number
         )
+
+        if existing_phone:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Phone number already exists",
+            )
+
+        trainer = await self.repository.create_trainer(trainer_data.model_dump())
 
         return trainer
 
-    async def get_all_trainers(self) -> list[TrainerResponse]:
+    async def get_all_trainers(
+        self,
+        offset: int,
+        limit: int,
+        specialization: str | None = None,
+        min_experience: int | None = None,
+        is_active: bool | None = None,
+        search: str | None = None,
+    ) -> list[TrainerResponse]:
 
-        trainers = await self.repository.get_all_trainers()
+        trainers = await self.repository.get_all_trainers(
+            offset,
+            limit,
+            specialization,
+            min_experience,
+            is_active,
+            search,
+        )
 
         return trainers
 
@@ -54,16 +84,40 @@ class TrainerServiceImpl(TrainerService):
 
         update_data = trainer_data.model_dump(exclude_unset=True)
 
-        trainer = await self.repository.update_trainer(
-            trainer_id,
-            update_data,
-        )
+        existing_trainer = await self.repository.get_trainer_by_id(trainer_id)
 
-        if trainer is None:
+        if existing_trainer is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Trainer not found",
             )
+
+        if "email" in update_data:
+            existing_email = await self.repository.get_trainer_by_email(
+                update_data["email"]
+            )
+
+            if existing_email and existing_email.trainer_id != trainer_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Email already exists",
+                )
+
+        if "phone_number" in update_data:
+            existing_phone = await self.repository.get_trainer_by_phone(
+                update_data["phone_number"]
+            )
+
+            if existing_phone and existing_phone.trainer_id != trainer_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Phone number already exists",
+                )
+
+        trainer = await self.repository.update_trainer(
+            trainer_id,
+            update_data,
+        )
 
         return trainer
 
@@ -73,10 +127,7 @@ class TrainerServiceImpl(TrainerService):
         is_active: bool,
     ) -> TrainerResponse:
 
-        trainer = await self.repository.update_trainer_status(
-            trainer_id,
-            is_active,
-        )
+        trainer = await self.repository.get_trainer_by_id(trainer_id)
 
         if trainer is None:
             raise HTTPException(
@@ -84,4 +135,9 @@ class TrainerServiceImpl(TrainerService):
                 detail="Trainer not found",
             )
 
-        return trainer
+        updated_trainer = await self.repository.update_trainer_status(
+            trainer_id,
+            is_active,
+        )
+
+        return updated_trainer

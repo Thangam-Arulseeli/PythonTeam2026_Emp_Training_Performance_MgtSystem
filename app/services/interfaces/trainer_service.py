@@ -12,7 +12,15 @@ class TrainerService(ABC):
         pass
 
     @abstractmethod
-    async def get_all_trainers(self) -> list[TrainerResponse]:
+    async def get_all_trainers(
+        self,
+        offset: int,
+        limit: int,
+        specialization: str | None = None,
+        min_experience: int | None = None,
+        is_active: bool | None = None,
+        search: str | None = None,
+    ) -> list[TrainerResponse]:
         pass
 
     @abstractmethod
@@ -37,3 +45,4 @@ class TrainerService(ABC):
         is_active: bool,
     ) -> TrainerResponse:
         pass
+

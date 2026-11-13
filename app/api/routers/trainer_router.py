@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.trainer_dependencies import get_trainer_service
 from app.schemas.trainer import (
@@ -28,14 +28,24 @@ async def create_trainer(
     return trainer
 
 
-@router.get(
-    "/",
-    response_model=list[TrainerResponse],
-)
+@router.get("/", response_model=list[TrainerResponse])
 async def get_all_trainers(
+    offset: int = 0,
+    limit: int = 10,
+    specialization: str | None = None,
+    min_experience: int | None = Query(default=None, ge=0),
+    is_active: bool | None = None,
+    search_name: str | None = None,
     service: TrainerServiceImpl = Depends(get_trainer_service),
 ):
-    trainers = await service.get_all_trainers()
+    trainers = await service.get_all_trainers(
+        offset,
+        limit,
+        specialization,
+        min_experience,
+        is_active,
+        search_name,
+    )
 
     return trainers
 
