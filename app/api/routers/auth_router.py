@@ -78,7 +78,7 @@ async def logout(
     data: RefreshRequest,
     service: AuthServiceDependency,
     db: Annotated[AsyncSession, Depends(get_session)],
-    current_user: User = Depends(get_current_user)
+    current_user: Annotated[User, Depends(get_current_user)]
 ):
     await service.logout(
         db,data.refresh_token,current_user.user_id
@@ -95,6 +95,6 @@ async def logout(
     response_model=UserProfileResponse
 )
 async def get_my_profile(
-    current_user: User = Depends(get_current_user)
+    current_user: Annotated[User, Depends(get_current_user)]
 ):
     return current_user

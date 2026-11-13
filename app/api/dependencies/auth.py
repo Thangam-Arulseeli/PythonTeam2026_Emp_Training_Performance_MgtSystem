@@ -1,9 +1,13 @@
+from typing import Annotated
+
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token
 from app.database.session import get_session
+from app.models.user import User
 from app.repositories.implementations.user_repository import UserRepository
 
 auth_scheme = OAuth2PasswordBearer(
@@ -12,9 +16,9 @@ auth_scheme = OAuth2PasswordBearer(
 user_repository = UserRepository()
 
 async def get_current_user(
-  token = Depends(auth_scheme),
-  db=Depends(get_session)  
-):
+    token: Annotated[str, Depends(auth_scheme)],
+    db: Annotated[AsyncSession, Depends(get_session)],
+)-> User:
     try:
         payload=decode_token(token)
 
@@ -44,8 +48,8 @@ async def get_current_user(
 
 def require_roles(*allowed_roles:str):
     async def role_checker(
-      current_user=Depends(get_current_user)  
-    ):
+            current_user: Annotated[User, Depends(get_current_user)], 
+    )-> User:
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
