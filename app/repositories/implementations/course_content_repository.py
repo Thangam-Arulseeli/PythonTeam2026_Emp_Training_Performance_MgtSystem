@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,11 +30,11 @@ class CourseContentRepository(CourseContentInterface):
 
         return content
 
-    async def get_by_id(self, content_id: int) -> Optional[CourseContent]:
+    async def get_by_id(self, content_id: int) -> CourseContent | None:
         """Return content metadata by primary key, or None when absent."""
         return await self.db.get(CourseContent, content_id)
 
-    async def get_by_course(self, course_id: int) -> List[CourseContent]:
+    async def get_by_course(self, course_id: int) -> list[CourseContent]:
         """Return all content records associated with a course."""
         stmt = select(CourseContent).where(CourseContent.course_id == course_id)
         result = await self.db.execute(stmt)

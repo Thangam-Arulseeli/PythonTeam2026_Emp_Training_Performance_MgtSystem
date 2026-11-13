@@ -7,14 +7,14 @@ settings = get_settings()
 if not settings.database_url :
     raise RuntimeError("DATABASE_URL is not set. Check your .env file.")
 
-#create a new engine 
-engine:AsyncEngine = create_async_engine ( 
-                        settings.database_url , 
+#create a new engine
+engine:AsyncEngine = create_async_engine (
+                        settings.database_url ,
                         pool_size=settings.db_pool_size,
                         max_overflow=settings.db_max_overflow,
                         pool_timeout=settings.db_pool_timeout,
                         pool_recycle=1800,
                         pool_pre_ping=True,
-                        echo=False, 
+                        echo=False,
                     )
 

@@ -2,17 +2,15 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    Integer,
-    String,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Identity,
-    CheckConstraint,
     Index,
-    UniqueConstraint,
+    Integer,
+    String,
     func,
 )
-
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base

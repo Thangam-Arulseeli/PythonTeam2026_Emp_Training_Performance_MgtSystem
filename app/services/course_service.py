@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 from app.exceptions import (
     ConflictException,
@@ -33,10 +32,17 @@ class CourseService:
         """Reject duplicate names, persist a course, and return its response model."""
         existing = await self.course_repo.get_by_name(payload.course_name)
         if existing:
-            logger.warning("Course creation conflict: name '%s' already exists", payload.course_name)
+            logger.warning(
+                "Course creation conflict: name '%s' already exists",
+                payload.course_name,
+            )
             raise ConflictException("Course name already exists")
         created = await self.course_repo.create(payload.model_dump())
-        logger.info("Course created successfully: id=%s, name='%s'", created.id, created.course_name)
+        logger.info(
+            "Course created successfully: id=%s, name='%s'",
+            created.id,
+            created.course_name,
+        )
         return CourseResponse.model_validate(created)
 
     async def get_course(self, course_id: int) -> CourseResponse:
@@ -45,7 +51,7 @@ class CourseService:
         return CourseResponse.model_validate(course)
 
     async def list_courses(
-        self, page: int, size: int, search: Optional[str] = None
+        self, page: int, size: int, search: str | None = None
     ) -> CourseListResponse:
         """Fetch a page of courses and include the total matching result count."""
         skip = max(0, (page - 1) * size)
@@ -71,7 +77,11 @@ class CourseService:
         if new_name:
             existing = await self.course_repo.get_by_name(new_name)
             if existing and existing.id != course_id:
-                logger.warning("Course update conflict: name '%s' already exists for another course", new_name)
+                logger.warning(
+                    "Course update conflict: name '%s' already exists for another "
+                    "course",
+                    new_name,
+                )
                 raise ConflictException("Course name already exists")
         updated = await self.course_repo.update(course, data)
         logger.info("Course updated successfully: id=%s", course_id)
@@ -81,7 +91,9 @@ class CourseService:
         """Delete a course without batches and remove its associated content files."""
         course = await self._get_or_404(course_id)
         if await self.course_repo.has_batches(course_id):
-            logger.warning("Cannot delete course: id=%s has associated batches", course_id)
+            logger.warning(
+                "Cannot delete course: id=%s has associated batches", course_id
+            )
             raise ConflictException("Cannot delete a course that has batches")
         file_paths = await self.course_repo.get_content_file_paths(course_id)
         await self.course_repo.delete(course)

@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 
 from sqlalchemy import exists, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -23,11 +22,11 @@ class CourseRepository(CourseInterface):
         await self.db.refresh(course)
         return course
 
-    async def get_by_id(self, course_id: int) -> Optional[Course]:
+    async def get_by_id(self, course_id: int) -> Course | None:
         """Return a course by primary key, or None when it does not exist."""
         return await self.db.get(Course, course_id)
 
-    async def get_by_name(self, course_name: str) -> Optional[Course]:
+    async def get_by_name(self, course_name: str) -> Course | None:
         """Find a course by name without regard to case or surrounding spaces."""
         stmt = select(Course).where(
             func.lower(Course.course_name) == course_name.strip().lower()
@@ -36,8 +35,8 @@ class CourseRepository(CourseInterface):
         return result.scalar_one_or_none()
 
     async def get_all(
-        self, skip: int, limit: int, search: Optional[str] = None
-    ) -> Tuple[List[Course], int]:
+        self, skip: int, limit: int, search: str | None = None
+    ) -> tuple[list[Course], int]:
         """Return an ordered course page and the total count matching the search."""
         stmt = select(Course)
 
@@ -80,8 +79,10 @@ class CourseRepository(CourseInterface):
         result = await self.db.execute(stmt)
         return bool(result.scalar())
 
-    async def get_content_file_paths(self, course_id: int) -> List[str]:
+    async def get_content_file_paths(self, course_id: int) -> list[str]:
         """Return stored file paths for uploaded content belonging to a course."""
-        stmt = select(CourseContent.file_path).where(CourseContent.course_id == course_id)
+        stmt = select(CourseContent.file_path).where(
+            CourseContent.course_id == course_id
+        )
         result = await self.db.execute(stmt)
         return list(result.scalars().all())

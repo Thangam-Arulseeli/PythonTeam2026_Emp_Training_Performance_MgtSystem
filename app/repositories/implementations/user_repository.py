@@ -1,11 +1,11 @@
-from sqlalchemy import func,or_,select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.repositories.interfaces.user_repository import UserRepositoryInterface
 
 from app.models.employee import EmployeeData
 from app.models.trainer import Trainer
 from app.models.user import User
+from app.repositories.interfaces.user_repository import UserRepositoryInterface
+
 
 class UserRepository(UserRepositoryInterface):
     async def get_by_email(self, db:AsyncSession, email:str) ->User|None:
@@ -56,11 +56,11 @@ class UserRepository(UserRepositoryInterface):
         return result.scalar_one_or_none() is not None
 
 
-    async def create_user(self, 
-        db:AsyncSession, 
-        username:str, 
-        email:str, 
-        hashed_password:str, 
+    async def create_user(self,
+        db:AsyncSession,
+        username:str,
+        email:str,
+        hashed_password:str,
         role:str
     ):
         """Add a user and flush it to the current transaction."""

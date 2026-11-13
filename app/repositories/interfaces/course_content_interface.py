@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from app.models.course_content import CourseContent
 
@@ -14,12 +13,12 @@ class CourseContentInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, content_id: int) -> Optional[CourseContent]:
+    async def get_by_id(self, content_id: int) -> CourseContent | None:
         """Return content metadata by ID, or None when it does not exist."""
         pass
 
     @abstractmethod
-    async def get_by_course(self, course_id: int) -> List[CourseContent]:
+    async def get_by_course(self, course_id: int) -> list[CourseContent]:
         """Return all content metadata associated with a course."""
         pass
 

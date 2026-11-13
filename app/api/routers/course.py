@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, status
 
@@ -41,7 +40,7 @@ async def create_course(
 async def list_courses(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Items per page"),
-    search: Optional[str] = Query(
+    search: str | None = Query(
         None, description="Search term for course name or description"
     ),
     current_user=Depends(get_current_user),

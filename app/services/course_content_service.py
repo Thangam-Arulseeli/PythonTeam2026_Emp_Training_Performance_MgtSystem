@@ -1,7 +1,6 @@
 import os
 import uuid
 from pathlib import Path
-from typing import Tuple
 
 from fastapi import UploadFile
 
@@ -57,7 +56,9 @@ class CourseContentService:
         extension = Path(filename).suffix.lower()
 
         if not filename or extension not in ALLOWED_EXTENSIONS:
-            logger.warning("Upload rejected: unsupported file extension '%s'", extension)
+            logger.warning(
+                "Upload rejected: unsupported file extension '%s'", extension
+            )
             raise BadRequestException(
                 f"Unsupported file type. Allowed: {sorted(ALLOWED_EXTENSIONS)}"
             )
@@ -74,7 +75,11 @@ class CourseContentService:
                     size += len(chunk)
 
                     if size > MAX_FILE_SIZE:
-                        logger.warning("Upload rejected: file size %s exceeds %s", size, MAX_FILE_SIZE)
+                        logger.warning(
+                            "Upload rejected: file size %s exceeds %s",
+                            size,
+                            MAX_FILE_SIZE,
+                        )
                         raise PayloadTooLargeException(
                             "File too large. Maximum size is 50 MB"
                         )
@@ -87,13 +92,22 @@ class CourseContentService:
                 file_path=str(file_path),
             )
 
-            logger.info("Course content uploaded successfully: id=%s for course=%s", content.id, course_id)
+            logger.info(
+                "Course content uploaded successfully: id=%s for course=%s",
+                content.id,
+                course_id,
+            )
             return CourseContentResponse.model_validate(content)
 
         except Exception as exc:
             if file_path.exists():
                 file_path.unlink()
-            if not isinstance(exc, (BadRequestException, NotFoundException, PayloadTooLargeException)):
+            expected_errors = (
+                BadRequestException,
+                NotFoundException,
+                PayloadTooLargeException,
+            )
+            if not isinstance(exc, expected_errors):
                 logger.exception("Error uploading course content file: %s", exc)
             raise
 
@@ -113,17 +127,25 @@ class CourseContentService:
             size=max(len(items), 1),
         )
 
-    async def get_file(self, content_id: int) -> Tuple[str, str]:
-        """Return the on-disk path and download filename for an existing content file."""
+    async def get_file(self, content_id: int) -> tuple[str, str]:
+        """Return the path and download filename for an existing content file."""
 
         content = await self.get_content_or_404(content_id)
         file_path = content.file_path
 
         if not os.path.exists(file_path):
-            logger.error("Content file missing on disk: path=%s for content_id=%s", file_path, content_id)
+            logger.error(
+                "Content file missing on disk: path=%s for content_id=%s",
+                file_path,
+                content_id,
+            )
             raise NotFoundException("File not found on server")
 
-        logger.info("Serving content file download: content_id=%s, filename='%s'", content_id, content.filename)
+        logger.info(
+            "Serving content file download: content_id=%s, filename='%s'",
+            content_id,
+            content.filename,
+        )
         return file_path, content.filename
 
     async def delete(self, content_id: int) -> None:
@@ -140,4 +162,6 @@ class CourseContentService:
                 os.remove(file_path)
                 logger.info("Content file deleted from disk: %s", file_path)
             except OSError as exc:
-                logger.error("Failed to delete content file from disk %s: %s", file_path, exc)
+                logger.error(
+                    "Failed to delete content file from disk %s: %s", file_path, exc
+                )

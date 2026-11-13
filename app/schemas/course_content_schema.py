@@ -1,4 +1,3 @@
-from typing import List
 
 from pydantic import BaseModel, ConfigDict
 
@@ -13,7 +12,7 @@ class CourseContentResponse(BaseModel):
 
 
 class CourseContentListResponse(BaseModel):
-    items: List[CourseContentResponse]
+    items: list[CourseContentResponse]
     total: int
     page: int
     size: int

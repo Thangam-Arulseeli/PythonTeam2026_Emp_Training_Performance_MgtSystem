@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 
-from app.core.config import get_settings
 from app.api.routers import (
     auth_router,
     batch_router,
@@ -8,6 +7,7 @@ from app.api.routers import (
     course_router,
     health_router,
 )
+from app.core.config import get_settings
 from app.exceptions.custom_exceptions import AppException
 from app.exceptions.handlers import (
     app_exception_handler,

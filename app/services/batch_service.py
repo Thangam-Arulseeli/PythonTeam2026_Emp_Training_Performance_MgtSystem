@@ -1,4 +1,3 @@
-from typing import List, Optional
 
 from app.exceptions import (
     NotFoundException,
@@ -39,11 +38,17 @@ class BatchService:
     async def validate_relations(self, course_id=None, trainer_id=None):
         """Confirm each supplied course and trainer ID refers to an existing record."""
         if course_id is not None and not await self.course_repo.get_by_id(course_id):
-            logger.warning("Relation validation failed: Course not found id=%s", course_id)
+            logger.warning(
+                "Relation validation failed: Course not found id=%s", course_id
+            )
             raise NotFoundException("Course not found")
 
-        if trainer_id is not None and not await self.batch_repo.trainer_exists(trainer_id):
-            logger.warning("Relation validation failed: Trainer not found id=%s", trainer_id)
+        if trainer_id is not None and not await self.batch_repo.trainer_exists(
+            trainer_id
+        ):
+            logger.warning(
+                "Relation validation failed: Trainer not found id=%s", trainer_id
+            )
             raise NotFoundException("Trainer not found")
 
     @staticmethod
@@ -55,9 +60,9 @@ class BatchService:
     @staticmethod
     def format_batch_list(
         batches: list,
-        total: Optional[int] = None,
+        total: int | None = None,
         page: int = 1,
-        size: Optional[int] = None,
+        size: int | None = None,
     ) -> BatchListResponse:
         """Convert batch records into the paginated API response shape."""
         count = total if total is not None else len(batches)
@@ -83,7 +88,9 @@ class BatchService:
         self.validate_dates(payload.start_date, payload.end_date)
 
         batch = await self.batch_repo.create(payload.model_dump())
-        logger.info("Batch created successfully: id=%s, name='%s'", batch.id, batch.batch_name)
+        logger.info(
+            "Batch created successfully: id=%s, name='%s'", batch.id, batch.batch_name
+        )
         return BatchResponse.model_validate(batch)
 
     async def get_batch(self, batch_id: int) -> BatchResponse:
@@ -133,7 +140,9 @@ class BatchService:
     async def get_batches_by_course(self, course_id: int) -> BatchListResponse:
         """Return batches for an existing course."""
         if not await self.course_repo.get_by_id(course_id):
-            logger.warning("get_batches_by_course failed: Course not found id=%s", course_id)
+            logger.warning(
+                "get_batches_by_course failed: Course not found id=%s", course_id
+            )
             raise NotFoundException("Course not found")
 
         batches = await self.batch_repo.get_by_course(course_id)
@@ -142,7 +151,9 @@ class BatchService:
     async def get_batches_by_trainer(self, trainer_id: int) -> BatchListResponse:
         """Return batches for an existing trainer."""
         if not await self.batch_repo.trainer_exists(trainer_id):
-            logger.warning("get_batches_by_trainer failed: Trainer not found id=%s", trainer_id)
+            logger.warning(
+                "get_batches_by_trainer failed: Trainer not found id=%s", trainer_id
+            )
             raise NotFoundException("Trainer not found")
 
         batches = await self.batch_repo.get_by_trainer(trainer_id)

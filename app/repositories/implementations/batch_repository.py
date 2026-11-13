@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 
 from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,13 +21,13 @@ class BatchRepository(BatchInterface):
         await self.db.refresh(batch)
         return batch
 
-    async def get_by_id(self, batch_id: int) -> Optional[Batch]:
+    async def get_by_id(self, batch_id: int) -> Batch | None:
         """Return a batch by primary key, or None when it does not exist."""
         return await self.db.get(Batch, batch_id)
 
     async def get_all(
         self, skip: int, limit: int
-    ) -> Tuple[List[Batch], int]:
+    ) -> tuple[list[Batch], int]:
         """Return a newest-first batch page and the total number of batches."""
         stmt = select(Batch)
         count_stmt = select(func.count()).select_from(stmt.subquery())
@@ -42,7 +41,7 @@ class BatchRepository(BatchInterface):
         batches = batches_res.scalars().all()
         return list(batches), total
 
-    async def get_by_course(self, course_id: int) -> List[Batch]:
+    async def get_by_course(self, course_id: int) -> list[Batch]:
         """Return batches for a course ordered by start date."""
         stmt = (
             select(Batch).where(Batch.course_id == course_id).order_by(Batch.start_date)
@@ -50,7 +49,7 @@ class BatchRepository(BatchInterface):
         res = await self.db.execute(stmt)
         return list(res.scalars().all())
 
-    async def get_by_trainer(self, trainer_id: int) -> List[Batch]:
+    async def get_by_trainer(self, trainer_id: int) -> list[Batch]:
         """Return batches assigned to a trainer ordered by start date."""
         stmt = (
             select(Batch)

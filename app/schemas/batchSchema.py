@@ -1,6 +1,12 @@
 from datetime import date
 
-from pydantic import BaseModel, ConfigDict, ValidationInfo, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 
 class BatchCreate(BaseModel):

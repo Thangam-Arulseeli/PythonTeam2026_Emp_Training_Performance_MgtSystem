@@ -34,7 +34,8 @@ async def log_requests(
         response.headers["X-Correlation-ID"] = correlation_id
 
         logger.info(
-            "Request completed: %s %s | Status: %s | Time: %.4f seconds | Correlation ID: %s",
+            "Request completed: %s %s | Status: %s | Time: %.4f seconds | "
+            "Correlation ID: %s",
             request.method,
             request.url.path,
             response.status_code,
@@ -46,7 +47,8 @@ async def log_requests(
     except Exception as exc:
         process_time = time.perf_counter() - start_time
         logger.exception(
-            "Request failed: %s %s | Time: %.4f seconds | Correlation ID: %s | Error: %s",
+            "Request failed: %s %s | Time: %.4f seconds | Correlation ID: %s | "
+            "Error: %s",
             request.method,
             request.url.path,
             process_time,

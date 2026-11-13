@@ -1,6 +1,5 @@
 from functools import lru_cache
 
-from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.engine import URL
 
@@ -14,13 +13,13 @@ class Settings(BaseSettings):
     db_user: str
     db_password: str
 
-    db_pool_size : int 
+    db_pool_size : int
     db_max_overflow :int
     db_pool_timeout:int
 
-    jwt_secret_key :str 
-    jwt_algorithm : str 
-    
+    jwt_secret_key :str
+    jwt_algorithm : str
+
     access_token_expire_minutes : int
     refresh_token_expire_days :int
 
@@ -43,7 +42,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-   
+
 
 @lru_cache
 def get_settings() -> Settings:

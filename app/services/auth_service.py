@@ -1,10 +1,8 @@
-from datetime import UTC,datetime
+from datetime import UTC, datetime
 
 import jwt
-
-from fastapi import HTTPException,status
-
-from sqlalchemy.exc import IntegrityError,SQLAlchemyError
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import (
@@ -13,11 +11,14 @@ from app.core.security import (
     decode_token,
     hash_password,
     hash_refresh_token,
-    verify_password
+    verify_password,
+)
+from app.repositories.interfaces.refresh_token_repository import (
+    RefreshTokenRepositoryInterface,
 )
 from app.repositories.interfaces.user_repository import UserRepositoryInterface
-from app.repositories.interfaces.refresh_token_repository import RefreshTokenRepositoryInterface
 from app.utils.logger import logger
+
 
 class AuthService:
     def __init__(
@@ -25,13 +26,13 @@ class AuthService:
         user_repository:UserRepositoryInterface,
         refresh_token_repository:RefreshTokenRepositoryInterface
     ):
-        """Create the authentication service with user and refresh-token repositories."""
+        """Create the service with user and refresh-token repositories."""
         self.user_repository = user_repository
         self.refresh_token_repository = refresh_token_repository
 
     # register user
     async def register(self,db:AsyncSession,data)->None:
-        """Register an employee or trainer whose email belongs to an active staff record."""
+        """Register an employee or trainer with an active staff email."""
         try:
 
             #only employee and trainer can register
@@ -93,13 +94,13 @@ class AuthService:
             )
 
 
-        except SQLAlchemyError as exc :
+        except SQLAlchemyError:
             await db.rollback()
             logger.exception("Registration failed")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Unable to complete registration"
-            ) 
+            )
 
 
     # login
@@ -251,7 +252,7 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid refresh token."
-            ) 
+            )
 
         if token_user_id != current_user_id:
             raise HTTPException(

@@ -4,10 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.refresh_token import RefreshToken
-
 from app.repositories.interfaces.refresh_token_repository import (
-    RefreshTokenRepositoryInterface
+    RefreshTokenRepositoryInterface,
 )
+
 
 class RefreshTokenRepository(RefreshTokenRepositoryInterface):
     async def create(
@@ -18,7 +18,7 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         expires_at: datetime
     ) -> RefreshToken:
         """Add a refresh-token record and flush it into the current transaction."""
-        
+
         token_record = RefreshToken(
             user_id=user_id,
             token_hash=token_hash,

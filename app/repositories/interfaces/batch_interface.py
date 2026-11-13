@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
 
 from app.models.batch import Batch
 
@@ -12,24 +11,24 @@ class BatchInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, batch_id: int) -> Optional[Batch]:
+    async def get_by_id(self, batch_id: int) -> Batch | None:
         """Return a batch by ID, or None when it does not exist."""
         pass
 
     @abstractmethod
     async def get_all(
         self, skip: int, limit: int
-    ) -> Tuple[List[Batch], int]:
+    ) -> tuple[list[Batch], int]:
         """Return a batch page and the total number of batches."""
         pass
 
     @abstractmethod
-    async def get_by_course(self, course_id: int) -> List[Batch]:
+    async def get_by_course(self, course_id: int) -> list[Batch]:
         """Return all batches assigned to a course."""
         pass
 
     @abstractmethod
-    async def get_by_trainer(self, trainer_id: int) -> List[Batch]:
+    async def get_by_trainer(self, trainer_id: int) -> list[Batch]:
         """Return all batches assigned to a trainer."""
         pass
 
