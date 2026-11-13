@@ -13,7 +13,13 @@ if TYPE_CHECKING:
 class Course(Base):
     __tablename__ = "courses"
     __table_args__ = (
-        CheckConstraint("duration > 0", name="ck_course_duration_positive"),
+        CheckConstraint(
+            "duration_value > 0", name="ck_course_duration_value_positive"
+        ),
+        CheckConstraint(
+            "duration_unit IN ('hours', 'days', 'weeks', 'months', 'years')",
+            name="ck_course_duration_unit",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -22,7 +28,8 @@ class Course(Base):
     course_contents: Mapped[list[str] | None] = mapped_column(
         ARRAY(Text()), nullable=True
     )
-    duration: Mapped[int] = mapped_column(Integer)  # in days
+    duration_value: Mapped[int] = mapped_column(Integer)
+    duration_unit: Mapped[str] = mapped_column(String(10))
 
     batches: Mapped[list["Batch"]] = relationship(back_populates="course")
     contents: Mapped[list["CourseContent"]] = relationship(

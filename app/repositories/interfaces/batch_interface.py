@@ -6,7 +6,7 @@ from app.models.batch import Batch
 class BatchInterface(ABC):
 
     @abstractmethod
-    async def create(self, data: dict) -> Batch:
+    async def create(self, data: dict[str, object]) -> Batch:
         """Persist a batch from its field dictionary."""
         pass
 
@@ -17,9 +17,13 @@ class BatchInterface(ABC):
 
     @abstractmethod
     async def get_all(
-        self, skip: int, limit: int
+        self,
+        skip: int,
+        limit: int,
+        status: str | None = None,
+        is_active: bool = True,
     ) -> tuple[list[Batch], int]:
-        """Return a batch page and the total number of batches."""
+        """Return a batch page filtered by completion status and active state."""
         pass
 
     @abstractmethod
@@ -33,13 +37,18 @@ class BatchInterface(ABC):
         pass
 
     @abstractmethod
-    async def update(self, batch: Batch, data: dict) -> Batch:
+    async def update(self, batch: Batch, data: dict[str, object]) -> Batch:
         """Apply the supplied fields to a persisted batch."""
         pass
 
     @abstractmethod
-    async def delete(self, batch: Batch) -> None:
-        """Delete a persisted batch."""
+    async def update_status(self, batch: Batch, status: str) -> Batch:
+        """Set a batch's status and persist the change."""
+        pass
+
+    @abstractmethod
+    async def set_active(self, batch: Batch, is_active: bool) -> Batch:
+        """Set whether a batch is active and persist the change."""
         pass
 
     @abstractmethod

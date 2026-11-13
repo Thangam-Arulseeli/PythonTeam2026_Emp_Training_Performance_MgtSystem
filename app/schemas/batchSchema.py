@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 
 from pydantic import (
     BaseModel,
@@ -7,6 +8,8 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+
+BatchStatus = Literal["completed", "not_completed"]
 
 
 class BatchCreate(BaseModel):
@@ -73,6 +76,12 @@ class BatchResponse(BaseModel):
     trainer_id: int
     start_date: date
     end_date: date
+    status: BatchStatus
+    is_active: bool
+
+
+class BatchStatusUpdate(BaseModel):
+    status: BatchStatus
 
 
 class BatchListResponse(BaseModel):

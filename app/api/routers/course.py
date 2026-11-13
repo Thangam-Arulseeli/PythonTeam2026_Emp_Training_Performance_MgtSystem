@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
@@ -28,7 +27,13 @@ async def create_course(
     current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ) -> CourseResponse:
-    """Create a course; access is restricted to administrators."""
+    """Create a course; access is restricted to administrators.
+
+    Provide the duration as a positive integer `duration_value` and a
+    `duration_unit` chosen from `hours`, `days`, `weeks`, `months`, or `years`.
+    For example, two weeks is `{"duration_value": 2, "duration_unit": "weeks"}`.
+
+    """
     return await service.create_course(payload)
 
 

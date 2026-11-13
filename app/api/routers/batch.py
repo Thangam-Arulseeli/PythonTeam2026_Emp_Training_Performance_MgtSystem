@@ -3,10 +3,13 @@ from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.api.dependencies.service_dependencies import get_batch_service
+from app.models.user import User
 from app.schemas.batchSchema import (
     BatchCreate,
     BatchListResponse,
     BatchResponse,
+    BatchStatus,
+    BatchStatusUpdate,
     BatchUpdate,
 )
 from app.services.batch_service import BatchService
@@ -25,7 +28,7 @@ router = APIRouter(
 )
 async def create_batch(
     payload: BatchCreate,
-    current_user=Depends(require_roles("admin")),
+    current_user: User = Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchResponse:
     """Create a batch after validating its course and trainer; admin only."""
@@ -40,11 +43,17 @@ async def create_batch(
 async def list_batches(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Items per page"),
-    current_user=Depends(get_current_user),
+    status: BatchStatus | None = Query(
+        None, description="Filter batches by status"
+    ),
+    is_active: bool = Query(True, description="Filter batches by active state"),
+    current_user: User = Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchListResponse:
-    """Return a paginated list of batches."""
-    return await service.list_batches(page=page, size=size)
+    """Return active batches by default, with optional status and active filters."""
+    return await service.list_batches(
+        page=page, size=size, status=status, is_active=is_active
+    )
 
 
 @router.get(
@@ -54,7 +63,7 @@ async def list_batches(
 )
 async def get_batches_by_course(
     course_id: int,
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchListResponse:
     """Return all batches assigned to the requested course."""
@@ -68,7 +77,7 @@ async def get_batches_by_course(
 )
 async def get_batches_by_trainer(
     trainer_id: int,
-    current_user=Depends(require_roles("admin", "trainer")),
+    current_user: User = Depends(require_roles("admin", "trainer")),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchListResponse:
     """Return batches assigned to a trainer; admins and trainers may access it."""
@@ -82,11 +91,40 @@ async def get_batches_by_trainer(
 )
 async def get_batch(
     batch_id: int,
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchResponse:
     """Return the batch with the requested identifier."""
     return await service.get_batch(batch_id)
+
+
+@router.patch(
+    "/{batch_id}/activate",
+    response_model=BatchResponse,
+    summary="Reactivate a batch",
+)
+async def activate_batch(
+    batch_id: int,
+    current_user: User = Depends(require_roles("admin")),
+    service: BatchService = Depends(get_batch_service),
+) -> BatchResponse:
+    """Reactivate a soft-deleted batch; access is restricted to administrators."""
+    return await service.activate_batch(batch_id)
+
+
+@router.patch(
+    "/{batch_id}/status",
+    response_model=BatchResponse,
+    summary="Update a batch status",
+)
+async def update_batch_status(
+    batch_id: int,
+    payload: BatchStatusUpdate,
+    current_user: User = Depends(require_roles("admin")),
+    service: BatchService = Depends(get_batch_service),
+) -> BatchResponse:
+    """Set a batch to completed or not_completed; admin access is required."""
+    return await service.update_batch_status(batch_id, payload)
 
 
 @router.put(
@@ -97,7 +135,7 @@ async def get_batch(
 async def update_batch(
     batch_id: int,
     payload: BatchUpdate,
-    current_user=Depends(require_roles("admin")),
+    current_user: User = Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchResponse:
     """Update the supplied batch fields; access is restricted to administrators."""
@@ -107,12 +145,12 @@ async def update_batch(
 @router.delete(
     "/{batch_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Delete a batch",
+    summary="Soft-delete a batch",
 )
 async def delete_batch(
     batch_id: int,
-    current_user=Depends(require_roles("admin")),
+    current_user: User = Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ) -> None:
-    """Delete the requested batch; access is restricted to administrators."""
+    """Soft-delete the requested batch; admin access is required."""
     await service.delete_batch(batch_id)

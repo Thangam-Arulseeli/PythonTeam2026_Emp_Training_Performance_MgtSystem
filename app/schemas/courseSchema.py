@@ -1,14 +1,17 @@
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-MAX_DURATION_DAYS = 1000
+from app.utils.duration import DurationUnit, duration_to_standard_units
+
+MAX_DURATION_STANDARD_UNITS = 24_000
 
 
 class CourseCreate(BaseModel):
     course_name: str
     description: str | None = None
     course_contents: list[str] | None = None
-    duration: int
+    duration_value: int = Field(ge=1)
+    duration_unit: DurationUnit
 
     @field_validator("course_name")
     @classmethod
@@ -20,20 +23,24 @@ class CourseCreate(BaseModel):
 
         return value
 
-    @field_validator("duration")
-    @classmethod
-    def validate_duration(cls, value: int) -> int:
-        if not 1 <= value <= MAX_DURATION_DAYS:
-            raise ValueError(f"Duration must be between 1 and {MAX_DURATION_DAYS} days")
-
-        return value
+    @model_validator(mode="after")
+    def validate_duration(self) -> "CourseCreate":
+        normalized_value = duration_to_standard_units(
+            self.duration_value, self.duration_unit
+        )
+        if normalized_value > MAX_DURATION_STANDARD_UNITS:
+            raise ValueError(
+                "Duration exceeds the maximum supported length"
+            )
+        return self
 
 
 class CourseUpdate(BaseModel):
     course_name: str | None = None
     description: str | None = None
     course_contents: list[str] | None = None
-    duration: int | None = None
+    duration_value: int | None = Field(default=None, ge=1)
+    duration_unit: DurationUnit | None = None
 
     @field_validator("course_name")
     @classmethod
@@ -48,16 +55,20 @@ class CourseUpdate(BaseModel):
 
         return value
 
-    @field_validator("duration")
-    @classmethod
-    def validate_duration(cls, value: int | None) -> int | None:
-        if value is None:
-            return value
+    @model_validator(mode="after")
+    def validate_duration(self) -> "CourseUpdate":
+        if "duration_value" in self.model_fields_set and self.duration_value is None:
+            raise ValueError("duration_value cannot be null")
+        if "duration_unit" in self.model_fields_set and self.duration_unit is None:
+            raise ValueError("duration_unit cannot be null")
 
-        if not 1 <= value <= MAX_DURATION_DAYS:
-            raise ValueError(f"Duration must be between 1 and {MAX_DURATION_DAYS} days")
-
-        return value
+        if self.duration_value is not None and self.duration_unit is not None:
+            if (
+                duration_to_standard_units(self.duration_value, self.duration_unit)
+                > MAX_DURATION_STANDARD_UNITS
+            ):
+                raise ValueError("Duration exceeds the maximum supported length")
+        return self
 
 
 class CourseResponse(BaseModel):
@@ -67,7 +78,8 @@ class CourseResponse(BaseModel):
     course_name: str
     description: str | None = None
     course_contents: list[str] | None = None
-    duration: int
+    duration_value: int
+    duration_unit: DurationUnit
 
 
 class CourseListResponse(BaseModel):

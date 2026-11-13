@@ -1,14 +1,19 @@
 
+from datetime import date
+
 from app.exceptions import (
     NotFoundException,
     UnprocessableEntityException,
 )
+from app.models.batch import Batch
 from app.repositories.interfaces.batch_interface import BatchInterface
 from app.repositories.interfaces.course_interface import CourseInterface
 from app.schemas.batchSchema import (
     BatchCreate,
     BatchListResponse,
     BatchResponse,
+    BatchStatus,
+    BatchStatusUpdate,
     BatchUpdate,
 )
 from app.utils.logger import logger
@@ -20,12 +25,12 @@ class BatchService:
         self,
         batch_repo: BatchInterface,
         course_repo: CourseInterface,
-    ):
+    ) -> None:
         """Create the batch service with batch and course persistence interfaces."""
         self.batch_repo = batch_repo
         self.course_repo = course_repo
 
-    async def get_batch_or_404(self, batch_id: int):
+    async def get_batch_or_404(self, batch_id: int) -> Batch:
         """Load a batch by ID or raise a not-found error."""
         batch = await self.batch_repo.get_by_id(batch_id)
 
@@ -35,7 +40,9 @@ class BatchService:
 
         return batch
 
-    async def validate_relations(self, course_id=None, trainer_id=None):
+    async def validate_relations(
+        self, course_id: int | None = None, trainer_id: int | None = None
+    ) -> None:
         """Confirm each supplied course and trainer ID refers to an existing record."""
         if course_id is not None and not await self.course_repo.get_by_id(course_id):
             logger.warning(
@@ -52,14 +59,14 @@ class BatchService:
             raise NotFoundException("Trainer not found")
 
     @staticmethod
-    def validate_dates(start_date, end_date):
+    def validate_dates(start_date: date, end_date: date) -> None:
         """Require the batch end date to be later than its start date."""
         if end_date <= start_date:
             raise UnprocessableEntityException("End date must be after start date")
 
     @staticmethod
     def format_batch_list(
-        batches: list,
+        batches: list[Batch],
         total: int | None = None,
         page: int = 1,
         size: int | None = None,
@@ -75,11 +82,15 @@ class BatchService:
         )
 
     async def list_batches(
-        self, page: int = 1, size: int = 10
+        self,
+        page: int = 1,
+        size: int = 10,
+        status: BatchStatus | None = None,
+        is_active: bool = True,
     ) -> BatchListResponse:
-        """Fetch and format a page of batches with the total record count."""
+        """Fetch a batch page filtered by completion status and active state."""
         skip = max(0, (page - 1) * size)
-        items, total = await self.batch_repo.get_all(skip, size)
+        items, total = await self.batch_repo.get_all(skip, size, status, is_active)
         return self.format_batch_list(items, total=total, page=page, size=size)
 
     async def create_batch(self, payload: BatchCreate) -> BatchResponse:
@@ -131,11 +142,29 @@ class BatchService:
         logger.info("Batch updated successfully: id=%s", batch_id)
         return BatchResponse.model_validate(updated_batch)
 
-    async def delete_batch(self, batch_id: int) -> None:
-        """Delete the requested batch or raise a not-found error."""
+    async def update_batch_status(
+        self, batch_id: int, payload: BatchStatusUpdate
+    ) -> BatchResponse:
+        """Update a batch's validated status or raise a not-found error."""
         batch = await self.get_batch_or_404(batch_id)
-        await self.batch_repo.delete(batch)
-        logger.info("Batch deleted successfully: id=%s", batch_id)
+        updated_batch = await self.batch_repo.update_status(batch, payload.status)
+        logger.info(
+            "Batch status updated: id=%s, status=%s", batch_id, payload.status
+        )
+        return BatchResponse.model_validate(updated_batch)
+
+    async def delete_batch(self, batch_id: int) -> None:
+        """Soft-delete a batch by marking it inactive."""
+        batch = await self.get_batch_or_404(batch_id)
+        await self.batch_repo.set_active(batch, False)
+        logger.info("Batch soft-deleted: id=%s", batch_id)
+
+    async def activate_batch(self, batch_id: int) -> BatchResponse:
+        """Reactivate a previously soft-deleted batch."""
+        batch = await self.get_batch_or_404(batch_id)
+        activated = await self.batch_repo.set_active(batch, True)
+        logger.info("Batch activated: id=%s", batch_id)
+        return BatchResponse.model_validate(activated)
 
     async def get_batches_by_course(self, course_id: int) -> BatchListResponse:
         """Return batches for an existing course."""

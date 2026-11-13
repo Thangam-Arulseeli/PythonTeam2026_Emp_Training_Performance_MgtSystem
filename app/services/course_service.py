@@ -7,11 +7,13 @@ from app.exceptions import (
 )
 from app.repositories.interfaces.course_interface import CourseInterface
 from app.schemas.courseSchema import (
+    MAX_DURATION_STANDARD_UNITS,
     CourseCreate,
     CourseListResponse,
     CourseResponse,
     CourseUpdate,
 )
+from app.utils.duration import DurationUnit, duration_to_standard_units
 from app.utils.logger import logger
 
 
@@ -37,7 +39,9 @@ class CourseService:
                 payload.course_name,
             )
             raise ConflictException("Course name already exists")
-        created = await self.course_repo.create(payload.model_dump())
+        course_data = payload.model_dump()
+        course_data["duration_unit"] = payload.duration_unit.value
+        created = await self.course_repo.create(course_data)
         logger.info(
             "Course created successfully: id=%s, name='%s'",
             created.id,
@@ -71,8 +75,27 @@ class CourseService:
         data = payload.model_dump(exclude_unset=True)
         if "course_name" in data and data["course_name"] is None:
             raise UnprocessableEntityException("course_name cannot be null")
-        if "duration" in data and data["duration"] is None:
-            raise UnprocessableEntityException("duration cannot be null")
+        if "duration_value" in data and data["duration_value"] is None:
+            raise UnprocessableEntityException("duration_value cannot be null")
+        if "duration_unit" in data and data["duration_unit"] is None:
+            raise UnprocessableEntityException("duration_unit cannot be null")
+
+        if "duration_value" in data or "duration_unit" in data:
+            duration_value = data.get("duration_value", course.duration_value)
+            duration_unit = DurationUnit(
+                data.get("duration_unit", course.duration_unit)
+            )
+            normalized_value = duration_to_standard_units(
+                duration_value, duration_unit
+            )
+            if normalized_value > MAX_DURATION_STANDARD_UNITS:
+                raise UnprocessableEntityException(
+                    "Duration exceeds the maximum supported length"
+                )
+            data.update(
+                duration_value=duration_value,
+                duration_unit=duration_unit.value,
+            )
         new_name = data.get("course_name")
         if new_name:
             existing = await self.course_repo.get_by_name(new_name)
