@@ -9,6 +9,7 @@ from app.models.user import User
 
 class UserRepository(UserRepositoryInterface):
     async def get_by_email(self, db:AsyncSession, email:str) ->User|None:
+        """Return the user matching an email address, if one exists."""
         result = await db.execute(
             select(User)
             .where(User.email == email)
@@ -16,6 +17,7 @@ class UserRepository(UserRepositoryInterface):
         return result.scalar_one_or_none()
 
     async def get_by_username(self, db:AsyncSession, username:str) ->User|None:
+        """Return the user matching a username, if one exists."""
         result = await db.execute(
             select(User)
             .where(User.username == username)
@@ -24,6 +26,7 @@ class UserRepository(UserRepositoryInterface):
 
 
     async def get_by_id(self, db:AsyncSession, user_id:int)->User|None:
+        """Return the user matching a primary key, if one exists."""
         result = await db.execute(
             select(User)
             .where(User.user_id == user_id)
@@ -32,6 +35,7 @@ class UserRepository(UserRepositoryInterface):
         return result.scalar_one_or_none()
 
     async def staff_email_exists(self, db:AsyncSession, email:str, role:str)->bool:
+        """Check for an active employee or trainer record with the given email."""
         if role == "employee":
             query = select(EmployeeData).where(
                 EmployeeData.email == email,
@@ -59,6 +63,7 @@ class UserRepository(UserRepositoryInterface):
         hashed_password:str, 
         role:str
     ):
+        """Add a user and flush it to the current transaction."""
         user =User(
             username=username,
             email=email,

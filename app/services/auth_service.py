@@ -25,11 +25,13 @@ class AuthService:
         user_repository:UserRepositoryInterface,
         refresh_token_repository:RefreshTokenRepositoryInterface
     ):
+        """Create the authentication service with user and refresh-token repositories."""
         self.user_repository = user_repository
         self.refresh_token_repository = refresh_token_repository
 
     # register user
     async def register(self,db:AsyncSession,data)->None:
+        """Register an employee or trainer whose email belongs to an active staff record."""
         try:
 
             #only employee and trainer can register
@@ -102,6 +104,7 @@ class AuthService:
 
     # login
     async def login(self,db:AsyncSession,username:str,password:str):
+        """Verify credentials and issue access and refresh tokens for an active user."""
         user = await self.user_repository.get_by_username(db,username)
         if user is None:
             raise HTTPException(
@@ -155,6 +158,7 @@ class AuthService:
 
     # refresh token
     async def refresh_tokens(self,db:AsyncSession,refresh_token:str)->dict[str,str]:
+        """Rotate a valid refresh token and return a replacement token pair."""
         try:
             payload = decode_token(refresh_token)
 
@@ -235,6 +239,7 @@ class AuthService:
         refresh_token: str,
         current_user_id: int
     ) -> None:
+        """Validate ownership and revoke the user's active refresh token."""
         try:
             payload = decode_token(refresh_token)
             if payload.get("type") != "refresh":

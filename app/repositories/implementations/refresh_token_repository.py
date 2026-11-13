@@ -17,6 +17,7 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         token_hash: str,
         expires_at: datetime
     ) -> RefreshToken:
+        """Add a refresh-token record and flush it into the current transaction."""
         
         token_record = RefreshToken(
             user_id=user_id,
@@ -32,6 +33,7 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         db: AsyncSession,
         token_hash: str
     ) -> RefreshToken | None:
+        """Lock and return an unrevoked, unexpired refresh token by its hash."""
         result = await db.execute(
             select(RefreshToken).where(
                 RefreshToken.token_hash == token_hash,

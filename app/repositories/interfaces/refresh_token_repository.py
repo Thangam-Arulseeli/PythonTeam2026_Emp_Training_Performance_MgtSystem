@@ -15,6 +15,7 @@ class RefreshTokenRepositoryInterface(ABC):
         token_hash: str,
         expires_at: datetime
     ) -> RefreshToken:
+        """Persist a refresh-token record for a user."""
         pass
 
     @abstractmethod
@@ -23,4 +24,5 @@ class RefreshTokenRepositoryInterface(ABC):
         db: AsyncSession,
         token_hash: str
     ) -> RefreshToken | None:
+        """Lock and find an active, unexpired refresh token by hash."""
         pass

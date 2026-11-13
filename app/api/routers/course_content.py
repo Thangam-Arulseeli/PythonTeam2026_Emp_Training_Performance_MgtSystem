@@ -27,6 +27,7 @@ async def upload_course_content(
     current_user=Depends(require_roles("admin", "trainer")),
     service: CourseContentService = Depends(get_course_content_service),
 ):
+    """Validate and upload a course content file for an admin or trainer."""
     return await service.upload(course_id=course_id, file=file)
 
 
@@ -40,6 +41,7 @@ async def list_course_contents(
     current_user=Depends(get_current_user),
     service: CourseContentService = Depends(get_course_content_service),
 ):
+    """List uploaded content files belonging to the specified course."""
     return await service.list_for_course(course_id=course_id)
 
 
@@ -52,6 +54,7 @@ async def download_course_content(
     current_user=Depends(get_current_user),
     service: CourseContentService = Depends(get_course_content_service),
 ):
+    """Return the requested course content file as a downloadable response."""
     file_path, filename = await service.get_file(content_id=content_id)
     return FileResponse(
         path=file_path,
@@ -70,4 +73,5 @@ async def delete_course_content(
     current_user=Depends(require_roles("admin", "trainer")),
     service: CourseContentService = Depends(get_course_content_service),
 ):
+    """Delete a course content record and its stored file; admin or trainer only."""
     await service.delete(content_id=content_id)

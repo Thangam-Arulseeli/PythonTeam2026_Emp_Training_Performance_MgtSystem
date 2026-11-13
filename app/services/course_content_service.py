@@ -10,10 +10,10 @@ from app.exceptions import (
     NotFoundException,
     PayloadTooLargeException,
 )
-from app.repositories.interface.course_content_interface import (
+from app.repositories.interfaces.course_content_interface import (
     CourseContentInterface,
 )
-from app.repositories.interface.course_interface import CourseInterface
+from app.repositories.interfaces.course_interface import CourseInterface
 from app.schemas.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
@@ -32,10 +32,12 @@ class CourseContentService:
         content_repo: CourseContentInterface,
         course_repo: CourseInterface,
     ):
+        """Create the content service with file metadata and course repositories."""
         self.content_repo = content_repo
         self.course_repo = course_repo
 
     async def get_content_or_404(self, content_id: int):
+        """Load course content metadata by ID or raise a not-found error."""
         content = await self.content_repo.get_by_id(content_id)
 
         if not content:
@@ -45,6 +47,7 @@ class CourseContentService:
         return content
 
     async def upload(self, course_id: int, file: UploadFile) -> CourseContentResponse:
+        """Validate and store an allowed file, then save its metadata for the course."""
 
         if not await self.course_repo.get_by_id(course_id):
             logger.warning("Upload failed: Course not found course_id=%s", course_id)
@@ -95,6 +98,7 @@ class CourseContentService:
             raise
 
     async def list_for_course(self, course_id: int) -> CourseContentListResponse:
+        """Return all uploaded content metadata for an existing course."""
 
         if not await self.course_repo.get_by_id(course_id):
             logger.warning("list_for_course failed: Course not found id=%s", course_id)
@@ -110,6 +114,7 @@ class CourseContentService:
         )
 
     async def get_file(self, content_id: int) -> Tuple[str, str]:
+        """Return the on-disk path and download filename for an existing content file."""
 
         content = await self.get_content_or_404(content_id)
         file_path = content.file_path
@@ -122,6 +127,7 @@ class CourseContentService:
         return file_path, content.filename
 
     async def delete(self, content_id: int) -> None:
+        """Delete content metadata and remove its file from disk when present."""
 
         content = await self.get_content_or_404(content_id)
         file_path = content.file_path

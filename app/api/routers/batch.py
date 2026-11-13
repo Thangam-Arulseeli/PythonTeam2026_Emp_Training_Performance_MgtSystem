@@ -29,6 +29,7 @@ async def create_batch(
     current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Create a batch after validating its course and trainer; admin only."""
     return await service.create_batch(payload)
 
 
@@ -43,6 +44,7 @@ async def list_batches(
     current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Return a paginated list of batches."""
     return await service.list_batches(page=page, size=size)
 
 
@@ -56,6 +58,7 @@ async def get_batches_by_course(
     current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Return all batches assigned to the requested course."""
     return await service.get_batches_by_course(course_id)
 
 
@@ -69,6 +72,7 @@ async def get_batches_by_trainer(
     current_user=Depends(require_roles("admin", "trainer")),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Return batches assigned to a trainer; admins and trainers may access it."""
     return await service.get_batches_by_trainer(trainer_id)
 
 
@@ -82,6 +86,7 @@ async def get_batch(
     current_user=Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Return the batch with the requested identifier."""
     return await service.get_batch(batch_id)
 
 
@@ -96,6 +101,7 @@ async def update_batch(
     current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Update the supplied batch fields; access is restricted to administrators."""
     return await service.update_batch(batch_id, payload)
 
 
@@ -109,4 +115,5 @@ async def delete_batch(
     current_user=Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ):
+    """Delete the requested batch; access is restricted to administrators."""
     await service.delete_batch(batch_id)

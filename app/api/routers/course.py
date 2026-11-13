@@ -29,6 +29,7 @@ async def create_course(
     current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ):
+    """Create a course; access is restricted to administrators."""
     return await service.create_course(payload)
 
 
@@ -46,6 +47,7 @@ async def list_courses(
     current_user=Depends(get_current_user),
     service: CourseService = Depends(get_course_service),
 ):
+    """Return a page of courses, optionally filtered by a search term."""
     return await service.list_courses(page=page, size=size, search=search)
 
 
@@ -59,6 +61,7 @@ async def get_course(
     current_user=Depends(get_current_user),
     service: CourseService = Depends(get_course_service),
 ):
+    """Return the course with the requested identifier."""
     return await service.get_course(course_id)
 
 
@@ -73,6 +76,7 @@ async def update_course(
     current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ):
+    """Update the supplied course fields; access is restricted to administrators."""
     return await service.update_course(course_id, payload)
 
 
@@ -86,4 +90,5 @@ async def delete_course(
     current_user=Depends(require_roles("admin")),
     service: CourseService = Depends(get_course_service),
 ):
+    """Delete a course that has no associated batches; admin access is required."""
     await service.delete_course(course_id)
