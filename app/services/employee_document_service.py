@@ -197,6 +197,8 @@ class EmployeeDocumentService:
         employee_id: int,
     ) -> list[EmployeeDocument]:
 
+        await self.check_employee(employee_id)
+
         documents = (
                 await self.document_repository
                 .get_documents_by_employee_id(employee_id)

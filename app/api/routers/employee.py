@@ -131,7 +131,7 @@ async def upload_employee_documents(
     "/{employee_id}/documents",
     response_model=EmployeeDocumentsListResponse,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(require_roles("admin"))],
+    dependencies=[Depends(require_roles("admin", "employee", "trainer"))]
 )
 async def get_employee_documents(
     service: EmployeeDocumentServiceDep,
