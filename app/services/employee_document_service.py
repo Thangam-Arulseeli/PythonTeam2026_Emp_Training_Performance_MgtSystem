@@ -143,57 +143,73 @@ class EmployeeDocumentService:
         return str(file_path)
 
     # UPLOAD PROFILE PICTURE AND RESUME
+    
     async def upload_documents(
         self,
         employee_id: int,
-        profile_picture: UploadFile,
-        resume: UploadFile,
+        profile_picture: UploadFile | None = None,
+        resume: UploadFile | None = None,
     ) -> list[EmployeeDocument]:
 
         await self.check_employee(employee_id)
+
+        if profile_picture is None and resume is None:
+            raise InvalidEmployeeDataException(
+                "Upload at least one document"
+            )
 
         existing_documents = (
             await self.document_repository
             .get_documents_by_employee_id(employee_id)
         )
 
-        if existing_documents:
-            raise EmployeeAlreadyExistsException(
-                "documents"
+        existing_types = {
+            doc.document_type
+            for doc in existing_documents
+        }
+
+        files_to_upload = []
+
+        if profile_picture is not None:
+            files_to_upload.append(
+                ("profile_picture", profile_picture)
             )
+
+        if resume is not None:
+            files_to_upload.append(
+                ("resume", resume)
+            )
+
+        for document_type, _ in files_to_upload:
+            if document_type in existing_types:
+                raise EmployeeAlreadyExistsException(
+                    document_type
+                )
 
         saved_paths = []
 
         try:
-            profile_path = await self.save_file(
-                profile_picture,
-                "profile_picture"
-            )
-            saved_paths.append(profile_path)
+            documents = []
 
-            resume_path = await self.save_file(
-                resume,
-                "resume"
-            )
-            saved_paths.append(resume_path)
+            for document_type, file in files_to_upload:
+                path = await self.save_file(
+                    file,
+                    document_type,
+                )
 
-            documents = [
-                EmployeeDocument(
-                    employee_id=employee_id,
-                    document_type="profile_picture",
-                    file_path=profile_path,
-                ),
-                EmployeeDocument(
-                    employee_id=employee_id,
-                    document_type="resume",
-                    file_path=resume_path,
-                ),
-            ]
+                saved_paths.append(path)
+
+                documents.append(
+                    EmployeeDocument(
+                        employee_id=employee_id,
+                        document_type=document_type,
+                        file_path=path,
+                    )
+                )
 
             documents = (
-                await self.document_repository.create_documents(
-                    documents
-                )
+                await self.document_repository
+                .create_documents(documents)
             )
 
             await self.db.commit()
@@ -206,11 +222,10 @@ class EmployeeDocumentService:
         except Exception as exc:
             await self.db.rollback()
 
-            # Remove newly saved files on failure.
             for path in saved_paths:
                 await asyncio.to_thread(
                     Path(path).unlink,
-                    missing_ok=True
+                    missing_ok=True,
                 )
 
             if (

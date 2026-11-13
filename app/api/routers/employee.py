@@ -25,6 +25,11 @@ from app.schemas.employee_document import (
     EmployeeDocumentResponse,
 )
 
+from fastapi import Depends, HTTPException, status
+from app.api.dependencies.auth import (  require_roles,)
+
+
+
 
 router = APIRouter(
     prefix="/api/employees",
@@ -37,6 +42,7 @@ router = APIRouter(
     "/",
     response_model=EmployeeResponse,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles("admin"))],
 )
 async def create_employee(
     data: EmployeeCreate,
@@ -50,6 +56,7 @@ async def create_employee(
     "/",
     response_model=list[EmployeeResponse],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin", "employee", "trainer"))]
 )
 async def get_all_employees(
     service: EmployeeServiceDep,
@@ -67,6 +74,7 @@ async def get_all_employees(
     "/{employee_id}",
     response_model=EmployeeResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin", "employee", "trainer"))]
 )
 async def get_employee_by_id(
     
@@ -83,6 +91,7 @@ async def get_employee_by_id(
     "/{employee_id}",
     response_model=EmployeeResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin"))],
 )
 async def update_employee(
     data: EmployeeUpdate,
@@ -98,13 +107,23 @@ async def update_employee(
 # SOFT DELETE EMPLOYEE
 @router.delete(
     "/{employee_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin"))],
 )
 async def delete_employee(
     service: EmployeeServiceDep,
     employee_id: int = Path(gt=0),
 ):
+    employee = await service.get_employee_by_id(employee_id)
+
     await service.delete_employee(employee_id)
+
+    return {
+        "message": "Employee deleted successfully",
+        "employee_id": employee.employee_id,
+        "full_name": employee.full_name,
+    }
+
 
 
 # UPLOAD PROFILE PICTURE AND RESUME
@@ -112,11 +131,12 @@ async def delete_employee(
     "/{employee_id}/documents",
     response_model=list[EmployeeDocumentResponse],
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_roles("admin"))],
 )
 async def upload_employee_documents(
     service: EmployeeDocumentServiceDep,
-    profile_picture: Annotated[UploadFile, File()],
-    resume: Annotated[UploadFile, File()],
+    profile_picture: Annotated[UploadFile | None, File()]= None,
+    resume: Annotated[UploadFile | None, File()]= None,
     employee_id: int = Path(gt=0),
 ):
     return await service.upload_documents(
@@ -131,6 +151,7 @@ async def upload_employee_documents(
     "/{employee_id}/documents",
     response_model=list[EmployeeDocumentResponse],
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_roles("admin"))],
 )
 async def get_employee_documents(
     service: EmployeeDocumentServiceDep,
