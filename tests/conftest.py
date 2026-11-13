@@ -5,6 +5,12 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 
+import sys
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT))
+
 from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.service_dependencies import get_auth_service
 from app.database.session import get_session
@@ -42,10 +48,10 @@ def api_service():
 
 
 @pytest.fixture
-def client(api_service,fakeuser):
-    app.dependency_overrides[get_auth_service] = api_service
-    app.dependency_overrides[get_session] = lambda:AsyncMock()
-    app.dependency_overrides[get_current_user] = lambda:fakeuser
+def client(api_service, fakeuser):
+    app.dependency_overrides[get_auth_service] =lambda: api_service
+    app.dependency_overrides[get_session] = lambda: AsyncMock()
+    app.dependency_overrides[get_current_user] =lambda: fakeuser
 
     with TestClient(app) as test_client:
         yield test_client

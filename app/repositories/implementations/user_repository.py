@@ -58,7 +58,7 @@ class UserRepository(UserRepositoryInterface):
         email:str, 
         hashed_password:str, 
         role:str
-    ):
+    )->User:
         user =User(
             username=username,
             email=email,
