@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.trainer import Trainer
+from app.models.trainer_resume import TrainerResume
+from app.models.user import User
 from app.repositories.interfaces.trainer_repository import TrainerRepository
 
 
@@ -107,24 +109,46 @@ class TrainerRepositoryImpl(TrainerRepository):
 
         if trainer is None:
             return None
+        try:
 
-        trainer.is_active = is_active
+            trainer.is_active = is_active
 
-        await self.db.commit()
+            result = await self.db.execute(
+                select(User).where(
+                    User.email == trainer.email,
+                    User.role == "trainer",
+                )
+            )
+
+            user = result.scalar_one_or_none()
+
+            if user is not None:
+                user.is_active = is_active
+
+            await self.db.commit()
+
+            result = await self.db.execute(
+                select(Trainer)
+                .options(selectinload(Trainer.resume))
+                .where(Trainer.trainer_id == trainer_id)
+            )
+
+            trainer = result.scalar_one_or_none()
+
+            return trainer
+
+        except Exception:
+            await self.db.rollback()
+            raise
+
+
+    async def get_trainer_by_email(self, email: str) -> Trainer | None:
 
         result = await self.db.execute(
             select(Trainer)
             .options(selectinload(Trainer.resume))
-            .where(Trainer.trainer_id == trainer_id)
+            .where(Trainer.email == email)
         )
-
-        trainer = result.scalar_one_or_none()
-
-        return trainer
-
-    async def get_trainer_by_email(self, email: str) -> Trainer | None:
-
-        result = await self.db.execute(select(Trainer).where(Trainer.email == email))
 
         trainer = result.scalar_one_or_none()
 
@@ -139,4 +163,3 @@ class TrainerRepositoryImpl(TrainerRepository):
         trainer = result.scalar_one_or_none()
 
         return trainer
-

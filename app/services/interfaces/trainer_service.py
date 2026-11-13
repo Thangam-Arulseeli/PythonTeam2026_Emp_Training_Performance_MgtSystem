@@ -46,3 +46,9 @@ class TrainerService(ABC):
     ) -> TrainerResponse:
         pass
 
+    @abstractmethod
+    async def get_my_trainer_details(
+        self, 
+        email: str
+    ) -> TrainerResponse:
+        pass

@@ -10,7 +10,11 @@ from alembic import context
 from app.database.base import Base
 from app.models.trainer import Trainer  # noqa: F401
 from app.models.trainer_resume import TrainerResume  # noqa: F401
-
+from app.models.user import User # noqa: F401
+from app.models.refresh_token import RefreshToken # noqa: F401
+from app.models.employee import EmployeeData # noqa: F401
+from app.models.employee_document import EmployeeDocument # noqa: F401
+# from app.models.course import Course # noqa: F401
 from app.core.config import get_settings
 
 config = context.config

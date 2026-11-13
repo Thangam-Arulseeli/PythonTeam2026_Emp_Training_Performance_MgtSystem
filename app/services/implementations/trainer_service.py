@@ -141,3 +141,21 @@ class TrainerServiceImpl(TrainerService):
         )
 
         return updated_trainer
+
+
+
+    async def get_my_trainer_details(
+        self,
+        email: str,
+    ) -> TrainerResponse:
+
+        trainer = await self.repository.get_trainer_by_email(email)
+
+        if trainer is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Trainer details not found",
+            )
+
+        return trainer
+    

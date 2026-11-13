@@ -20,6 +20,26 @@ class TrainerResumeServiceImpl(TrainerResumeService):
         self.trainer_repository = trainer_repository
         self.resume_repository = resume_repository
 
+    async def get_trainer_resume(
+        self,
+        trainer_id: int,
+    ) -> TrainerResumeResponse:
+        trainer = await self.trainer_repository.get_trainer_by_id(trainer_id)
+        if trainer is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Trainer not found",
+            )
+
+        resume = await self.resume_repository.get_resume_by_trainer_id(trainer_id)
+        if resume is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Resume not found",
+            )
+
+        return resume
+
     async def upload_trainer_resume(
         self,
         trainer_id: int,

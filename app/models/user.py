@@ -16,6 +16,10 @@ from sqlalchemy.orm import (
 )
 
 from app.database.base import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.refresh_token import RefreshToken
 
 class User(Base):
     __tablename__ = "users"

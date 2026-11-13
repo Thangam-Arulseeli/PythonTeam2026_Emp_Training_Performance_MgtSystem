@@ -20,66 +20,74 @@ SpecializationType = Annotated[
 
 class TrainerCreate(BaseModel):
     trainer_name: str = Field(min_length=2, max_length=100)
-
     dob: date
-
     experience: int = Field(ge=0)
-
     joining_date: date
-
     specialization: list[SpecializationType] = Field(min_length=1)
-
     qualification: str = Field(min_length=2, max_length=150)
-
     email: EmailStr
-
-    phone_number: str = Field(min_length=10, max_length=15)
-
+    phone_number: str = Field(min_length=10, max_length=10)
     address: str = Field(min_length=5)
 
     @field_validator("dob")
     @classmethod
     def validate_dob(cls, value: date) -> date:
-        if value > date.today():
-            raise ValueError("Date of birth cannot be in the future")
+        today = date.today()
+        minimum_dob = today.replace(year=today.year - 21)
+
+        if value > minimum_dob:
+            raise ValueError("Trainer must be at least 21 years old")
+
+        return value
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone_number(cls, value: str) -> str:
+        if not value.isdigit():
+            raise ValueError("Phone number must contain only digits")
+
         return value
 
 
 class TrainerUpdate(BaseModel):
     trainer_name: str | None = Field(default=None, min_length=2, max_length=100)
-
     dob: date | None = None
-
     experience: int | None = Field(default=None, ge=0)
-
     joining_date: date | None = None
-
     specialization: list[SpecializationType] | None = Field(
         default=None,
         min_length=1,
     )
-
     qualification: str | None = Field(
         default=None,
         min_length=2,
         max_length=150,
     )
-
     email: EmailStr | None = None
-
     phone_number: str | None = Field(
         default=None,
         min_length=10,
-        max_length=15,
+        max_length=10,
     )
-
     address: str | None = Field(default=None, min_length=5)
 
     @field_validator("dob")
     @classmethod
-    def validate_dob(cls, value: date | None) -> date | None:
-        if value is not None and value > date.today():
-            raise ValueError("Date of birth cannot be in the future")
+    def validate_dob(cls, value: date) -> date:
+        today = date.today()
+        minimum_dob = today.replace(year=today.year - 21)
+
+        if value > minimum_dob:
+            raise ValueError("Trainer must be at least 21 years old")
+
+        return value
+
+    @field_validator("phone_number")
+    @classmethod
+    def validate_phone_number(cls, value: str) -> str:
+        if not value.isdigit():
+            raise ValueError("Phone number must contain only digits")
+
         return value
 
 
