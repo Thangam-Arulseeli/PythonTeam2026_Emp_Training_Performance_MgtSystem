@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import require_roles
@@ -8,6 +10,14 @@ from app.schemas.trainer import (
     TrainerUpdate,
 )
 from app.services.implementations.trainer_service import TrainerServiceImpl
+
+AdminUser = Annotated[dict, Depends(require_roles("admin"))]
+TrainerUser = Annotated[dict, Depends(require_roles("trainer"))]
+TrainerService = Annotated[
+    TrainerServiceImpl,
+    Depends(get_trainer_service),
+]
+
 
 router = APIRouter(
     prefix="/trainers",
@@ -22,8 +32,8 @@ router = APIRouter(
 )
 async def create_trainer(
     trainer_data: TrainerCreate,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
+    current_user: AdminUser,
+    service: TrainerService,
 ):
     trainer = await service.create_trainer(trainer_data)
 
@@ -32,14 +42,14 @@ async def create_trainer(
 
 @router.get("/", response_model=list[TrainerResponse])
 async def get_all_trainers(
+    current_user: AdminUser,
+    service: TrainerService,
     offset: int = 0,
     limit: int = 10,
     specialization: str | None = None,
     min_experience: int | None = Query(default=None, ge=0),
     is_active: bool | None = None,
     search_name: str | None = None,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
 ):
     trainers = await service.get_all_trainers(
         offset,
@@ -58,8 +68,8 @@ async def get_all_trainers(
     response_model=TrainerResponse,
 )
 async def get_my_trainer_details(
-    current_user=Depends(require_roles("trainer")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
+    current_user: TrainerUser,
+    service: TrainerService,
 ):
     trainer = await service.get_my_trainer_details(current_user.email)
 
@@ -72,8 +82,8 @@ async def get_my_trainer_details(
 )
 async def get_trainer_by_id(
     trainer_id: int,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
+    current_user: AdminUser,
+    service: TrainerService,
 ):
     trainer = await service.get_trainer_by_id(trainer_id)
 
@@ -87,8 +97,8 @@ async def get_trainer_by_id(
 async def update_trainer(
     trainer_id: int,
     trainer_data: TrainerUpdate,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
+    current_user: AdminUser,
+    service: TrainerService,
 ):
     trainer = await service.update_trainer(
         trainer_id,
@@ -104,8 +114,8 @@ async def update_trainer(
 )
 async def deactivate_trainer(
     trainer_id: int,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
+    current_user: AdminUser,
+    service: TrainerService,
 ):
     trainer = await service.update_trainer_status(
         trainer_id,
@@ -121,8 +131,8 @@ async def deactivate_trainer(
 )
 async def activate_trainer(
     trainer_id: int,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerServiceImpl = Depends(get_trainer_service),
+    current_user: AdminUser,
+    service: TrainerService,
 ):
     trainer = await service.update_trainer_status(
         trainer_id,

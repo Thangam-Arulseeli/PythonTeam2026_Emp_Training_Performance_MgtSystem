@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from app.api.dependencies.auth import require_roles
@@ -21,8 +23,11 @@ router = APIRouter(
 )
 async def get_trainer_resume(
     trainer_id: int,
-    current_user=Depends(require_roles("admin")),
-    service: TrainerResumeServiceImpl = Depends(get_trainer_resume_service),
+    current_user: Annotated[dict, Depends(require_roles("admin"))],
+    service: Annotated[
+        TrainerResumeServiceImpl,
+        Depends(get_trainer_resume_service),
+    ],
 ):
     return await service.get_trainer_resume(trainer_id)
 
@@ -34,8 +39,11 @@ async def get_trainer_resume(
 )
 async def upload_trainer_resume(
     trainer_id: int,
-    file: UploadFile = File(...),
-    current_user=Depends(require_roles("admin")),
-    service: TrainerResumeServiceImpl = Depends(get_trainer_resume_service),
+    file: Annotated[UploadFile, File()],
+    current_user: Annotated[dict, Depends(require_roles("admin"))],
+    service: Annotated[
+        TrainerResumeServiceImpl,
+        Depends(get_trainer_resume_service),
+    ],
 ):
     return await service.upload_trainer_resume(trainer_id, file)
