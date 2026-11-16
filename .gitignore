@@ -11,6 +11,7 @@ venv/
 
 # Test cache
 .pytest_cache/
+pytest.ini
 
 # Coverage reports
 .coverage
@@ -24,12 +25,13 @@ htmlcov/
 *.log
 logs/
 
-# alembic
-alembic/
-alembic.ini
-
-# Uploaded files
+# File uploads
 uploads/
 
-#test config
-pytest.ini
+# Alembic configuration and migrations
+alembic.ini
+alembic/
+
+test/
+pyproject.toml
+.ruff_cache/
