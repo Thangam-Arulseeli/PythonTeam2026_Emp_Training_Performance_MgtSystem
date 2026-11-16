@@ -18,10 +18,11 @@ from app.repositories.interfaces.refresh_token_repository import (
 )
 from app.repositories.interfaces.user_repository import UserRepositoryInterface
 from app.schemas.auth_schema import RegisterRequest
+from app.services.interfaces.auth_service import AuthServiceInterface
 from app.utils.logger import logger
 
 
-class AuthService:
+class AuthService(AuthServiceInterface):
     def __init__(
         self,
         user_repository: UserRepositoryInterface,

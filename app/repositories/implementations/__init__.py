@@ -12,6 +12,6 @@ __all__ = [
     "BatchRepository",
     "CourseContentRepository",
     "CourseRepository",
-    "UserRepository",
     "RefreshTokenRepository",
+    "UserRepository",
 ]

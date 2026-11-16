@@ -14,10 +14,11 @@ from app.repositories.implementations.user_repository import UserRepository
 from app.repositories.interfaces.batch_interface import BatchInterface
 from app.repositories.interfaces.course_content_interface import CourseContentInterface
 from app.repositories.interfaces.course_interface import CourseInterface
-from app.services.auth_service import AuthService
 from app.services.batch_service import BatchService
 from app.services.course_content_service import CourseContentService
 from app.services.course_service import CourseService
+from app.services.implementations.auth_service import AuthService
+from app.services.interfaces.auth_service import AuthServiceInterface
 
 
 def get_course_repository(db: AsyncSession = Depends(get_session)) -> CourseInterface:
@@ -60,7 +61,7 @@ def get_course_content_service(
     return CourseContentService(content_repo, course_repo)
 
 
-def get_auth_service() -> AuthService:
+def get_auth_service() -> AuthServiceInterface:
     """Build the authentication service with user and refresh-token repositories."""
     return AuthService(
         user_repository=UserRepository(),
