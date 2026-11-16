@@ -1,21 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import (
-    Boolean,
-    CheckConstraint,
-    DateTime,
-    Integer,
-    String,
-    func
-)
-
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship
-)
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
+if TYPE_CHECKING:
+    from app.models.refresh_token import RefreshToken
+
 
 class User(Base):
     __tablename__ = "users"

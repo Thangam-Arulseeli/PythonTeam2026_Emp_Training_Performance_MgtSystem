@@ -242,6 +242,7 @@ def test_logout_without_access_token(unauthenticated_client):
         "/api/auth/logout",
         json={"refresh_token":"a"*30}
     )
+    assert response.status_code == 401
 
 # get current user profile endpoint
 # get profile success

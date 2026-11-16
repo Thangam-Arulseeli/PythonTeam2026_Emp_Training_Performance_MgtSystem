@@ -1,12 +1,11 @@
-from datetime import datetime,UTC
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
 from fastapi.testclient import TestClient
-
-import sys
-from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -16,6 +15,7 @@ from app.api.dependencies.service_dependencies import get_auth_service
 from app.database.session import get_session
 from app.main import app
 from app.services.auth_service import AuthService
+
 
 @pytest.fixture
 def db_session():

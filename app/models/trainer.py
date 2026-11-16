@@ -1,7 +1,7 @@
 from datetime import date, datetime
-from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    ARRAY,
     Boolean,
     CheckConstraint,
     Date,
@@ -10,7 +10,6 @@ from sqlalchemy import (
     String,
     Text,
     func,
-    ARRAY
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

@@ -1,11 +1,12 @@
-from datetime import datetime,UTC,timedelta
-import pytest
-
-from fastapi import HTTPException
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
+
+import pytest
+from fastapi import HTTPException
 
 from app.schemas.auth_schema import RegisterRequest
 from app.services import auth_service as auth_module
+
 
 # register success
 @pytest.mark.asyncio
@@ -135,7 +136,9 @@ async def test_login_inactive_user(auth_service,db_session,monkeypatch):
 
     assert err.value.status_code == 403
 
-
+# raise error when decode_token function called
+def mock_invalid_decode_token(token):
+    raise ValueError("Invalid token")
 
 # refresh invalid token
 @pytest.mark.asyncio
@@ -143,13 +146,11 @@ async def test_refresh_invalid_token(auth_service,db_session,monkeypatch):
     monkeypatch.setattr(
         auth_module,
         "decode_token",
-        lambda token : (_ for _ in ()).throw(ValueError("Invalid token"))
+        mock_invalid_decode_token
     )
-
 
     with pytest.raises(HTTPException) as err:
         await auth_service.refresh_tokens(db_session,"invalid-refresh-token")
-
     assert err.value.status_code == 401
 
 
@@ -159,10 +160,9 @@ async def test_logout_invalid_token(auth_service,db_session,monkeypatch):
     monkeypatch.setattr(
         auth_module,
         "decode_token",
-        lambda token:(_ for _ in ()).throw(ValueError("Invalid token"))
+        mock_invalid_decode_token
     )
     with pytest.raises(HTTPException) as err:
         await auth_service.logout(db_session,"invalid-token",1)
-
     assert err.value.status_code ==401
 

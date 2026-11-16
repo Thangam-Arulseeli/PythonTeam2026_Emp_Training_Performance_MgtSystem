@@ -1,30 +1,21 @@
 from datetime import date
+
 import pytest
 import pytest_asyncio
-
-from sqlalchemy import text
-from sqlalchemy.engine import make_url
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    async_sessionmaker
-)
-
 from fastapi import HTTPException
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
 from app.database.base import Base
-
-from app.models.user import User
-from app.models.refresh_token import RefreshToken
 from app.models.employee import EmployeeData
-from app.models.employee_document import EmployeeDocument
 from app.models.trainer import Trainer
-from app.models.trainer_resume import TrainerResume
-
-from app.services.auth_service import AuthService
+from app.repositories.implementations.refresh_token_repository import (
+    RefreshTokenRepository,
+)
 from app.repositories.implementations.user_repository import UserRepository
-from app.repositories.implementations.refresh_token_repository import RefreshTokenRepository
 from app.schemas.auth_schema import RegisterRequest
+from app.services.auth_service import AuthService
 
 
 @pytest_asyncio.fixture
@@ -34,12 +25,10 @@ async def integration_db():
 
     test_db_name = "test_emp_training_db"
     admin_url = database_url.set(database="postgres")
-
     admin_engine = create_async_engine(
         admin_url,
         isolation_level="AUTOCOMMIT"
     )
-
     test_engine = None
     database_created = False
 
@@ -85,7 +74,6 @@ def real_auth_service():
     )
 
 
-
 # employee register,login,refresh,logout
 @pytest.mark.asyncio
 async def test_employee_registration_login_refresh_logout(
@@ -123,7 +111,6 @@ async def test_employee_registration_login_refresh_logout(
     assert user.email == "integration.employee@gmail.com"
     assert user.role == "employee"
 
-
     login_result = await real_auth_service.login(
         integration_db,
         "integration_employee",
@@ -132,7 +119,6 @@ async def test_employee_registration_login_refresh_logout(
 
     assert login_result["access_token"]
     assert login_result["refresh_token"]
-
 
     refresh_result = await real_auth_service.refresh_tokens(
         integration_db,
