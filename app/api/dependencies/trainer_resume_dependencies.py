@@ -18,7 +18,7 @@ from app.services.implementations.trainer_resume_service import (
 
 def get_trainer_resume_repository(
     db: Annotated[AsyncSession, Depends(get_session)],
-):
+)->TrainerResumeRepositoryImpl:
     return TrainerResumeRepositoryImpl(db)
 
 
@@ -29,5 +29,5 @@ def get_trainer_resume_service(
     resume_repository: Annotated[
         TrainerResumeRepositoryImpl, Depends(get_trainer_resume_repository)
     ],
-):
+)->TrainerResumeServiceImpl:
     return TrainerResumeServiceImpl(trainer_repository, resume_repository)
