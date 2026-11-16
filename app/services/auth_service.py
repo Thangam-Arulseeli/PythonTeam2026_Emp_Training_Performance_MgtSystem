@@ -17,66 +17,60 @@ from app.repositories.interfaces.refresh_token_repository import (
     RefreshTokenRepositoryInterface,
 )
 from app.repositories.interfaces.user_repository import UserRepositoryInterface
+from app.schemas.auth_schema import RegisterRequest
 from app.utils.logger import logger
 
 
 class AuthService:
     def __init__(
         self,
-        user_repository:UserRepositoryInterface,
-        refresh_token_repository:RefreshTokenRepositoryInterface
-    ):
-        """Create the service with user and refresh-token repositories."""
+        user_repository: UserRepositoryInterface,
+        refresh_token_repository: RefreshTokenRepositoryInterface,
+    ) -> None:
         self.user_repository = user_repository
         self.refresh_token_repository = refresh_token_repository
 
     # register user
-    async def register(self,db:AsyncSession,data)->None:
-        """Register an employee or trainer with an active staff email."""
+    async def register(self, db: AsyncSession, data: RegisterRequest) -> None:
         try:
 
-            #only employee and trainer can register
-            if data.role not in {"employee","trainer"}:
+            # only employee and trainer can register
+            if data.role not in {"employee", "trainer"}:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Only employees and trainers can register."
+                    detail="Only employees and trainers can register.",
                 )
 
-            #verifying the mail in existing trainer and employee table
+            # verifying the mail in existing trainer and employee table
             if not await self.user_repository.staff_email_exists(
-                db,data.email,data.role
+                db, data.email, data.role
             ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Email is not registered as an active {data.role}"
+                    detail=f"Email is not registered as an active {data.role}",
                 )
 
             # cheking duplicate email,username
-            if await self.user_repository.get_by_email(
-                db,data.email
-            ):
+            if await self.user_repository.get_by_email(db, data.email):
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail="Email is already registered."
+                    detail="Email is already registered.",
                 )
 
-            if await self.user_repository.get_by_username(
-                db,data.username
-            ):
+            if await self.user_repository.get_by_username(db, data.username):
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail="Username is already taken"
+                    detail="Username is already taken",
                 )
 
-
-            hashed_password= hash_password(data.password)
+            hashed_password = hash_password(data.password)
 
             await self.user_repository.create_user(
                 db,
                 username=data.username,
                 email=data.email,
                 hashed_password=hashed_password,
-                role=data.role
+                role=data.role,
             )
             logger.info("User registered successfully")
             await db.commit()
@@ -90,55 +84,49 @@ class AuthService:
             logger.exception("Registration failed")
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Username or email is already registered."
+                detail="Username or email is already registered.",
             )
-
 
         except SQLAlchemyError:
             await db.rollback()
             logger.exception("Registration failed")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Unable to complete registration"
+                detail="Unable to complete registration",
             )
 
-
     # login
-    async def login(self,db:AsyncSession,username:str,password:str):
-        """Verify credentials and issue access and refresh tokens for an active user."""
-        user = await self.user_repository.get_by_username(db,username)
+    async def login(
+        self, db: AsyncSession, username: str, password: str
+    ) -> dict[str, str]:
+        user = await self.user_repository.get_by_username(db, username)
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid username or password"
+                detail="Invalid username or password",
             )
 
-        if not verify_password(password,user.hashed_password):
+        if not verify_password(password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid username or password"
+                detail="Invalid username or password",
             )
 
         if not user.is_active:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="User account is inactive"
+                status_code=status.HTTP_403_FORBIDDEN, detail="User account is inactive"
             )
 
-        access_token = create_access_token(
-            user_id=user.user_id,
-            role=user.role
-        )
-        refresh_token,expires_at = create_refresh_token(
-            user_id=user.user_id,
-            role=user.role
+        access_token = create_access_token(user_id=user.user_id, role=user.role)
+        refresh_token, expires_at = create_refresh_token(
+            user_id=user.user_id, role=user.role
         )
         try:
             await self.refresh_token_repository.create(
                 db,
                 user_id=user.user_id,
                 token_hash=hash_refresh_token(refresh_token),
-                expires_at=expires_at
+                expires_at=expires_at,
             )
             await db.commit()
             logger.info("User logged in sucessfully")
@@ -148,17 +136,19 @@ class AuthService:
             logger.exception("Unable to complete log in")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Unable to complete login."
+                detail="Unable to complete login.",
             )
 
         return {
-            "access_token":access_token,
-            "refresh_token":refresh_token,
-            "token_type":"bearer"
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
         }
 
     # refresh token
-    async def refresh_tokens(self,db:AsyncSession,refresh_token:str)->dict[str,str]:
+    async def refresh_tokens(
+        self, db: AsyncSession, refresh_token: str
+    ) -> dict[str, str]:
         """Rotate a valid refresh token and return a replacement token pair."""
         try:
             payload = decode_token(refresh_token)
@@ -168,49 +158,40 @@ class AuthService:
 
             user_id = int(payload["sub"])
 
-        except (jwt.PyJWTError,ValueError,KeyError,TypeError):
+        except (jwt.PyJWTError, ValueError, KeyError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired refresh token"
+                detail="Invalid or expired refresh token",
             )
 
         try:
-            stored_token =(
-                await self.refresh_token_repository.get_valid_for_update(
-                    db,hash_refresh_token(refresh_token)
-                )
+            stored_token = await self.refresh_token_repository.get_valid_for_update(
+                db, hash_refresh_token(refresh_token)
             )
             if stored_token is None or stored_token.user_id != user_id:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Refresh token is invalid, expired or already used."
+                    detail="Refresh token is invalid, expired or already used.",
                 )
 
-            user = await self.user_repository.get_by_id(db,user_id=user_id)
+            user = await self.user_repository.get_by_id(db, user_id=user_id)
             if user is None or not user.is_active:
 
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="User account is unavailable."
+                    detail="User account is unavailable.",
                 )
 
-            stored_token.revoked_at= datetime.now(UTC)
+            stored_token.revoked_at = datetime.now(UTC)
 
             # generate new tokens
-            new_access_token = create_access_token(
-                user.user_id,
-                user.role
-            )
+            new_access_token = create_access_token(user.user_id, user.role)
             new_refresh_token, expires_at = create_refresh_token(
-                user.user_id,
-                user.role
+                user.user_id, user.role
             )
 
             await self.refresh_token_repository.create(
-                db,
-                user.user_id,
-                hash_refresh_token(new_refresh_token),
-                expires_at
+                db, user.user_id, hash_refresh_token(new_refresh_token), expires_at
             )
             await db.commit()
             logger.info("New access and refresh token created")
@@ -225,20 +206,17 @@ class AuthService:
             logger.exception("Unable to refresh token")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Unable to refresh session."
+                detail="Unable to refresh session.",
             )
         return {
             "access_token": new_access_token,
             "refresh_token": new_refresh_token,
-            "token_type": "bearer"
+            "token_type": "bearer",
         }
 
     # logout
     async def logout(
-        self,
-        db: AsyncSession,
-        refresh_token: str,
-        current_user_id: int
+        self, db: AsyncSession, refresh_token: str, current_user_id: int
     ) -> None:
         """Validate ownership and revoke the user's active refresh token."""
         try:
@@ -251,25 +229,23 @@ class AuthService:
         except (jwt.PyJWTError, ValueError, KeyError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token."
+                detail="Invalid refresh token.",
             )
 
         if token_user_id != current_user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Refresh token does not belong to current user."
+                detail="Refresh token does not belong to current user.",
             )
 
         try:
-            stored_token = (
-                await self.refresh_token_repository.get_valid_for_update(
-                    db,hash_refresh_token(refresh_token)
-                )
+            stored_token = await self.refresh_token_repository.get_valid_for_update(
+                db, hash_refresh_token(refresh_token)
             )
             if stored_token is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Refresh token is invalid or already revoked."
+                    detail="Refresh token is invalid or already revoked.",
                 )
 
             stored_token.revoked_at = datetime.now(UTC)
@@ -286,9 +262,5 @@ class AuthService:
             logger.exception("Logout failed")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Unable to log out."
+                detail="Unable to log out.",
             )
-
-
-
-

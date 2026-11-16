@@ -37,13 +37,10 @@ CurrentUserDependency = Annotated[User, Depends(get_current_user)]
 async def register(
     data: RegisterRequest,
     service: AuthServiceDependency,
-    db: SessionDependency,
+    db: Annotated[AsyncSession, Depends(get_session)],
 ) -> MessageResponse:
-    """Register an employee or trainer account using an authorized staff email."""
     await service.register(db, data)
-    return MessageResponse(
-        message="Registration successful. You can now log in."
-    )
+    return MessageResponse(message="Registration successful. You can now log in.")
 
 
 # login
@@ -55,9 +52,8 @@ async def register(
 async def login(
     data: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: AuthServiceDependency,
-    db: SessionDependency,
+    db: Annotated[AsyncSession, Depends(get_session)],
 ) -> TokenResponse:
-    """Verify submitted credentials and return access and refresh bearer tokens."""
     return await service.login(db, data.username, data.password)
 
 
@@ -70,9 +66,8 @@ async def login(
 async def refresh(
     data: RefreshRequest,
     service: AuthServiceDependency,
-    db: SessionDependency,
+    db: Annotated[AsyncSession, Depends(get_session)],
 ) -> TokenResponse:
-    """Exchange a valid refresh token for a new access and refresh token pair."""
     return await service.refresh_tokens(db, data.refresh_token)
 
 
@@ -85,11 +80,11 @@ async def refresh(
 async def logout(
     data: RefreshRequest,
     service: AuthServiceDependency,
-    db: SessionDependency,
-    current_user: CurrentUserDependency,
+    db: Annotated[AsyncSession, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
 ) -> MessageResponse:
-    """Revoke the supplied refresh token belonging to the authenticated user."""
     await service.logout(db, data.refresh_token, current_user.user_id)
+
     return MessageResponse(message="Logged out successfully.")
 
 
@@ -100,7 +95,6 @@ async def logout(
     summary="Get current user profile",
 )
 async def get_my_profile(
-    current_user: CurrentUserDependency,
-) -> UserProfileResponse:
-    """Return the profile for the currently authenticated user."""
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
     return current_user

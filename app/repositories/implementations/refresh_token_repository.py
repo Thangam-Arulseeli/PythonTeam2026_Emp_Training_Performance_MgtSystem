@@ -10,6 +10,7 @@ from app.repositories.interfaces.refresh_token_repository import (
 
 
 class RefreshTokenRepository(RefreshTokenRepositoryInterface):
+    # create refresh token
     async def create(
         self,
         db: AsyncSession,
@@ -28,6 +29,7 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         await db.flush()
         return token_record
 
+    # getting the valid refresh token and lock the row
     async def get_valid_for_update(
         self,
         db: AsyncSession,
