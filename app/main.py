@@ -16,6 +16,10 @@ from app.exceptions.handlers import (
     global_exception_handler,
 )
 from app.middleware.request_logging import log_requests
+from app.api.routers.health import router as health_router
+from app.api.routers.trainer_resume_router import router as trainer_resume_router
+from app.api.routers.trainer_router import router as trainer_router
+from app.core.config import get_settings
 
 # Load application settings
 settings = get_settings()
@@ -45,3 +49,6 @@ register_exception_handlers(app)
 app.include_router(course_router)
 app.include_router(batch_router)
 app.include_router(course_content_router)
+
+app.include_router(trainer_router)
+app.include_router(trainer_resume_router)
