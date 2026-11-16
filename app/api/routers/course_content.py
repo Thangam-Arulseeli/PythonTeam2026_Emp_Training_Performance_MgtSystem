@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, File, UploadFile, status
 from fastapi.responses import FileResponse
 
 from app.api.dependencies.auth import get_current_user, require_roles
-from app.api.dependencies.service_dependencies import get_course_content_service
+from app.api.dependencies.course_content_dependencies import get_course_content_service
 from app.schemas.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
 )
-from app.services.course_content_service import CourseContentService
+from app.services.interfaces.course_content_service import CourseContentService
 
 router = APIRouter(
     prefix="/courses",

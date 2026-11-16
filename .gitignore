@@ -32,6 +32,6 @@ uploads/
 alembic.ini
 alembic/
 
-test/
+tests/
 pyproject.toml
 .ruff_cache/
