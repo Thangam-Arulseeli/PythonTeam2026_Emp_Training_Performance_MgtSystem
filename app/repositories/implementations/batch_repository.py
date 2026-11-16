@@ -1,4 +1,3 @@
-
 from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +7,6 @@ from app.repositories.interfaces.batch_interface import BatchInterface
 
 
 class BatchRepository(BatchInterface):
-
     def __init__(self, db: AsyncSession) -> None:
         """Create the batch repository for the supplied async database session."""
         self.db = db
@@ -41,9 +39,7 @@ class BatchRepository(BatchInterface):
         count_res = await self.db.execute(count_stmt)
         total = count_res.scalar_one() or 0
 
-        batches_stmt = (
-            stmt.order_by(Batch.start_date.desc()).offset(skip).limit(limit)
-        )
+        batches_stmt = stmt.order_by(Batch.start_date.desc()).offset(skip).limit(limit)
         batches_res = await self.db.execute(batches_stmt)
         batches = batches_res.scalars().all()
         return list(batches), total
@@ -96,4 +92,3 @@ class BatchRepository(BatchInterface):
         stmt = select(exists().where(Trainer.trainer_id == trainer_id))
         res = await self.db.execute(stmt)
         return bool(res.scalar())
-

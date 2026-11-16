@@ -25,7 +25,6 @@ MAX_FILE_SIZE = 50 * 1024 * 1024
 
 
 class CourseContentService:
-
     def __init__(
         self,
         content_repo: CourseContentInterface,

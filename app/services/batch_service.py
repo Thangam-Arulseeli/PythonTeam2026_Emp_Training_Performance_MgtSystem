@@ -1,4 +1,3 @@
-
 from datetime import date
 
 from app.exceptions import (
@@ -20,7 +19,6 @@ from app.utils.logger import logger
 
 
 class BatchService:
-
     def __init__(
         self,
         batch_repo: BatchInterface,
@@ -148,9 +146,7 @@ class BatchService:
         """Update a batch's validated status or raise a not-found error."""
         batch = await self.get_batch_or_404(batch_id)
         updated_batch = await self.batch_repo.update_status(batch, payload.status)
-        logger.info(
-            "Batch status updated: id=%s, status=%s", batch_id, payload.status
-        )
+        logger.info("Batch status updated: id=%s, status=%s", batch_id, payload.status)
         return BatchResponse.model_validate(updated_batch)
 
     async def delete_batch(self, batch_id: int) -> None:

@@ -4,7 +4,6 @@ from app.models.batch import Batch
 
 
 class BatchInterface(ABC):
-
     @abstractmethod
     async def create(self, data: dict[str, object]) -> Batch:
         """Persist a batch from its field dictionary."""
@@ -55,4 +54,3 @@ class BatchInterface(ABC):
     async def trainer_exists(self, trainer_id: int) -> bool:
         """Check whether a trainer exists with the given ID."""
         pass
-

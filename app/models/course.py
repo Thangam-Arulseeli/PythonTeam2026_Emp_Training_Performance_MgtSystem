@@ -13,9 +13,7 @@ if TYPE_CHECKING:
 class Course(Base):
     __tablename__ = "courses"
     __table_args__ = (
-        CheckConstraint(
-            "duration_value > 0", name="ck_course_duration_value_positive"
-        ),
+        CheckConstraint("duration_value > 0", name="ck_course_duration_value_positive"),
         CheckConstraint(
             "duration_unit IN ('hours', 'days', 'weeks', 'months', 'years')",
             name="ck_course_duration_unit",

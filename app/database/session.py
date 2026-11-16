@@ -15,8 +15,7 @@ SessionLocal = async_sessionmaker(bind=engine, autoflush=True, expire_on_commit=
 
 # dependecy creation
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    """Create and provide an asynchronous database session the session is automatically closed when the request finishes"""
+    """Provide a session that closes automatically when the request finishes."""
 
     async with SessionLocal() as session:
-
         yield session

@@ -85,9 +85,7 @@ class CourseService:
             duration_unit = DurationUnit(
                 data.get("duration_unit", course.duration_unit)
             )
-            normalized_value = duration_to_standard_units(
-                duration_value, duration_unit
-            )
+            normalized_value = duration_to_standard_units(duration_value, duration_unit)
             if normalized_value > MAX_DURATION_STANDARD_UNITS:
                 raise UnprocessableEntityException(
                     "Duration exceeds the maximum supported length"

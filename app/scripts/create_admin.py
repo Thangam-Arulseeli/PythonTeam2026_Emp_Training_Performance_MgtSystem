@@ -9,7 +9,7 @@ from app.database.session import SessionLocal
 from app.models.user import User
 
 
-async def main() ->None:
+async def main() -> None:
     username = input("Admin username :").strip()
     email = input("Admin email :").strip()
     password = getpass("Admin password :")
@@ -22,25 +22,20 @@ async def main() ->None:
         raise SystemExit("Password must be between 8 and 50 characters")
     async with SessionLocal() as db:
         result = await db.execute(
-            select(User).where(
-                or_(
-                    User.username == username,
-                    User.email == email
-                )
-            )
+            select(User).where(or_(User.username == username, User.email == email))
         )
 
         if result.scalar_one_or_none() is not None:
             raise SystemExit("Username or email already registered")
 
-        hashed_password = await asyncio.to_thread(hash_password,password)
+        hashed_password = await asyncio.to_thread(hash_password, password)
 
         admin = User(
-            username = username,
-            email = email,
-            hashed_password = hashed_password,
+            username=username,
+            email=email,
+            hashed_password=hashed_password,
             role="admin",
-            is_active =True
+            is_active=True,
         )
 
         db.add(admin)
@@ -56,7 +51,6 @@ async def main() ->None:
 
     print("Administrator created successfully..")
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-

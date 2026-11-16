@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
@@ -43,9 +42,7 @@ async def create_batch(
 async def list_batches(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Items per page"),
-    status: BatchStatus | None = Query(
-        None, description="Filter batches by status"
-    ),
+    status: BatchStatus | None = Query(None, description="Filter batches by status"),
     is_active: bool = Query(True, description="Filter batches by active state"),
     current_user: User = Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),

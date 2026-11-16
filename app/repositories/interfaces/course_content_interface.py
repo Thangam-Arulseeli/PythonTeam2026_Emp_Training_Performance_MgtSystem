@@ -4,7 +4,6 @@ from app.models.course_content import CourseContent
 
 
 class CourseContentInterface(ABC):
-
     @abstractmethod
     async def create(
         self, course_id: int, filename: str, file_path: str

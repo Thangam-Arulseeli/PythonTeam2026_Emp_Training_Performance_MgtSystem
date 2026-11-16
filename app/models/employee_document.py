@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
 
 class EmployeeDocument(Base):
-
     __tablename__ = "employee_documents"
 
     __table_args__ = (

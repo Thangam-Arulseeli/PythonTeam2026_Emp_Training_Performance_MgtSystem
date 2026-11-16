@@ -9,7 +9,6 @@ from app.repositories.implementations.course_content_repository import (
 from app.repositories.implementations.course_repository import CourseRepository
 from app.repositories.implementations.refresh_token_repository import (
     RefreshTokenRepository,
-    RefreshTokenRepository,
 )
 from app.repositories.implementations.user_repository import UserRepository
 from app.repositories.interfaces.batch_interface import BatchInterface

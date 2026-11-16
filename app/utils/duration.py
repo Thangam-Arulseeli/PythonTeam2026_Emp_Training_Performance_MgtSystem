@@ -10,6 +10,7 @@ class DurationUnit(StrEnum):
     MONTHS = "months"
     YEARS = "years"
 
+
 STANDARD_UNIT_FACTORS: dict[DurationUnit, int] = {
     DurationUnit.HOURS: 1,
     DurationUnit.DAYS: 24,

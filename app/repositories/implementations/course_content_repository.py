@@ -1,4 +1,3 @@
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,7 +8,6 @@ from app.repositories.interfaces.course_content_interface import (
 
 
 class CourseContentRepository(CourseContentInterface):
-
     def __init__(self, db: AsyncSession):
         """Create the content repository for the supplied async database session."""
         self.db = db

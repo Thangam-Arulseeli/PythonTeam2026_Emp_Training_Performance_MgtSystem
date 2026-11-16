@@ -1,7 +1,5 @@
-
 class AppException(Exception):
     def __init__(self, message: str):
-
         """Base exception for handling custom application errors."""
 
         self.message = message
@@ -10,19 +8,15 @@ class AppException(Exception):
 
 class EmployeeNotFoundException(AppException):
     def __init__(self):
-    
         """Indicate that an employee was not found or is inactive."""
-    
+
         super().__init__("Employee not found or not active")
 
 
 class EmployeeAlreadyExistsException(AppException):
     def __init__(self, field: str):
-
         """Indicate that an employee with the specified field already exists."""
-        super().__init__(
-            f"Employee with this {field} already exists"
-        )
+        super().__init__(f"Employee with this {field} already exists")
 
 
 class EmployeeInactiveException(AppException):

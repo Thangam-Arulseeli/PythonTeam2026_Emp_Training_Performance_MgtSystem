@@ -33,7 +33,6 @@ class AuthService:
     # register user
     async def register(self, db: AsyncSession, data: RegisterRequest) -> None:
         try:
-
             # only employee and trainer can register
             if data.role not in {"employee", "trainer"}:
                 raise HTTPException(
@@ -176,7 +175,6 @@ class AuthService:
 
             user = await self.user_repository.get_by_id(db, user_id=user_id)
             if user is None or not user.is_active:
-
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="User account is unavailable.",

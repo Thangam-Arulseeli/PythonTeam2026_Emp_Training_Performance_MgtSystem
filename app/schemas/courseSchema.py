@@ -1,4 +1,3 @@
-
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -36,9 +35,7 @@ class CourseCreate(BaseModel):
             self.duration_value, self.duration_unit
         )
         if normalized_value > MAX_DURATION_STANDARD_UNITS:
-            raise ValueError(
-                "Duration exceeds the maximum supported length"
-            )
+            raise ValueError("Duration exceeds the maximum supported length")
         return self
 
 

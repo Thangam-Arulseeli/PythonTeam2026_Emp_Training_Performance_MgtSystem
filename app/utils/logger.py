@@ -19,7 +19,7 @@ if not logger.handlers:
         LOG_DIR / "application.log",
         maxBytes=1 * 1024 * 1024,
         backupCount=5,
-        encoding="utf-8"
+        encoding="utf-8",
     )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)

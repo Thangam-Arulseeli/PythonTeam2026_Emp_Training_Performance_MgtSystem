@@ -26,7 +26,6 @@ from app.services.employee_service import EmployeeService
 def get_employee_repository(
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> EmployeeRepositoryInterface:
-    
     """Provide the employee repository implementation"""
 
     return EmployeeRepositoryImpl(db=db)
@@ -36,7 +35,6 @@ def get_employee_repository(
 def get_employee_document_repository(
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> EmployeeDocumentRepositoryInterface:
-
     """Provide the employee document repository implementation."""
 
     return EmployeeDocumentRepositoryImpl(db=db)
@@ -45,24 +43,35 @@ def get_employee_document_repository(
 # EMPLOYEE SERVICE DEPENDENCY
 def get_employee_service(
     db: Annotated[AsyncSession, Depends(get_session)],
-    repository: Annotated[  EmployeeRepositoryInterface, Depends(get_employee_repository), ],
+    repository: Annotated[
+        EmployeeRepositoryInterface,
+        Depends(get_employee_repository),
+    ],
 ) -> EmployeeService:
-
     """Provide the employee service with its dependencies."""
 
-    return EmployeeService( db=db, repository=repository,)
+    return EmployeeService(
+        db=db,
+        repository=repository,
+    )
 
 
 # EMPLOYEE DOCUMENT SERVICE DEPENDENCY
 
+
 def get_employee_document_service(
     db: Annotated[AsyncSession, Depends(get_session)],
-    employee_repository: Annotated[  EmployeeRepositoryInterface, Depends(get_employee_repository), ],
-    document_repository: Annotated[ EmployeeDocumentRepositoryInterface, Depends(get_employee_document_repository),],
+    employee_repository: Annotated[
+        EmployeeRepositoryInterface,
+        Depends(get_employee_repository),
+    ],
+    document_repository: Annotated[
+        EmployeeDocumentRepositoryInterface,
+        Depends(get_employee_document_repository),
+    ],
 ) -> EmployeeDocumentService:
-    
-    """ Provide the employee document service with its dependencies."""
-    
+    """Provide the employee document service with its dependencies."""
+
     return EmployeeDocumentService(
         db=db,
         employee_repository=employee_repository,
@@ -71,6 +80,12 @@ def get_employee_document_service(
 
 
 # REUSABLE SERVICE DEPENDENCIES
-EmployeeServiceDep = Annotated[EmployeeService,Depends(get_employee_service),]
+EmployeeServiceDep = Annotated[
+    EmployeeService,
+    Depends(get_employee_service),
+]
 
-EmployeeDocumentServiceDep = Annotated[ EmployeeDocumentService, Depends(get_employee_document_service),]
+EmployeeDocumentServiceDep = Annotated[
+    EmployeeDocumentService,
+    Depends(get_employee_document_service),
+]

@@ -1,10 +1,5 @@
 from fastapi import FastAPI
 
-from app.api.routers.auth_router import router as auth_router
-from app.api.routers.employee import router as employee_router
-from app.api.routers.health import router as health_router
-from app.core.config import get_settings
-from app.exceptions.exception_handlers import register_exception_handlers
 from app.api.routers import (
     auth_router,
     batch_router,
@@ -12,8 +7,10 @@ from app.api.routers import (
     course_router,
     health_router,
 )
+from app.api.routers.employee import router as employee_router
 from app.core.config import get_settings
 from app.exceptions.custom_exceptions import AppException
+from app.exceptions.exception_handlers import register_exception_handlers
 from app.exceptions.handlers import (
     app_exception_handler,
     global_exception_handler,

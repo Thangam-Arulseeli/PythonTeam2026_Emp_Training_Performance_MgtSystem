@@ -22,7 +22,6 @@ if TYPE_CHECKING:
 
 
 class EmployeeData(Base):
-
     __tablename__ = "employee"
 
     __table_args__ = (
