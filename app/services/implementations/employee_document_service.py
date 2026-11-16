@@ -20,6 +20,7 @@ from app.repositories.interfaces.employee_document_interface import (
 from app.repositories.interfaces.employee_repository_interface import (
     EmployeeRepositoryInterface,
 )
+from app.services.interfaces.employee_document_service import EmployeeDocumentServiceInterface
 
 # CREATE THE UPLOAD DIR
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -30,7 +31,7 @@ IMAGE_MAX_SIZE = 2 * 1024 * 1024
 RESUME_MAX_SIZE = 5 * 1024 * 1024
 
 
-class EmployeeDocumentService:
+class EmployeeDocumentServiceImpl(EmployeeDocumentServiceInterface):
     def __init__(
         self,
         db: AsyncSession,

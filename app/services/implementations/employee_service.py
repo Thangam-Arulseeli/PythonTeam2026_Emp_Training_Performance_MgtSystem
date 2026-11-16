@@ -16,9 +16,10 @@ from app.schemas.employee import (
     EmployeeCreate,
     EmployeeUpdate,
 )
+from app.services.interfaces.employee_service import EmployeeServiceInterface
 
 
-class EmployeeService:
+class EmployeeServiceImpl(EmployeeServiceInterface):
     def __init__(
         self,
         db: AsyncSession,
