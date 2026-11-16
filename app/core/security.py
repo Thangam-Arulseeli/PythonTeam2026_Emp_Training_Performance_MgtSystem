@@ -50,7 +50,7 @@ def create_access_token(user_id:int,role:str)->str:
     )
     return token
 
-def create_refresh_token(user_id:int,role:str)->str:
+def create_refresh_token(user_id:int,role:str)->tuple[str,datetime]:
     return create_token(
         user_id=user_id,
         role=role,
@@ -63,5 +63,5 @@ def decode_token(token:str)->dict:
         token,settings.jwt_secret_key,algorithms=[settings.jwt_algorithm]
     )
 
-def hash_refresh_token(token:str) ->dict:
+def hash_refresh_token(token:str) ->str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()

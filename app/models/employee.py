@@ -20,6 +20,7 @@ from app.database.base import Base
 if TYPE_CHECKING :
     from app.models.employee_document import EmployeeDocument
 
+
 class EmployeeData(Base):
 
     __tablename__="employee"

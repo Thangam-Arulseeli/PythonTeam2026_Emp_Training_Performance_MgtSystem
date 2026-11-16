@@ -8,6 +8,7 @@ from app.repositories.interfaces.user_repository import UserRepositoryInterface
 
 
 class UserRepository(UserRepositoryInterface):
+    # get the user by email
     async def get_by_email(self, db:AsyncSession, email:str) ->User|None:
         result = await db.execute(
             select(User)
@@ -15,6 +16,7 @@ class UserRepository(UserRepositoryInterface):
         )
         return result.scalar_one_or_none()
 
+    # get the user by username
     async def get_by_username(self, db:AsyncSession, username:str) ->User|None:
         result = await db.execute(
             select(User)
@@ -22,15 +24,15 @@ class UserRepository(UserRepositoryInterface):
         )
         return result.scalar_one_or_none()
 
-
+    # get the user by id
     async def get_by_id(self, db:AsyncSession, user_id:int)->User|None:
         result = await db.execute(
             select(User)
             .where(User.user_id == user_id)
         )
-
         return result.scalar_one_or_none()
 
+    # check whether the particular email exists in employee or trainer
     async def staff_email_exists(self, db:AsyncSession, email:str, role:str)->bool:
         if role == "employee":
             query = select(EmployeeData).where(
@@ -48,17 +50,17 @@ class UserRepository(UserRepositoryInterface):
             return False
 
         result = await db.execute(query)
-
         return result.scalar_one_or_none() is not None
 
 
+    # creating user
     async def create_user(self, 
         db:AsyncSession, 
         username:str, 
         email:str, 
         hashed_password:str, 
         role:str
-    ):
+    )->User:
         user =User(
             username=username,
             email=email,

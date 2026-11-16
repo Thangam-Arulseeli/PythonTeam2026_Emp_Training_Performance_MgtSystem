@@ -27,4 +27,6 @@ htmlcov/
 alembic/
 alembic.ini
 
+# tests
+tests/
 uploads/

@@ -16,4 +16,5 @@ email-validator
 
 sqlalchemy[asyncio]
 asyncpg
+httpx2
 

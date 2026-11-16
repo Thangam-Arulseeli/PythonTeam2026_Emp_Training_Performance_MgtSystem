@@ -34,7 +34,7 @@ async def register(
     data: RegisterRequest,
     service: AuthServiceDependency,
     db: Annotated[AsyncSession, Depends(get_session)],
-):
+)->MessageResponse:
     await service.register(db, data)
     return MessageResponse(
         message="Registration successful. You can now log in."
@@ -50,7 +50,7 @@ async def login(
     data: Annotated[OAuth2PasswordRequestForm,Depends()],
     service: AuthServiceDependency,
     db: Annotated[AsyncSession, Depends(get_session)],
-):
+)->TokenResponse:
     return await service.login(db,data.username, data.password)
 
 
@@ -63,7 +63,7 @@ async def refresh(
     data: RefreshRequest,
     service: AuthServiceDependency,
     db: Annotated[AsyncSession, Depends(get_session)],
-):
+)->TokenResponse:
     return await service.refresh_tokens(
         db,data.refresh_token
     )
@@ -79,7 +79,7 @@ async def logout(
     service: AuthServiceDependency,
     db: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)]
-):
+)->MessageResponse:
     await service.logout(
         db,data.refresh_token,current_user.user_id
     )
@@ -96,5 +96,5 @@ async def logout(
 )
 async def get_my_profile(
     current_user: Annotated[User, Depends(get_current_user)]
-):
+)->User:
     return current_user
