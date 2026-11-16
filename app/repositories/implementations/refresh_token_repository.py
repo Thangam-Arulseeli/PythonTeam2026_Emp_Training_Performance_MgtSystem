@@ -4,10 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.refresh_token import RefreshToken
-
 from app.repositories.interfaces.refresh_token_repository import (
-    RefreshTokenRepositoryInterface
+    RefreshTokenRepositoryInterface,
 )
+
 
 class RefreshTokenRepository(RefreshTokenRepositoryInterface):
     async def create(
