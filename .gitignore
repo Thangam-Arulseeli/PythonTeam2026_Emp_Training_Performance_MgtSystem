@@ -22,3 +22,9 @@ htmlcov/
 
 # Logs
 *.log
+
+# alembic
+alembic/
+alembic.ini
+
+uploads/

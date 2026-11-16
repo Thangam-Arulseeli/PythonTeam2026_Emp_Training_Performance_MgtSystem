@@ -14,4 +14,6 @@ pytest
 pytest-asyncio
 email-validator
 
+sqlalchemy[asyncio]
+asyncpg
 
