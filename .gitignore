@@ -22,11 +22,14 @@ htmlcov/
 
 # Logs
 *.log
+logs/
 
 # alembic
 alembic/
 alembic.ini
 
-# tests
-tests/
+# Uploaded files
 uploads/
+
+#test config
+pytest.ini
