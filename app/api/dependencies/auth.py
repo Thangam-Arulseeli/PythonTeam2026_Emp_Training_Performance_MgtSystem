@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -18,9 +19,9 @@ user_repository = UserRepository()
 
 # get current user
 async def get_current_user(
-  token:str = Depends(auth_scheme),
-  db:AsyncSession =Depends(get_session)  
-)->User:
+    token: Annotated[str, Depends(auth_scheme)],
+    db: Annotated[AsyncSession, Depends(get_session)],
+)-> User:
     try:
         payload=decode_token(token)
 
@@ -49,7 +50,7 @@ async def get_current_user(
 # it checks whether the particular role can access the endpoint or no
 def require_roles(*allowed_roles:str) -> Callable:
     async def role_checker(
-      current_user=Depends(get_current_user)  
+            current_user: Annotated[User, Depends(get_current_user)], 
     )-> User:
         if current_user.role not in allowed_roles:
             raise HTTPException(

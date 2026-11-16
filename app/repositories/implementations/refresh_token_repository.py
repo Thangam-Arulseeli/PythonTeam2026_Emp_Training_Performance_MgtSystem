@@ -8,6 +8,7 @@ from app.repositories.interfaces.refresh_token_repository import (
     RefreshTokenRepositoryInterface,
 )
 
+
 class RefreshTokenRepository(RefreshTokenRepositoryInterface):
     # create refresh token
     async def create(
