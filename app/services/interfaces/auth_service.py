@@ -6,11 +6,10 @@ from app.schemas.auth_schema import RegisterRequest
 
 
 class AuthServiceInterface(ABC):
-
     # register user
     @abstractmethod
     async def register(self, db: AsyncSession, data: RegisterRequest) -> None:
-        pass            
+        pass
 
     # login
     @abstractmethod
@@ -25,7 +24,6 @@ class AuthServiceInterface(ABC):
         self, db: AsyncSession, refresh_token: str
     ) -> dict[str, str]:
         pass
-
 
     # logout
     @abstractmethod

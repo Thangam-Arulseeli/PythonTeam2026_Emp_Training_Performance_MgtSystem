@@ -27,7 +27,9 @@ class BatchService(ABC):
     async def get_batch(self, batch_id: int) -> BatchResponse: ...
 
     @abstractmethod
-    async def update_batch(self, batch_id: int, payload: BatchUpdate) -> BatchResponse: ...
+    async def update_batch(
+        self, batch_id: int, payload: BatchUpdate
+    ) -> BatchResponse: ...
 
     @abstractmethod
     async def update_batch_status(

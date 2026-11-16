@@ -10,7 +10,9 @@ from app.schemas.course_content_schema import (
 
 class CourseContentService(ABC):
     @abstractmethod
-    async def upload(self, course_id: int, file: UploadFile) -> CourseContentResponse: ...
+    async def upload(
+        self, course_id: int, file: UploadFile
+    ) -> CourseContentResponse: ...
 
     @abstractmethod
     async def list_for_course(self, course_id: int) -> CourseContentListResponse: ...
