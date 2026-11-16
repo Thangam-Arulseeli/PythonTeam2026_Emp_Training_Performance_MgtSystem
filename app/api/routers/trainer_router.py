@@ -49,7 +49,7 @@ async def get_all_trainers(
     specialization: str | None = None,
     min_experience: int | None = Query(default=None, ge=0),
     is_active: bool | None = None,
-    search_name: str | None = None,
+    search_by_trainer_name: str | None = None,
 ):
     trainers = await service.get_all_trainers(
         offset,
@@ -57,7 +57,7 @@ async def get_all_trainers(
         specialization,
         min_experience,
         is_active,
-        search_name,
+        search_by_trainer_name,
     )
 
     return trainers
