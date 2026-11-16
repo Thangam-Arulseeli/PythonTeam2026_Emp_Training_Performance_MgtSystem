@@ -12,6 +12,6 @@ __all__ = [
     "BatchInterface",
     "CourseContentInterface",
     "CourseInterface",
-    "UserRepositoryInterface",
     "RefreshTokenRepositoryInterface",
+    "UserRepositoryInterface",
 ]

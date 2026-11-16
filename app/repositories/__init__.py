@@ -10,10 +10,10 @@ from app.repositories.interfaces import (
 )
 
 __all__ = [
-    "CourseInterface",
     "BatchInterface",
-    "CourseContentInterface",
-    "CourseRepository",
     "BatchRepository",
+    "CourseContentInterface",
     "CourseContentRepository",
+    "CourseInterface",
+    "CourseRepository",
 ]
