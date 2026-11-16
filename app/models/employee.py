@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    func,
     text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -59,6 +60,13 @@ class EmployeeData(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=text("NOW()"), nullable=False
+    )
+
+    modified_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=True,
+        default=None,
+        onupdate=func.now(),
     )
 
     documents: Mapped[list["EmployeeDocument"]] = relationship(

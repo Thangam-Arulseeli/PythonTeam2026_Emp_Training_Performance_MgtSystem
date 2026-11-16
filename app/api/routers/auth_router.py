@@ -19,21 +19,25 @@ from app.services.auth_service import AuthService
 
 router = APIRouter(
     prefix="/api/auth",
-    tags=["Authentication"]
+    tags=["Authentication"],
 )
 
-AuthServiceDependency = Annotated[AuthService,Depends(get_auth_service)]
+AuthServiceDependency = Annotated[AuthService, Depends(get_auth_service)]
+SessionDependency = Annotated[AsyncSession, Depends(get_session)]
+CurrentUserDependency = Annotated[User, Depends(get_current_user)]
+
 
 # register
 @router.post(
     "/register",
     response_model=MessageResponse,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user account",
 )
 async def register(
     data: RegisterRequest,
     service: AuthServiceDependency,
-    db: AsyncSession = Depends(get_session)
+    db: SessionDependency,
 ) -> MessageResponse:
     """Register an employee or trainer account using an authorized staff email."""
     await service.register(db, data)
@@ -45,61 +49,58 @@ async def register(
 # login
 @router.post(
     "/login",
-    response_model=TokenResponse
+    response_model=TokenResponse,
+    summary="Authenticate user and return tokens",
 )
 async def login(
-    data: Annotated[OAuth2PasswordRequestForm,Depends()],
+    data: Annotated[OAuth2PasswordRequestForm, Depends()],
     service: AuthServiceDependency,
-    db: AsyncSession = Depends(get_session)
+    db: SessionDependency,
 ) -> TokenResponse:
     """Verify submitted credentials and return access and refresh bearer tokens."""
-    return await service.login(db,data.username, data.password)
+    return await service.login(db, data.username, data.password)
 
 
 # refresh
 @router.post(
     "/refresh",
-    response_model=TokenResponse
+    response_model=TokenResponse,
+    summary="Refresh access token",
 )
 async def refresh(
     data: RefreshRequest,
     service: AuthServiceDependency,
-    db: AsyncSession = Depends(get_session)
+    db: SessionDependency,
 ) -> TokenResponse:
     """Exchange a valid refresh token for a new access and refresh token pair."""
-    return await service.refresh_tokens(
-        db,data.refresh_token
-    )
+    return await service.refresh_tokens(db, data.refresh_token)
 
 
 # logout
 @router.post(
     "/logout",
-    response_model=MessageResponse
+    response_model=MessageResponse,
+    summary="Log out and revoke refresh token",
 )
 async def logout(
     data: RefreshRequest,
     service: AuthServiceDependency,
-    db: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user)
+    db: SessionDependency,
+    current_user: CurrentUserDependency,
 ) -> MessageResponse:
     """Revoke the supplied refresh token belonging to the authenticated user."""
-    await service.logout(
-        db,data.refresh_token,current_user.user_id
-    )
-
-    return MessageResponse(
-        message="Logged out successfully."
-    )
+    await service.logout(db, data.refresh_token, current_user.user_id)
+    return MessageResponse(message="Logged out successfully.")
 
 
-# current user
+# current user profile
 @router.get(
     "/me",
-    response_model=UserProfileResponse
+    response_model=UserProfileResponse,
+    summary="Get current user profile",
 )
 async def get_my_profile(
-    current_user: User = Depends(get_current_user)
+    current_user: CurrentUserDependency,
 ) -> UserProfileResponse:
     """Return the profile for the currently authenticated user."""
     return current_user
