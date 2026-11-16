@@ -3,20 +3,20 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
-    Integer,
-    String,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Identity,
-    CheckConstraint,
     Index,
+    Integer,
+    String,
     UniqueConstraint,
-    func
+    func,
 )
-
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
+
 if TYPE_CHECKING:
     from app.models.employee import EmployeeData
 
@@ -30,6 +30,10 @@ class EmployeeDocument(Base):
         CheckConstraint("document_type IN ('profile_picture', 'resume')",
             name="ck_employee_document_type"
         ),
+        UniqueConstraint( "employee_id",
+                            "document_type",
+                            name="uq_employee_document_type",
+                        ),
 
         Index( "ix_employee_documents_employee_id",
             "employee_id"

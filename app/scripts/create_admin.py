@@ -1,12 +1,13 @@
 import asyncio
 from getpass import getpass
 
-from sqlalchemy import or_,select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 
 from app.core.security import hash_password
 from app.database.session import SessionLocal
 from app.models.user import User
+
 
 async def main() ->None:
     username = input("Admin username :").strip()

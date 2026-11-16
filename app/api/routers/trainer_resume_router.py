@@ -28,7 +28,7 @@ async def get_trainer_resume(
         TrainerResumeServiceImpl,
         Depends(get_trainer_resume_service),
     ],
-):
+)-> TrainerResumeResponse:
     return await service.get_trainer_resume(trainer_id)
 
 
@@ -45,5 +45,5 @@ async def upload_trainer_resume(
         TrainerResumeServiceImpl,
         Depends(get_trainer_resume_service),
     ],
-):
+)-> TrainerResumeResponse:
     return await service.upload_trainer_resume(trainer_id, file)

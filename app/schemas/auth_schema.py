@@ -1,12 +1,8 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    EmailStr,
-    Field
-)
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
 
 class RegisterRequest(BaseModel):
     username :str =Field(
