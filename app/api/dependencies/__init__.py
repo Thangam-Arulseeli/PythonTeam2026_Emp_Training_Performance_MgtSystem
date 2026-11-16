@@ -16,13 +16,13 @@ from app.api.dependencies.course_dependencies import (
 )
 
 __all__ = [
-    "get_current_user",
-    "require_roles",
     "get_auth_service",
-    "get_course_repository",
-    "get_course_service",
     "get_batch_repository",
     "get_batch_service",
     "get_course_content_repository",
     "get_course_content_service",
+    "get_course_repository",
+    "get_course_service",
+    "get_current_user",
+    "require_roles",
 ]

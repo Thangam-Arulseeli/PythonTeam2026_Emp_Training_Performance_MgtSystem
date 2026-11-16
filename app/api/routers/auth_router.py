@@ -15,14 +15,14 @@ from app.schemas.auth_schema import (
     TokenResponse,
     UserProfileResponse,
 )
-from app.services.auth_service import AuthService
+from app.services.interfaces.auth_service import AuthServiceInterface
 
 router = APIRouter(
     prefix="/api/auth",
     tags=["Authentication"],
 )
 
-AuthServiceDependency = Annotated[AuthService, Depends(get_auth_service)]
+AuthServiceDependency = Annotated[AuthServiceInterface, Depends(get_auth_service)]
 SessionDependency = Annotated[AsyncSession, Depends(get_session)]
 CurrentUserDependency = Annotated[User, Depends(get_current_user)]
 

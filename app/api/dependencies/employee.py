@@ -6,27 +6,45 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_session
+
+# Repository implementations
 from app.repositories.implementations.employee_document_repository import (
     EmployeeDocumentRepositoryImpl,
 )
-from app.repositories.implementations.employee_repository import EmployeeRepositoryImpl
+from app.repositories.implementations.employee_repository import (
+    EmployeeRepositoryImpl,
+)
+
+# Repository interfaces
 from app.repositories.interfaces.employee_document_interface import (
     EmployeeDocumentRepositoryInterface,
 )
 from app.repositories.interfaces.employee_repository_interface import (
     EmployeeRepositoryInterface,
 )
-from app.services.employee_document_service import (
-    EmployeeDocumentService,
+
+# Service interfaces
+from app.services.interfaces.employee_service import (
+    EmployeeServiceInterface,
 )
-from app.services.employee_service import EmployeeService
+from app.services.interfaces.employee_document_service import (
+    EmployeeDocumentServiceInterface,
+)
+
+# Service implementations
+from app.services.implementations.employee_service import (
+    EmployeeServiceImpl,
+)
+from app.services.implementations.employee_document_service import (
+    EmployeeDocumentServiceImpl,
+)
 
 
 # EMPLOYEE REPOSITORY DEPENDENCY
 def get_employee_repository(
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> EmployeeRepositoryInterface:
-    """Provide the employee repository implementation"""
+    """Provide the employee repository implementation."""
 
     return EmployeeRepositoryImpl(db=db)
 
@@ -47,18 +65,16 @@ def get_employee_service(
         EmployeeRepositoryInterface,
         Depends(get_employee_repository),
     ],
-) -> EmployeeService:
-    """Provide the employee service with its dependencies."""
+) -> EmployeeServiceInterface:
+    """Provide the employee service implementation."""
 
-    return EmployeeService(
+    return EmployeeServiceImpl(
         db=db,
         repository=repository,
     )
 
 
 # EMPLOYEE DOCUMENT SERVICE DEPENDENCY
-
-
 def get_employee_document_service(
     db: Annotated[AsyncSession, Depends(get_session)],
     employee_repository: Annotated[
@@ -69,10 +85,10 @@ def get_employee_document_service(
         EmployeeDocumentRepositoryInterface,
         Depends(get_employee_document_repository),
     ],
-) -> EmployeeDocumentService:
-    """Provide the employee document service with its dependencies."""
+) -> EmployeeDocumentServiceInterface:
+    """Provide the employee document service implementation."""
 
-    return EmployeeDocumentService(
+    return EmployeeDocumentServiceImpl(
         db=db,
         employee_repository=employee_repository,
         document_repository=document_repository,
@@ -81,11 +97,11 @@ def get_employee_document_service(
 
 # REUSABLE SERVICE DEPENDENCIES
 EmployeeServiceDep = Annotated[
-    EmployeeService,
+    EmployeeServiceInterface,
     Depends(get_employee_service),
 ]
 
 EmployeeDocumentServiceDep = Annotated[
-    EmployeeDocumentService,
+    EmployeeDocumentServiceInterface,
     Depends(get_employee_document_service),
 ]

@@ -7,7 +7,7 @@ from app.api.routers.health import router as health_router
 __all__ = [
     "auth_router",
     "batch_router",
-    "course_router",
     "course_content_router",
+    "course_router",
     "health_router",
 ]

@@ -1,11 +1,19 @@
-from app.services.auth_service import AuthService
+"""Service contracts and application service implementations."""
+
+from app.services.implementations.auth_service import AuthService
+from app.services.interfaces.auth_service import AuthServiceInterface
 from app.services.interfaces.batch_service import BatchService
 from app.services.interfaces.course_content_service import CourseContentService
 from app.services.interfaces.course_service import CourseService
+from app.services.interfaces.trainer_resume_service import TrainerResumeService
+from app.services.interfaces.trainer_service import TrainerService
 
 __all__ = [
     "AuthService",
-    "CourseService",
+    "AuthServiceInterface",
     "BatchService",
     "CourseContentService",
+    "CourseService",
+    "TrainerResumeService",
+    "TrainerService",
 ]
