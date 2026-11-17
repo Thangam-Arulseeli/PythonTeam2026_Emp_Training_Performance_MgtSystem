@@ -33,3 +33,5 @@ uploads/
 
 #test config
 pytest.ini
+tests
+
