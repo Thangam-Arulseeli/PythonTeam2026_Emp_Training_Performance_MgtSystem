@@ -19,6 +19,7 @@ from app.database.base import Base
 
 if TYPE_CHECKING:
     from app.models.employee_document import EmployeeDocument
+    from app.models.enrollment import Enrollment
 
 
 class EmployeeData(Base):
@@ -70,4 +71,9 @@ class EmployeeData(Base):
 
     documents: Mapped[list["EmployeeDocument"]] = relationship(
         "EmployeeDocument", back_populates="employee", cascade="all, delete-orphan"
+    )
+
+    enrollments : Mapped[list["Enrollment"]] = relationship(
+        "Enrollment",
+        back_populates="employee"
     )

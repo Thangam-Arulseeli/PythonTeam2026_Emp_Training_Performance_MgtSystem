@@ -5,6 +5,7 @@ from app.api.routers import (
     batch_router,
     course_content_router,
     course_router,
+    enrollment_router,
     health_router,
 )
 from app.api.routers.employee import router as employee_router
@@ -50,3 +51,6 @@ app.include_router(course_content_router)
 
 app.include_router(trainer_router)
 app.include_router(trainer_resume_router)
+
+app.include_router(enrollment_router)
+
