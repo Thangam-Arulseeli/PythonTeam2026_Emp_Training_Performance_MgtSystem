@@ -20,7 +20,9 @@ from app.repositories.interfaces.employee_document_interface import (
 from app.repositories.interfaces.employee_repository_interface import (
     EmployeeRepositoryInterface,
 )
-from app.services.interfaces.employee_document_service import EmployeeDocumentServiceInterface
+from app.services.interfaces.employee_document_service import (
+    EmployeeDocumentServiceInterface,
+)
 
 # CREATE THE UPLOAD DIR
 BASE_DIR = Path(__file__).resolve().parents[2]

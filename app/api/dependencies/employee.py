@@ -22,21 +22,21 @@ from app.repositories.interfaces.employee_document_interface import (
 from app.repositories.interfaces.employee_repository_interface import (
     EmployeeRepositoryInterface,
 )
-
-# Service interfaces
-from app.services.interfaces.employee_service import (
-    EmployeeServiceInterface,
-)
-from app.services.interfaces.employee_document_service import (
-    EmployeeDocumentServiceInterface,
+from app.services.implementations.employee_document_service import (
+    EmployeeDocumentServiceImpl,
 )
 
 # Service implementations
 from app.services.implementations.employee_service import (
     EmployeeServiceImpl,
 )
-from app.services.implementations.employee_document_service import (
-    EmployeeDocumentServiceImpl,
+from app.services.interfaces.employee_document_service import (
+    EmployeeDocumentServiceInterface,
+)
+
+# Service interfaces
+from app.services.interfaces.employee_service import (
+    EmployeeServiceInterface,
 )
 
 

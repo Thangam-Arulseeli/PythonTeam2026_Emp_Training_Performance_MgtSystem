@@ -13,11 +13,12 @@ from app.schemas.courseSchema import (
     CourseResponse,
     CourseUpdate,
 )
+from app.services.interfaces.course_service import CourseService
 from app.utils.duration import DurationUnit, duration_to_standard_units
 from app.utils.logger import logger
 
 
-class CourseService:
+class CourseServiceImpl(CourseService):
     def __init__(self, course_repo: CourseInterface):
         """Create the course service with its persistence interface."""
         self.course_repo = course_repo

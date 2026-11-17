@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
-from app.api.dependencies.service_dependencies import get_course_service
+from app.api.dependencies.course_dependencies import get_course_service
 from app.schemas.courseSchema import (
     CourseCreate,
     CourseListResponse,
     CourseResponse,
     CourseUpdate,
 )
-from app.services.course_service import CourseService
+from app.services.interfaces.course_service import CourseService
 
 router = APIRouter(
     prefix="/courses",

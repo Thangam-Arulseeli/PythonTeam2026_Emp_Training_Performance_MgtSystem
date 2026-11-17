@@ -17,6 +17,7 @@ from app.schemas.course_content_schema import (
     CourseContentListResponse,
     CourseContentResponse,
 )
+from app.services.interfaces.course_content_service import CourseContentService
 from app.utils.logger import logger
 
 UPLOAD_DIR = Path("uploads/course_content")
@@ -24,7 +25,7 @@ ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx", ".txt"}
 MAX_FILE_SIZE = 50 * 1024 * 1024
 
 
-class CourseContentService:
+class CourseContentServiceImpl(CourseContentService):
     def __init__(
         self,
         content_repo: CourseContentInterface,

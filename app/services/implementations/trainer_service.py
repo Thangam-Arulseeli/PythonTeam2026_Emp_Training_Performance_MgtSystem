@@ -142,8 +142,6 @@ class TrainerServiceImpl(TrainerService):
 
         return updated_trainer
 
-
-
     async def get_my_trainer_details(
         self,
         email: str,
@@ -158,4 +156,3 @@ class TrainerServiceImpl(TrainerService):
             )
 
         return trainer
-    

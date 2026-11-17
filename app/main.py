@@ -8,7 +8,6 @@ from app.api.routers import (
     health_router,
 )
 from app.api.routers.employee import router as employee_router
-from app.api.routers.health import router as health_router
 from app.api.routers.trainer_resume_router import router as trainer_resume_router
 from app.api.routers.trainer_router import router as trainer_router
 from app.core.config import get_settings

@@ -15,10 +15,11 @@ from app.schemas.batchSchema import (
     BatchStatusUpdate,
     BatchUpdate,
 )
+from app.services.interfaces.batch_service import BatchService
 from app.utils.logger import logger
 
 
-class BatchService:
+class BatchServiceImpl(BatchService):
     def __init__(
         self,
         batch_repo: BatchInterface,
