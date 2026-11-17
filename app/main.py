@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.api.routers import (
+    attendance_session_router,
     auth_router,
     batch_router,
     course_content_router,
@@ -50,3 +51,5 @@ app.include_router(course_content_router)
 
 app.include_router(trainer_router)
 app.include_router(trainer_resume_router)
+
+app.include_router(attendance_session_router)

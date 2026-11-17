@@ -8,7 +8,10 @@ from app.repositories.implementations.refresh_token_repository import (
 )
 from app.repositories.implementations.user_repository import UserRepository
 
+from .attendance_session_repository import AttendanceSessionRepository
+
 __all__ = [
+    "AttendanceSessionRepository",
     "BatchRepository",
     "CourseContentRepository",
     "CourseRepository",

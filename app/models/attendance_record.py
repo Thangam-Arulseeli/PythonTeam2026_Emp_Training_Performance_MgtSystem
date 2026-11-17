@@ -45,7 +45,7 @@ class AttendanceRecord(Base):
     )
 
     enrollment_id: Mapped[int] = mapped_column(
-        ForeignKey("enrollments.enrollment_id", ondelete="RESTRICT"),
+        ForeignKey("enrollments.id", ondelete="RESTRICT"),
         nullable=False,
     )
 

@@ -8,10 +8,13 @@ from app.services.implementations.trainer_resume_service import (
 )
 from app.services.implementations.trainer_service import TrainerServiceImpl
 
+from .attendance_session_service import AttendanceSessionService
+
 __all__ = [
+    "AttendanceSessionService",
     "BatchServiceImpl",
     "CourseContentServiceImpl",
     "CourseServiceImpl",
-    "TrainerServiceImpl",
     "TrainerResumeServiceImpl",
+    "TrainerServiceImpl",
 ]

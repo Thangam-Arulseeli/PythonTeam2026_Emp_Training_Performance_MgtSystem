@@ -8,10 +8,19 @@ from app.repositories.interfaces.user_repository import (
     UserRepositoryInterface,
 )
 
+from .attendance_session_repository_interface import (
+    AttendanceSessionRepositoryInterface,
+)
+from .employee_repository_interface import EmployeeRepositoryInterface
+from .trainer_repository import TrainerRepository
+
 __all__ = [
+    "AttendanceSessionRepositoryInterface",
     "BatchInterface",
     "CourseContentInterface",
     "CourseInterface",
+    "EmployeeRepositoryInterface",
     "RefreshTokenRepositoryInterface",
+    "TrainerRepository",
     "UserRepositoryInterface",
 ]

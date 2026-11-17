@@ -15,7 +15,10 @@ from app.api.dependencies.service_dependencies import (
     get_auth_service,
 )
 
+from .attendance_dependency import get_attance_session_service
+
 __all__ = [
+    "get_attance_session_service",
     "get_auth_service",
     "get_batch_repository",
     "get_batch_service",
