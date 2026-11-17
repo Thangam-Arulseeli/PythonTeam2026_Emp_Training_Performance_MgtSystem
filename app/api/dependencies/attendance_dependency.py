@@ -5,19 +5,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.batch_dependencies import get_batch_service
 from app.api.dependencies.employee import get_employee_repository
+from app.api.dependencies.enrollment_dependencies import get_enrollment_repository
 from app.api.dependencies.trainer_dependencies import get_trainer_repository
 from app.database import get_session
 from app.repositories.implementations import AttendanceSessionRepository
 from app.repositories.interfaces import (
     AttendanceSessionRepositoryInterface,
     EmployeeRepositoryInterface,
+    EnrollmentRepositoryInterface,
 )
 from app.repositories.interfaces import BatchInterface as BatchServiceInterface
 from app.repositories.interfaces import (
     TrainerRepository as TrainerRepositoryInterface,
 )
 from app.services.implementations import AttendanceSessionService
-from app.services.interfaces import AttendanceSessionServiceInterface
+from app.services.interfaces import (
+    AttendanceSessionServiceInterface,
+)
 
 
 def get_attendance_session_repository(
@@ -38,7 +42,15 @@ def get_attance_session_service(
     employee_repository: Annotated[
         EmployeeRepositoryInterface, Depends(get_employee_repository)
     ],
+    enrollment_repository: Annotated[
+        EnrollmentRepositoryInterface, Depends(get_enrollment_repository)
+    ],
 ) -> AttendanceSessionServiceInterface:
     return AttendanceSessionService(
-        db, repository, batch_repository, trainer_repository , employee_repository
+        db,
+        repository,
+        batch_repository,
+        trainer_repository,
+        employee_repository,
+        enrollment_repository,
     )

@@ -5,6 +5,7 @@ from app.models import AttendanceSession, User
 from app.repositories.interfaces import (
     AttendanceSessionRepositoryInterface,
     EmployeeRepositoryInterface,
+    EnrollmentRepositoryInterface,
 )
 from app.repositories.interfaces import BatchInterface as BatchRepositoryInterface
 from app.repositories.interfaces import TrainerRepository as TrainerRepositoryInterface
@@ -24,12 +25,14 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
         batch_repository: BatchRepositoryInterface,
         trainer_repository: TrainerRepositoryInterface,
         employee_repository: EmployeeRepositoryInterface,
+        enrollment_repository: EnrollmentRepositoryInterface,
     ):
         self.db = db
         self.repository = repository
         self.batch_repository = batch_repository
         self.trainer_repository = trainer_repository
         self.employee_repository = employee_repository
+        self.enrollment_repository = enrollment_repository
 
     async def create(
         self, data: AttendanceSessionCreate, user: User
@@ -146,7 +149,7 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
 
         return result
 
-    async def get_by_trainer_id(self , trainer_id:int) -> list[AttendanceSession]  : 
-        result = await self.repository.get_by_trainer_id(trainer_id) 
+    async def get_by_trainer_id(self, trainer_id: int) -> list[AttendanceSession]:
+        result = await self.repository.get_by_trainer_id(trainer_id)
 
-        return result 
+        return result

@@ -12,6 +12,7 @@ from .attendance_session_repository_interface import (
     AttendanceSessionRepositoryInterface,
 )
 from .employee_repository_interface import EmployeeRepositoryInterface
+from .enrollment_interface import EnrollmentInterface as EnrollmentRepositoryInterface
 from .trainer_repository import TrainerRepository
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "CourseContentInterface",
     "CourseInterface",
     "EmployeeRepositoryInterface",
+    "EnrollmentRepositoryInterface",
     "RefreshTokenRepositoryInterface",
     "TrainerRepository",
     "UserRepositoryInterface",
