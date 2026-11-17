@@ -9,6 +9,7 @@ from app.models.refresh_token import RefreshToken
 from app.models.trainer import Trainer
 from app.models.trainer_resume import TrainerResume
 from app.models.user import User
+from app.models.enrollment import Enrollment
 
 __all__ = [
     "Batch",
@@ -20,4 +21,5 @@ __all__ = [
     "Trainer",
     "TrainerResume",
     "User",
+    "Enrollment"
 ]

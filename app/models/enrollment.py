@@ -66,10 +66,10 @@ class Enrollment(Base):
         nullable=False
     )
     status_update_date : Mapped[datetime] = mapped_column(
-        Date,
+        DateTime(timezone=True),
         nullable=True
     )
-    remarks : Mapped[str] =mapped_column(
+    remarks : Mapped[str | None] =mapped_column(
         Text,
         nullable=True
     )
@@ -81,13 +81,16 @@ class Enrollment(Base):
     updated_at : Mapped[datetime] =mapped_column(
         DateTime(timezone=True),
         nullable=False,
+        server_default=func.now(),
         onupdate=func.now()
     )
     employee : Mapped["EmployeeData"] = relationship(
-        "EmployeeData", back_populates="enrollments"
+        "EmployeeData", 
+        back_populates="enrollments"
     )
     batch : Mapped["Batch"] = relationship(
-        "Batch", back_populates="enrollments"
+        "Batch", 
+        back_populates="enrollments"
     )
 
 
