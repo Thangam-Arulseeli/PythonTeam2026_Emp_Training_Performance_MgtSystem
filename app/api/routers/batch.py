@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, status
 
 from app.api.dependencies.auth import get_current_user, require_roles
-from app.api.dependencies.service_dependencies import get_batch_service
+from app.api.dependencies.batch_dependencies import get_batch_service
 from app.models.user import User
 from app.schemas.batchSchema import (
     BatchCreate,
@@ -11,7 +11,7 @@ from app.schemas.batchSchema import (
     BatchStatusUpdate,
     BatchUpdate,
 )
-from app.services.batch_service import BatchService
+from app.services.interfaces.batch_service import BatchService
 
 router = APIRouter(
     prefix="/batches",

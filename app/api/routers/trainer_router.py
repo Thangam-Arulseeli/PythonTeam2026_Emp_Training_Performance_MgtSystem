@@ -34,7 +34,7 @@ async def create_trainer(
     trainer_data: TrainerCreate,
     current_user: AdminUser,
     service: TrainerService,
-)->TrainerResponse:
+) -> TrainerResponse:
     trainer = await service.create_trainer(trainer_data)
 
     return trainer
@@ -50,7 +50,7 @@ async def get_all_trainers(
     min_experience: int | None = Query(default=None, ge=0),
     is_active: bool | None = None,
     search_by_trainer_name: str | None = None,
-)-> list[TrainerResponse]:
+) -> list[TrainerResponse]:
     trainers = await service.get_all_trainers(
         offset,
         limit,
@@ -70,7 +70,7 @@ async def get_all_trainers(
 async def get_my_trainer_details(
     current_user: TrainerUser,
     service: TrainerService,
-)-> TrainerResponse:
+) -> TrainerResponse:
     trainer = await service.get_my_trainer_details(current_user.email)
 
     return trainer
@@ -84,7 +84,7 @@ async def get_trainer_by_id(
     trainer_id: int,
     current_user: AdminUser,
     service: TrainerService,
-)-> TrainerResponse:
+) -> TrainerResponse:
     trainer = await service.get_trainer_by_id(trainer_id)
 
     return trainer
@@ -99,7 +99,7 @@ async def update_trainer(
     trainer_data: TrainerUpdate,
     current_user: AdminUser,
     service: TrainerService,
-)-> TrainerResponse:
+) -> TrainerResponse:
     trainer = await service.update_trainer(
         trainer_id,
         trainer_data,
@@ -116,7 +116,7 @@ async def deactivate_trainer(
     trainer_id: int,
     current_user: AdminUser,
     service: TrainerService,
-)-> TrainerResponse:
+) -> TrainerResponse:
     trainer = await service.update_trainer_status(
         trainer_id,
         False,
@@ -133,7 +133,7 @@ async def activate_trainer(
     trainer_id: int,
     current_user: AdminUser,
     service: TrainerService,
-)-> TrainerResponse:
+) -> TrainerResponse:
     trainer = await service.update_trainer_status(
         trainer_id,
         True,

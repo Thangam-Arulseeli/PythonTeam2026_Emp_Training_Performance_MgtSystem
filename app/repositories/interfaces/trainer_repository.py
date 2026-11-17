@@ -40,10 +40,8 @@ class TrainerRepository(ABC):
     ) -> Trainer | None:
         pass
 
-
     async def get_trainer_by_email(self, email: str) -> Trainer | None:
         pass
 
     async def get_trainer_by_phone(self, phone_number: str) -> Trainer | None:
         pass
-

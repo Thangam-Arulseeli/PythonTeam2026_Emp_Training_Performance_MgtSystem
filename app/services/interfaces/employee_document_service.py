@@ -1,18 +1,18 @@
 from abc import ABC, abstractmethod
 
 from fastapi import UploadFile
+
 from app.models.employee_document import EmployeeDocument
 
 
 class EmployeeDocumentServiceInterface(ABC):
-
     @abstractmethod
     async def check_employee(self, employee_id: int) -> None:
         """Verify whether the employee exists and is active."""
         pass
 
     @abstractmethod
-    async def save_file( self, file: UploadFile, document_type: str ) -> str:
+    async def save_file(self, file: UploadFile, document_type: str) -> str:
         """VALIDATE AND STORE FILE"""
         pass
 
@@ -27,6 +27,6 @@ class EmployeeDocumentServiceInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_documents( self, employee_id: int ) -> list[EmployeeDocument]:
+    async def get_documents(self, employee_id: int) -> list[EmployeeDocument]:
         """GET EMPLOYEE DOCUMENTS"""
         pass
