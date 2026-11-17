@@ -44,8 +44,8 @@ class EnrollmentResponse(BaseModel):
     batch_id : int
     enrollment_date : datetime
     status : EnrollmentStatus
-    status_update_date : datetime | None
-    remarks : str|None
+    status_update_date : datetime | None = None
+    remarks : str|None = None
     created_at : datetime
     updated_at : datetime
 

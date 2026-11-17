@@ -1,9 +1,8 @@
-from app.database.base import Base
-from datetime import date, datetime 
+from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     CheckConstraint,
-    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -11,12 +10,10 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
-
 )
-
-from typing import TYPE_CHECKING
-
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database.base import Base
 
 if TYPE_CHECKING:
     from app.models.batch import Batch

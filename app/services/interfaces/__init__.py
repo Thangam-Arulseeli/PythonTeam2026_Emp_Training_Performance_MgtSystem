@@ -8,6 +8,6 @@ __all__ = [
     "BatchService",
     "CourseContentService",
     "CourseService",
-    "TrainerService",
     "TrainerResumeService",
+    "TrainerService",
 ]

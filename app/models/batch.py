@@ -8,8 +8,8 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.course import Course
+    from app.models.enrollment import Enrollment
     from app.models.trainer import Trainer  # teammate's model
-    from app.models.enrollment import Enrollment 
 
 
 class Batch(Base):

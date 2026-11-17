@@ -12,6 +12,6 @@ __all__ = [
     "BatchServiceImpl",
     "CourseContentServiceImpl",
     "CourseServiceImpl",
-    "TrainerServiceImpl",
     "TrainerResumeServiceImpl",
+    "TrainerServiceImpl",
 ]
