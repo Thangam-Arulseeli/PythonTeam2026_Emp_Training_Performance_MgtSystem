@@ -77,7 +77,7 @@ class AttendanceSessionFilter(BaseModel):
         max_length=200,
     )
 
-    skip: int = Field(default=0, ge=0)
+    offset: int = Field(default=0, ge=0)
     limit: int = Field(default=20, ge=1, le=100)
 
     @model_validator(mode="after")

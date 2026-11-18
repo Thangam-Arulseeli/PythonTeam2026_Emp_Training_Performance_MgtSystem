@@ -15,6 +15,7 @@ class AttendanceSessionServiceInterface(ABC):
     ) -> AttendanceSession:
         pass
 
+    @abstractmethod
     async def update_session(
         self,
         session_id: int,
@@ -23,14 +24,24 @@ class AttendanceSessionServiceInterface(ABC):
     ) -> AttendanceSession:
         pass
 
+    @abstractmethod
     async def get_session_by_id(self, session_id: int, user: User) -> AttendanceSession:
         pass
 
+    @abstractmethod
     async def get_all_sessions(
         self, user: User, filters: AttendanceSessionFilter
     ) -> AttendanceSession:
         pass
-    
 
-    async def get_by_trainer_id(self , trainer_id:int) -> list[AttendanceSession]  :
+    @abstractmethod
+    async def get_by_trainer_id(self, trainer_id: int) -> list[AttendanceSession]:
+        pass
+
+    @abstractmethod
+    async def get_current_user_sessions(self , user:User ) -> list[AttendanceSession] :
         pass 
+
+    @abstractmethod 
+    async def complete_session(self , session_id:int , user:User) -> AttendanceSession :
+        pass  

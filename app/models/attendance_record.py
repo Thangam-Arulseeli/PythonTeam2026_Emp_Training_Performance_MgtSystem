@@ -45,7 +45,7 @@ class AttendanceRecord(Base):
     )
 
     enrollment_id: Mapped[int] = mapped_column(
-        ForeignKey("enrollments.id", ondelete="RESTRICT"),
+        ForeignKey("enrollments.enrollment_id", ondelete="RESTRICT"),
         nullable=False,
     )
 
@@ -55,6 +55,7 @@ class AttendanceRecord(Base):
             name="attendance_status",
             values_callable=lambda enum: [item.value for item in enum],
         ),
+        default=AttendanceStatus.UNMARKED,
         nullable=False,
     )
 

@@ -8,6 +8,7 @@ from app.repositories.interfaces.user_repository import (
     UserRepositoryInterface,
 )
 
+from .attendance_record_repository_interface import AttendanceRecordRepositoryInterface
 from .attendance_session_repository_interface import (
     AttendanceSessionRepositoryInterface,
 )
@@ -16,6 +17,7 @@ from .enrollment_interface import EnrollmentInterface as EnrollmentRepositoryInt
 from .trainer_repository import TrainerRepository
 
 __all__ = [
+    "AttendanceRecordRepositoryInterface",
     "AttendanceSessionRepositoryInterface",
     "BatchInterface",
     "CourseContentInterface",

@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core import AttendanceSessionStatus
 from app.models import AttendanceSession, Batch, Enrollment
 from app.repositories.interfaces import AttendanceSessionRepositoryInterface
 
@@ -41,7 +42,7 @@ class AttendanceSessionRepository(AttendanceSessionRepositoryInterface):
     async def get_all(
         self,
         filters: dict,
-    ) -> tuple[list[AttendanceSession], int]:
+    ) -> list[AttendanceSession]:
 
         query_filters = dict(filters)
         role = query_filters.pop("role", None)
@@ -101,7 +102,7 @@ class AttendanceSessionRepository(AttendanceSessionRepositoryInterface):
                 AttendanceSession.topic.ilike(f"%{query_filters['topic']}%")
             )
 
-        skip = query_filters.get("skip", 0)
+        offset = query_filters.get("offset", 0)
         limit = query_filters.get("limit", 20)
 
         query = (
@@ -109,7 +110,7 @@ class AttendanceSessionRepository(AttendanceSessionRepositoryInterface):
                 AttendanceSession.session_date.desc(),
                 AttendanceSession.start_time.desc(),
             )
-            .offset(skip)
+            .offset(offset)
             .limit(limit)
         )
 
@@ -122,10 +123,35 @@ class AttendanceSessionRepository(AttendanceSessionRepositoryInterface):
     async def get_by_trainer_id(self, id: int) -> list[AttendanceSession]:
         query = (
             select(AttendanceSession)
+            .options(
+                selectinload(AttendanceSession.batch),
+                selectinload(AttendanceSession.attendance_records),
+            )
             .join(Batch)
             .where(Batch.trainer_id == id)
             .order_by(AttendanceSession.session_date.desc())
         )
 
         result = await self.db.scalars(query)
-        return result.all()
+        return list(result.all())
+
+    async def get_by_employee_id(self, employee_id: int) -> list[AttendanceSession]:
+        query = (
+            select(AttendanceSession)
+            .join(Batch, AttendanceSession.batch_id == Batch.id)
+            .join(Enrollment, Enrollment.batch_id == Batch.id)
+            .where(Enrollment.employee_id == employee_id)
+            .order_by(AttendanceSession.session_date.desc())
+            .distinct()
+        )
+
+        result = await self.db.scalars(query)
+        return list(result.all())
+
+    async def complete(
+        self, attendance_session: AttendanceSession
+    ) -> AttendanceSession:
+        attendance_session.status = AttendanceSessionStatus.COMPLETED
+        await self.db.flush()
+        await self.db.refresh(attendance_session)
+        return attendance_session

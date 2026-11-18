@@ -42,6 +42,3 @@ class EmployeeRepositoryInterface(ABC):
     ) -> EmployeeData:
         """update the inactive employee to active employee"""
 
-    @abstractmethod
-    async def get_employee_by_email(self, email: str) -> EmployeeData | None:
-        pass

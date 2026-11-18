@@ -111,14 +111,3 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
         )
 
         return result.scalar_one_or_none()
-
-    async def get_employee_by_email(self, email: str) -> EmployeeData | None:
-
-        statement = select(EmployeeData).where(
-            EmployeeData.email == email,
-            EmployeeData.is_active.is_(True),
-        )
-
-        result = await self.db.execute(statement)
-
-        return result.scalar_one_or_none()

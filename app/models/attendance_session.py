@@ -5,6 +5,7 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     DateTime,
+    Enum,
     ForeignKey,
     Index,
     Integer,
@@ -13,7 +14,6 @@ from sqlalchemy import (
     Time,
     func,
 )
-from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core import AttendanceSessionStatus
@@ -72,7 +72,7 @@ class AttendanceSession(Base):
     )
 
     status: Mapped[AttendanceSessionStatus] = mapped_column(
-        SQLAlchemyEnum(
+        Enum(
             AttendanceSessionStatus,
             name="attendance_session_status",
             values_callable=lambda enum: [item.value for item in enum],
@@ -95,13 +95,11 @@ class AttendanceSession(Base):
         nullable=False,
     )
 
-    batch: Mapped["Batch"] = relationship(
-        "Batch",
-        back_populates="attendance_sessions",
-    )
+    batch: Mapped["Batch"] = relationship()
 
     attendance_records: Mapped[list["AttendanceRecord"]] = relationship(
         "AttendanceRecord",
         back_populates="session",
         cascade="all, delete-orphan",
     )
+    

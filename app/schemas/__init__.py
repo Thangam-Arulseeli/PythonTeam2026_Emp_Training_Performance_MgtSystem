@@ -22,6 +22,11 @@ from app.schemas.courseSchema import (
     CourseUpdate,
 )
 
+from .attendance_record import (
+    AttendanceRecordCreate,
+    AttendanceRecordResponse,
+    AttendanceRecordUpdate,
+)
 from .attendance_session import (
     AttendanceSessionBase,
     AttendanceSessionCreate,
@@ -56,4 +61,7 @@ __all__ = [
     "AttendanceSessionResponse",
     "AttendanceSessionUpdate",
     "AttendanceSessionFilter",
+    "AttendanceRecordCreate",
+    "AttendanceRecordUpdate",
+    "AttendanceRecordResponse",
 ]
