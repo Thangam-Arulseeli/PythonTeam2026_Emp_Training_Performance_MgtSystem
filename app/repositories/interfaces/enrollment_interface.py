@@ -7,6 +7,11 @@ from app.models.batch import Batch
 
 
 class EnrollmentInterface(ABC):
+
+    @abstractmethod
+    async def count_active_by_employee(self,employee_id : int)-> int:
+        pass
+    
     @abstractmethod
     async def create(self, data:dict[str, object]) -> Enrollment:
         pass
