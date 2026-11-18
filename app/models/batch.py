@@ -8,6 +8,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.course import Course
+    from app.models.enrollment import Enrollment
     from app.models.trainer import Trainer  # teammate's model
 
 
@@ -44,3 +45,8 @@ class Batch(Base):
 
     course: Mapped["Course"] = relationship(back_populates="batches")
     trainer: Mapped["Trainer"] = relationship()
+
+    enrollments: Mapped[list["Enrollment"]] = relationship(
+        "Enrollment",
+        back_populates="batch",
+    )
