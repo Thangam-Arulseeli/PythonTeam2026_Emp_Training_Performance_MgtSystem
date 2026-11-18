@@ -25,6 +25,7 @@ from app.schemas.enrollment_schema import (
 )
 from app.services.interfaces.enrollment_service import EnrollmentServiceInterface
 from app.utils.logger import logger
+from app.utils.email_service import EmailService
 
 
 class EnrollmentService(EnrollmentServiceInterface):
@@ -35,12 +36,14 @@ class EnrollmentService(EnrollmentServiceInterface):
         employee_repo: EmployeeRepositoryInterface,
         batch_repo: BatchInterface,
         trainer_repo: TrainerRepository,
+        email_service : EmailService
     ) -> None:
 
         self.enrollment_repo = enrollment_repo
         self.employee_repo = employee_repo
         self.batch_repo = batch_repo
         self.trainer_repo = trainer_repo
+        self.email_service = email_service
 
 
     # GET BATCH OR RAISE ERROR
@@ -117,9 +120,26 @@ class EnrollmentService(EnrollmentServiceInterface):
                 "Cannot enroll employees in a completed batch"
             )
 
-        if batch.end_date < date.today():
+        today=date.today()
+
+        if today > batch.start_date:
+            raise ConflictException(
+                "Cannot enroll after the batch start date"
+            )
+
+        if batch.end_date < today:
             raise UnprocessableEntityException(
                 "Cannot enroll employees in a batch that has ended"
+            )
+
+        # check whether the employee already enrolled in other batch
+        active_count = (await self.enrollment_repo.count_active_by_employee(
+            payload.employee_id)
+        ) 
+
+        if active_count >=1:
+            raise ConflictException(
+                "Employee already have an active enrollment. So complete or cancel the existing enrollment"
             )
 
         # Create enrollment
@@ -136,6 +156,14 @@ class EnrollmentService(EnrollmentServiceInterface):
             enrollment.enrollment_id,
             enrollment.employee_id,
             enrollment.batch_id,
+        )
+
+        # TO send enrollment confirmation mail
+        await self.email_service.send_enrollment_confirmation_async(
+            employee_name=employee.full_name,
+            employee_email=employee.email,
+            enrollment_id=enrollment.enrollment_id,
+            batch_name=batch.batch_name
         )
 
         return EnrollmentResponse.model_validate(enrollment)
@@ -205,6 +233,8 @@ class EnrollmentService(EnrollmentServiceInterface):
         if not enrollment:
             raise NotFoundException("Enrollment not found")
 
+        old_status = enrollment.status
+
         # Get associated batch
         batch = await self.batch_repo.get_by_id(enrollment.batch_id)
         if not batch:
@@ -239,6 +269,12 @@ class EnrollmentService(EnrollmentServiceInterface):
             if batch.status != "completed":
                 raise ConflictException("Enrollment can be completed only after batch completion")
 
+        # prevent duplicate status change
+        if old_status == payload.status:
+            raise ConflictException(
+                f"Enrollment is already in '{old_status}' status"
+            )
+
         # Update enrollment
         enrollment.status = payload.status
         enrollment.status_update_date = datetime.now(timezone.utc)
@@ -247,6 +283,19 @@ class EnrollmentService(EnrollmentServiceInterface):
 
         # Save changes
         updated_enrollment = await self.enrollment_repo.update(enrollment)
+
+        # Get employee details for email notification
+        employee = await self.employee_repo.get_employee_by_id(updated_enrollment.employee_id)
+        if employee:
+            await self.email_service.send_enrollment_status_email_async(
+                employee_name=employee.full_name,
+                employee_email=employee.email,
+                enrollment_id=updated_enrollment.enrollment_id,
+                batch_name=batch.batch_name,
+                old_status=old_status,
+                new_status=updated_enrollment.status,
+                remarks=updated_enrollment.remarks,
+            )
 
         return updated_enrollment
 
