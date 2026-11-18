@@ -2,7 +2,11 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from app.models.assessment import Assessment
-from app.schemas.assessment_schema import AssessmentCreate, AssessmentPatch
+from app.schemas.assessment_schema import (
+    AssessmentCreate,
+    AssessmentFilterParams,
+    AssessmentPatch,
+)
 
 
 class AssessmentInterface(ABC):
@@ -13,7 +17,9 @@ class AssessmentInterface(ABC):
         pass
 
     @abstractmethod
-    async def get_all_assessments(self):
+    async def get_all_assessments(
+        self, filter_params: AssessmentFilterParams
+    ) -> dict[str, Any]:
         """Gets all the Assessements with optional filters"""
         pass
 
@@ -30,6 +36,8 @@ class AssessmentInterface(ABC):
         pass
 
     @abstractmethod
-    async def deactivate_assessment(self):
-        """Change the is_active to False"""
+    async def update_assessment_activation(
+        self, assessment: Assessment, status: bool
+    ) -> Assessment:
+        """Change the is_active to True/False"""
         pass

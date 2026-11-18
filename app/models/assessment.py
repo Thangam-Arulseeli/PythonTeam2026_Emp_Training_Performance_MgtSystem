@@ -1,4 +1,5 @@
 from decimal import Decimal
+from enum import StrEnum
 
 from sqlalchemy import (
     Boolean,
@@ -15,7 +16,11 @@ from app.database.base import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
-ASSESSMENT_TYPE = ("quiz", "interview", "exam")
+
+class AssessmentType(StrEnum):
+    QUIZ = "quiz"
+    INTERVIEW = "interview"
+    EXAM = "exam"
 
 
 class Assessment(Base):
@@ -24,7 +29,7 @@ class Assessment(Base):
 
     __table_args__ = (
         CheckConstraint(
-            f"assessment_type IN {ASSESSMENT_TYPE}",
+            f"assessment_type IN {tuple(typ.value for typ in AssessmentType)}",
             name="ck_assessments_assessment_type",
         ),
     )

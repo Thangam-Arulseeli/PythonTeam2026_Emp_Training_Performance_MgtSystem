@@ -2,7 +2,11 @@ from app.exceptions.custom_exceptions import BadRequestException, NotFoundExcept
 from app.models.assessment import Assessment
 from app.repositories.interfaces.assessment_interface import AssessmentInterface
 from app.repositories.interfaces.batch_interface import BatchInterface
-from app.schemas.assessment_schema import AssessmentCreate, AssessmentPatch
+from app.schemas.assessment_schema import (
+    AssessmentCreate,
+    AssessmentFilterParams,
+    AssessmentPatch,
+)
 from app.services.interfaces.assessment_service import AssessmentServiceInterface
 
 
@@ -16,7 +20,7 @@ class AssessmentService(AssessmentServiceInterface):
         self.assessment_repository = assessment_repository
         self.batch_repository = batch_repository
 
-    async def get_assessment_by_id(self, assessment_id):
+    async def get_assessment_by_id(self, assessment_id) -> Assessment | None:
 
         assessment = await self.assessment_repository.get_assessment_by_id(
             assessment_id
@@ -50,7 +54,7 @@ class AssessmentService(AssessmentServiceInterface):
 
     async def patch_assessment(
         self, assessment_id: int, assessment_data: AssessmentPatch
-    ):
+    ) -> Assessment:
         existing_assessment = await self.get_assessment_by_id(assessment_id)
 
         if not existing_assessment:
@@ -89,12 +93,12 @@ class AssessmentService(AssessmentServiceInterface):
                 raise BadRequestException(f"Batch is inactive.")
 
             if batch.status == "completed":
-                raise BadRequestException("The was already completed.")
+                raise BadRequestException("The batch was already completed.")
 
             assessment_date = (
                 assessment_data.scheduled_date_time.date()
                 if assessment_data.scheduled_date_time
-                else existing_assessment.scheduled_date_time
+                else existing_assessment.scheduled_date_time.date()
             )
 
             if not (batch.start_date <= assessment_date <= batch.end_date):
@@ -107,3 +111,35 @@ class AssessmentService(AssessmentServiceInterface):
         )
 
         return assessment
+
+    async def update_assessment_activation(
+        self, assessment_id: int, status: bool
+    ) -> Assessment:
+        existing_assessment = await self.get_assessment_by_id(assessment_id)
+
+        if not existing_assessment:
+            raise NotFoundException("Assessment Not Found")
+
+        if status is True:
+            batch = await self.batch_repository.get_by_id(existing_assessment.batch_id)
+
+            if not batch:
+                raise NotFoundException(f"Batch not found")
+            if batch.is_active == False:
+                raise BadRequestException(f"Coressponding Batch is inactive.")
+
+            if batch.status == "completed":
+                raise BadRequestException("The batch was already completed.")
+
+        updated_assessment = (
+            await self.assessment_repository.update_assessment_activation(
+                existing_assessment, status
+            )
+        )
+
+        return updated_assessment
+
+    async def get_all_assessments(
+        self, filter_params: AssessmentFilterParams
+    ) -> list[Assessment]:
+        return await self.assessment_repository.get_all_assessments(filter_params)
