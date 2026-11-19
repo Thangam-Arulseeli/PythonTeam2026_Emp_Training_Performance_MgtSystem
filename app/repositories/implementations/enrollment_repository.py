@@ -105,6 +105,24 @@ class EnrollmentRepository(EnrollmentInterface):
         await self.db.commit()
         await self.db.refresh(enrollment)
         return enrollment
+
+
+    # to get enrollment by batch id
+    async def get_by_batch_id(
+        self, 
+        batch_id : int , 
+        trainer_id : int | None = None
+    )->list[Enrollment]:
+        query = select(Enrollment).where(Enrollment.batch_id==batch_id)
+
+        if trainer_id is not None:
+            query = query.join(Batch,Enrollment.batch_id == Batch.id).where(
+                Batch.trainer_id == trainer_id
+            )
+
+        query = query.order_by(Enrollment.enrollment_date)
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
     
 
 

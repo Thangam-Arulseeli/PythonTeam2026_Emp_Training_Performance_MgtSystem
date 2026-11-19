@@ -35,3 +35,7 @@ class EnrollmentInterface(ABC):
     @abstractmethod
     async def update(self, enrollment: Enrollment) -> Enrollment:
         pass
+
+    @abstractmethod
+    async def get_by_batch_id(self,batch_id : int, trainer_id:int | None = None)-> list[Enrollment]:
+        pass
