@@ -91,6 +91,17 @@ async def get_session_by_trainer_id(
     return await service.get_by_trainer_id(trainer_id)
 
 
+@router.get("/{session_id}/summary")
+async def get_session_summary(
+    session_id: int,
+    user: Annotated[User, Depends(require_roles("trainer", "admin"))],
+    service: Annotated[
+        AttendanceSessionServiceInterface, Depends(get_attendance_session_service)
+    ],
+):
+    return await service.get_session_summary(session_id, user)
+
+
 @router.patch("/{session_id}/complete", response_model=AttendanceSessionResponse)
 async def mark_session_complete(
     session_id: int,

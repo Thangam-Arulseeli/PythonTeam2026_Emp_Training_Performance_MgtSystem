@@ -33,6 +33,7 @@ from .attendance_session import (
     AttendanceSessionFilter,
     AttendanceSessionResponse,
     AttendanceSessionUpdate,
+    AttendanceSummaryResponse,
 )
 
 __all__ = [
@@ -64,4 +65,5 @@ __all__ = [
     "AttendanceRecordCreate",
     "AttendanceRecordUpdate",
     "AttendanceRecordResponse",
+    "AttendanceSummaryResponse",
 ]

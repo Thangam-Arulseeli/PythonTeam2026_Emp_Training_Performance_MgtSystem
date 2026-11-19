@@ -1,9 +1,9 @@
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core import AttendanceSessionStatus
-from app.models import AttendanceSession, Batch, Enrollment
+from app.core import AttendanceSessionStatus, AttendanceStatus
+from app.models import AttendanceRecord, AttendanceSession, Batch, Enrollment
 from app.repositories.interfaces import AttendanceSessionRepositoryInterface
 
 
@@ -155,3 +155,17 @@ class AttendanceSessionRepository(AttendanceSessionRepositoryInterface):
         await self.db.flush()
         await self.db.refresh(attendance_session)
         return attendance_session
+
+    async def get_session_attendance_summary(self, session_id: int):
+        query = select(
+            func.count(AttendanceRecord.id).label("total_records"),
+            func.count(
+                case((AttendanceRecord.status == AttendanceStatus.PRESENT, 1))
+            ).label("present"),
+            func.count(
+                case((AttendanceRecord.status == AttendanceStatus.ABSENT, 1))
+            ).label("absent"),
+        ).where(AttendanceRecord.session_id == session_id)
+
+        result = await self.db.execute(query)
+        return result.mappings().one()

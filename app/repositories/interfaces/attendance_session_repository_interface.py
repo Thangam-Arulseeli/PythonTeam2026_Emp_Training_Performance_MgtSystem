@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 
 from app.models import AttendanceSession
 
-
 class AttendanceSessionRepositoryInterface(ABC):
     @abstractmethod
     async def create(self, attendance_session: AttendanceSession) -> AttendanceSession:
@@ -32,4 +31,8 @@ class AttendanceSessionRepositoryInterface(ABC):
 
     @abstractmethod 
     async def complete(self , attendance_session:AttendanceSession) -> AttendanceSession :
+        pass 
+
+    @abstractmethod
+    async def get_session_attendance_summary(self, session_id: int):
         pass 

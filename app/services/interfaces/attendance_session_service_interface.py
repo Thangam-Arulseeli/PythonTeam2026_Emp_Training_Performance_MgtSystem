@@ -45,3 +45,7 @@ class AttendanceSessionServiceInterface(ABC):
     @abstractmethod 
     async def complete_session(self , session_id:int , user:User) -> AttendanceSession :
         pass  
+
+    @abstractmethod 
+    async def get_session_summary(self , session_id:int , user:User ) :
+        pass 

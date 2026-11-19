@@ -50,7 +50,9 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
             trainer = await self.trainer_repository.get_trainer_by_email(user.email)
 
             if trainer is None:
-                raise NotFoundException("Trainer profile linked with the user not found")
+                raise NotFoundException(
+                    "Trainer profile linked with the user not found"
+                )
 
             if batch.trainer_id != trainer.trainer_id:
                 raise NotAuthorizedException(
@@ -82,7 +84,9 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
             trainer = await self.trainer_repository.get_trainer_by_email(user.email)
 
             if trainer is None:
-                raise NotFoundException("Trainer profile linked with the user not found")
+                raise NotFoundException(
+                    "Trainer profile linked with the user not found"
+                )
 
             if attendance_session.batch.trainer_id != trainer.trainer_id:
                 raise NotAuthorizedException(
@@ -163,7 +167,9 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
         if user.role == "trainer":
             trainer = await self.trainer_repository.get_trainer_by_email(user.email)
             if trainer is None:
-                raise NotFoundException("Trainer profile linked with the user not found")
+                raise NotFoundException(
+                    "Trainer profile linked with the user not found"
+                )
             new_filters["trainer_id"] = trainer.trainer_id
 
         if user.role == "employee":
@@ -230,3 +236,41 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
         except Exception:
             await self.db.rollback()
             raise
+
+    async def get_session_summary(self, session_id: int, user: User):
+        attendance_session = await self.repository.get_by_id(session_id)
+
+        if attendance_session is None:
+            raise NotFoundException(
+                f"Attendance session with id {session_id} not found"
+            )
+
+        if user.role == "trainer":
+            trainer = await self.trainer_repository.get_trainer_by_email(user.email)
+
+            if trainer is None:
+                raise NotFoundException(
+                    "Trainer profile linked with the user not found"
+                )
+            if attendance_session.batch.trainer_id != trainer.trainer_id:
+                raise NotAuthorizedException(
+                    "You are not allowed to perform this operation"
+                )
+
+        statistics = await self.repository.get_session_attendance_summary(session_id)
+
+        result = {
+            "session": attendance_session.id,
+            "session_date": attendance_session.session_date,
+            "total enrollments": statistics["total_records"],
+            "present": statistics["present"],
+            "absent": statistics["absent"],
+            "unmarked": statistics["total_records"]
+            - statistics["present"]
+            - statistics["absent"],
+            "status": attendance_session.status,
+            "is_finalized": attendance_session.status
+            == AttendanceSessionStatus.COMPLETED,
+        }
+
+        return result

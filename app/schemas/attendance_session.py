@@ -90,3 +90,20 @@ class AttendanceSessionFilter(BaseModel):
             raise ValueError("End date cannot be earlier than start date")
 
         return self
+
+class AttendanceSummaryResponse(BaseModel):
+    session_id: int
+    session_status: AttendanceSessionStatus
+    is_finalized: bool
+
+    total_enrolled: int
+    total_records: int
+
+    present: int
+    absent: int
+    late: int
+    excused: int
+    unmarked: int
+
+    attendance_percentage: float | None
+    cancellation_reason: str | None = None
