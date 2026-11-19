@@ -71,6 +71,22 @@ async def get_all_enrollments(
     )
 
 
+# GET ENROLLMENTS BY BATCH ID
+@router.get(
+    "/batch/{batch_id}",
+    response_model=list[EnrollmentResponse]
+)
+async def get_enrollments_by_batch(
+    current_user : Annotated[User, Depends(require_roles("admin","trainer"))],
+    service: Annotated[EnrollmentServiceInterface, Depends(get_enrollment_service)],
+    batch_id:int
+)->list[EnrollmentResponse]:
+    return await service.get_enrollments_by_batch(
+        batch_id=batch_id,
+        current_user=current_user
+    )
+
+
 # GET ENROLLMENTS BY EMPLOYEE ID
 @router.get(
     "/employee/{employee_id}",
@@ -93,6 +109,7 @@ async def get_enrollments_by_employee(
     "/{enrollment_id}/status",
     response_model=EnrollmentResponse,
     status_code=status.HTTP_200_OK,
+    description="Status value includes 'enrolled','paused','cancelled','completed'"
 )
 async def update_enrollment_status(
     enrollment_id: int,
