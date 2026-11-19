@@ -12,6 +12,17 @@ class EnrollmentRepository(EnrollmentInterface):
     def __init__(self, db:AsyncSession)-> None:
         self.db = db
 
+    # Method to find is the employee already enrolled in a batch or not
+    async def count_active_by_employee(self, employee_id:int)-> int:    
+        query = select(
+            func.count(Enrollment.enrollment_id)).where(
+                Enrollment.employee_id ==employee_id,
+                Enrollment.status.in_(["enrolled","paused"])
+            )
+        result = await self.db.execute(query)
+        return result.scalar_one()
+
+
     # Method to create enrollment
     async def create(self, data: dict[str, object]) -> Enrollment:
         enrollment = Enrollment(**data)

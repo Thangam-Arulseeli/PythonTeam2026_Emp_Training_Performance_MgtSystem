@@ -19,6 +19,8 @@ from app.repositories.interfaces.trainer_repository import TrainerRepository
 from app.services.implementations.enrollment_service import EnrollmentService
 from app.services.interfaces.enrollment_service import EnrollmentServiceInterface
 
+from app.utils.email_service import EmailService
+
 # Build the enrollment repository.
 def get_enrollment_repository(db: AsyncSession = Depends(get_session)) -> EnrollmentInterface:
     return EnrollmentRepository(db)
@@ -37,5 +39,6 @@ def get_enrollment_service(
         employee_repo=employee_repo,
         batch_repo=batch_repo,
         trainer_repo=trainer_repo,
+        email_service=EmailService()
     )
 
