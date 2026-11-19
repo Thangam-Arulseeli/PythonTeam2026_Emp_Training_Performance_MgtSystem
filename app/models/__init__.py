@@ -11,7 +11,12 @@ from app.models.trainer import Trainer
 from app.models.trainer_resume import TrainerResume
 from app.models.user import User
 
+from .attendance_record import AttendanceRecord
+from .attendance_session import AttendanceSession
+
 __all__ = [
+    "AttendanceRecord",
+    "AttendanceSession",
     "Batch",
     "Course",
     "CourseContent",

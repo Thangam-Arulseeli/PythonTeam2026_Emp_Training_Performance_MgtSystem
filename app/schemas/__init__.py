@@ -22,6 +22,20 @@ from app.schemas.courseSchema import (
     CourseUpdate,
 )
 
+from .attendance_record import (
+    AttendanceRecordCreate,
+    AttendanceRecordResponse,
+    AttendanceRecordUpdate,
+)
+from .attendance_session import (
+    AttendanceSessionBase,
+    AttendanceSessionCreate,
+    AttendanceSessionFilter,
+    AttendanceSessionResponse,
+    AttendanceSessionUpdate,
+    AttendanceSummaryResponse,
+)
+
 __all__ = [
     # Auth schemas
     "RegisterRequest",
@@ -42,4 +56,14 @@ __all__ = [
     # Course Content schemas
     "CourseContentResponse",
     "CourseContentListResponse",
+    # attendence session
+    "AttendanceSessionBase",
+    "AttendanceSessionCreate",
+    "AttendanceSessionResponse",
+    "AttendanceSessionUpdate",
+    "AttendanceSessionFilter",
+    "AttendanceRecordCreate",
+    "AttendanceRecordUpdate",
+    "AttendanceRecordResponse",
+    "AttendanceSummaryResponse",
 ]
