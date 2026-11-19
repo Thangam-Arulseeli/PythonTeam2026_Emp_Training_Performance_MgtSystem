@@ -24,14 +24,11 @@ htmlcov/
 *.log
 logs/
 
-# alembic
-alembic/
-alembic.ini
-
-# Uploaded files
+# File uploads
 uploads/
 
-#test config
-pytest.ini
-tests
+# Alembic configuration and migrations
+alembic.ini
+alembic/
 
+.ruff_cache/

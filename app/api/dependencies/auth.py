@@ -12,54 +12,54 @@ from app.models.user import User
 from app.repositories.implementations.user_repository import UserRepository
 
 # extracts the access token from header
-auth_scheme = OAuth2PasswordBearer(
-    tokenUrl="/api/auth/login"
-)
+
+auth_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 user_repository = UserRepository()
+
 
 # get current user
 async def get_current_user(
     token: Annotated[str, Depends(auth_scheme)],
     db: Annotated[AsyncSession, Depends(get_session)],
-)-> User:
+) -> User:
     try:
-        payload=decode_token(token)
+        payload = decode_token(token)
 
         if payload.get("type") != "access":
             raise ValueError("Access token required")
 
         user_id = int(payload["sub"])
 
-    except (jwt.PyJWTError ,ValueError, KeyError, TypeError) as exc:
+    except (jwt.PyJWTError, ValueError, KeyError, TypeError) as exc:
         raise HTTPException(
-            status_code= status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired access token.",
-            headers={"WWW-Authenticate":"Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         ) from exc
 
-    user = await user_repository.get_by_id(db,user_id)
+    user = await user_repository.get_by_id(db, user_id)
 
     if not user or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found or inactive."
+            detail="User not found or inactive.",
         )
     return user
 
 
 # it checks whether the particular role can access the endpoint or no
-def require_roles(*allowed_roles:str) -> Callable:
+def require_roles(*allowed_roles: str) -> Callable:
+    """Create a dependency that allows only users with one of the supplied roles."""
+
     async def role_checker(
-            current_user: Annotated[User, Depends(get_current_user)], 
-    )-> User:
+        current_user: Annotated[User, Depends(get_current_user)],
+    ) -> User:
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You dont have permission to perform this action."
+                detail="You dont have permission to perform this action.",
             )
 
         return current_user
 
     return role_checker
-
-
