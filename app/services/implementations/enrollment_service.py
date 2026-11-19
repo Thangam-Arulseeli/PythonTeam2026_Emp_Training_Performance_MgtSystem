@@ -106,7 +106,7 @@ class EnrollmentService(EnrollmentServiceInterface):
 
         # Check whether employee exists and is active
         employee = await self.employee_repo.get_employee_by_id(payload.employee_id)
-        if employee is None:
+        if employee is None or not employee.is_active:
             raise NotFoundException("Active employee not found")
 
         # Check batch availability
@@ -319,6 +319,21 @@ class EnrollmentService(EnrollmentServiceInterface):
         enrollments = await self.enrollment_repo.get_by_employee_id(
             employee_id=employee_id,
             trainer_id=trainer_id
+        )
+
+        return [
+            EnrollmentResponse.model_validate(enrollment)
+            for enrollment in enrollments
+        ]
+
+    async def get_enrollments_by_batch(
+        self, 
+        batch_id : int ,
+        current_user: User
+    )->list[EnrollmentResponse]:
+        batch = await self.validate_batch_access(batch_id, current_user)
+        enrollments = await self.enrollment_repo.get_by_batch_id(
+            batch_id= batch_id
         )
 
         return [
