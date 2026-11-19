@@ -45,3 +45,11 @@ class EnrollmentServiceInterface(ABC):
     )->list[EnrollmentResponse]:
         pass
 
+    @abstractmethod
+    async def get_enrollments_by_batch(
+        self,
+        batch_id: int,
+        current_user: User
+    ) -> list[EnrollmentResponse]:
+        pass
+
