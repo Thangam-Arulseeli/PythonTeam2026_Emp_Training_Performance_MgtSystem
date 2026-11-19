@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from app.api.dependencies.assessment_dependencies import (
     get_assessment_result_service,
@@ -8,8 +8,16 @@ from app.api.dependencies.assessment_dependencies import (
 )
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.models.assessment import Assessment
+from app.models.assessment_result import AssessmentResult
 from app.models.user import User
-from app.schemas.assessment_result_schema import AssessmentAssignResponse
+from app.schemas.assessment_result_schema import (
+    AssessmentAssignResponse,
+    AssessmentCancelRequest,
+    AssessmentGradeRequest,
+    AssessmentResultResponse,
+    AssessmentDetailResponse,
+    TraineeAssessmentDetailResponse,
+)
 from app.schemas.assessment_schema import (
     AssessmentActivation,
     AssessmentCreate,
@@ -31,6 +39,102 @@ Assessment_Service = Annotated[
 Assessment_Result_Service = Annotated[
     AssessmentResultServiceInterface, Depends(get_assessment_result_service)
 ]
+
+
+@router.get(
+    "/my-assessments",
+    response_model=list[TraineeAssessmentDetailResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get all assessments assigned to the currently logged-in trainee",
+)
+async def get_my_assessments(
+    service: Assessment_Result_Service,
+    current_user: User = Depends(get_current_user),
+) -> list[TraineeAssessmentDetailResponse]:
+    return await service.get_my_assessments(current_user)
+
+
+@router.get(
+    "/results/{result_id}",
+    response_model=TraineeAssessmentDetailResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get details of a single assessment result",
+)
+async def get_result_by_id(
+    result_id: int,
+    service: Assessment_Result_Service,
+    current_user: User = Depends(get_current_user),
+) -> TraineeAssessmentDetailResponse:
+    return await service.get_result_by_id(result_id, current_user)
+
+
+@router.get(
+    "/{assessment_id}/results",
+    response_model=list[AssessmentDetailResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get all trainee submission results for an assessment (trainer/admin view)",
+)
+async def get_results_by_assessment_id(
+    assessment_id: int,
+    service: Assessment_Result_Service,
+    current_user: User = Depends(require_roles("admin", "trainer")),
+) -> list[AssessmentDetailResponse]:
+    return await service.get_results_by_assessment_id(assessment_id)
+
+
+@router.post(
+    "/results/{result_id}/submit",
+    response_model=AssessmentResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Submit an assessment with optional file upload",
+)
+async def submit_assessment(
+    result_id: int,
+    service: Assessment_Result_Service,
+    file: UploadFile | None = File(None),
+    current_user: User = Depends(get_current_user),
+) -> AssessmentResult:
+    return await service.submit_assessment(
+        result_id=result_id,
+        file=file,
+        current_user=current_user,
+    )
+
+
+@router.post(
+    "/results/{result_id}/grade",
+    response_model=AssessmentResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Grade a submitted assessment",
+)
+async def grade_assessment(
+    result_id: int,
+    payload: AssessmentGradeRequest,
+    service: Assessment_Result_Service,
+    current_user: User = Depends(require_roles("admin", "trainer")),
+) -> AssessmentResult:
+    return await service.grade_assessment(
+        result_id=result_id,
+        payload=payload,
+    )
+
+
+@router.patch(
+    "/results/{result_id}/cancel",
+    response_model=AssessmentResultResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Cancel a pending assessment",
+)
+async def cancel_assessment_result(
+    result_id: int,
+    payload: AssessmentCancelRequest,
+    service: Assessment_Result_Service,
+    current_user: User = Depends(require_roles("admin", "trainer")),
+) -> AssessmentResult:
+    return await service.cancel_assessment_result(
+        result_id=result_id,
+        payload=payload,
+    )
 
 
 @router.get("/{id}", response_model=AssessmentResponse, status_code=status.HTTP_200_OK)

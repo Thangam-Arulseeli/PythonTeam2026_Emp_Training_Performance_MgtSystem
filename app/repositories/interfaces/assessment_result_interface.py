@@ -46,3 +46,24 @@ class AssessmentResultInterface(ABC):
     ) -> AssessmentResult:
         """Update an existing AssessmentResult with supplied fields."""
         pass
+
+    @abstractmethod
+    async def get_results_by_employee_id(
+        self, employee_id: int
+    ) -> list[AssessmentResult]:
+        """Fetch all AssessmentResults for an employee with joined Assessment and Enrollment."""
+        pass
+
+    @abstractmethod
+    async def get_result_by_id_with_details(
+        self, result_id: int
+    ) -> AssessmentResult | None:
+        """Fetch AssessmentResult by ID with joined Assessment and Enrollment."""
+        pass
+
+    @abstractmethod
+    async def get_results_by_assessment_id(
+        self, assessment_id: int
+    ) -> list[AssessmentResult]:
+        """Fetch all AssessmentResults for an assessment with joined trainee details."""
+        pass
