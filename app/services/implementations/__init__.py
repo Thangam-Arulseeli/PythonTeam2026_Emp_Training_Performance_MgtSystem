@@ -8,7 +8,12 @@ from app.services.implementations.trainer_resume_service import (
 )
 from app.services.implementations.trainer_service import TrainerServiceImpl
 
+from .attendance_record_service import AttendanceRecordService
+from .attendance_session_service import AttendanceSessionService
+
 __all__ = [
+    "AttendanceRecordService",
+    "AttendanceSessionService",
     "BatchServiceImpl",
     "CourseContentServiceImpl",
     "CourseServiceImpl",
