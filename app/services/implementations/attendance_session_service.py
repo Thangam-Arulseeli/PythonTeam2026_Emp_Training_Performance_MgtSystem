@@ -268,9 +268,15 @@ class AttendanceSessionService(AttendanceSessionServiceInterface):
             "unmarked": statistics["total_records"]
             - statistics["present"]
             - statistics["absent"],
+            "attendance_percentage": round(
+                (statistics["present"] / statistics["total_records"]) * 100, 2
+            )
+            if attendance_session.status != AttendanceSessionStatus.CANCELLED
+            else None,
             "status": attendance_session.status,
             "is_finalized": attendance_session.status
             == AttendanceSessionStatus.COMPLETED,
         }
 
         return result
+    

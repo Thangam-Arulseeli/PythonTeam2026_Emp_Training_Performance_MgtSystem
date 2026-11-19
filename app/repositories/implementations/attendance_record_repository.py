@@ -64,7 +64,7 @@ class AttendanceRecordRepository(AttendanceRecordRepositoryInterface):
         enrollment_query = select(
             literal(session_id),
             Enrollment.enrollment_id,
-            literal(AttendanceStatus.ABSENT),
+            literal(AttendanceStatus.PRESENT),
             literal(marked_by),
         ).where(Enrollment.batch_id == batch_id)
 
