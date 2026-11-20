@@ -26,6 +26,7 @@ class ConflictException(AppException):
 class PayloadTooLargeException(AppException):
     status_code = status.HTTP_413_CONTENT_TOO_LARGE
 
+
 class UnprocessableEntityException(AppException):
     status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
 
