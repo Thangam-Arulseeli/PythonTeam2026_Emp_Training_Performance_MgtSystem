@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int
     refresh_token_expire_days: int
 
+    # Email Configuration
+    email_sender: str | None = None
+    email_password: str | None = None
+    admin_email: str | None = None
+
     @property
     def database_url(self) -> URL:
         """Construct the PostgreSQL connection URL using asyncpg."""

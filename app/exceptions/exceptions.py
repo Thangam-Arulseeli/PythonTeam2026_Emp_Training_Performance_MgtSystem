@@ -7,16 +7,21 @@ class AppException(Exception):
 
 
 class EmployeeNotFoundException(AppException):
-    def __init__(self):
+    def __init__(self, message: str = "Employee not found or not active"):
         """Indicate that an employee was not found or is inactive."""
 
-        super().__init__("Employee not found or not active")
+        super().__init__(message)
 
 
 class EmployeeAlreadyExistsException(AppException):
     def __init__(self, field: str):
         """Indicate that an employee with the specified field already exists."""
         super().__init__(f"Employee with this {field} already exists")
+
+
+class EmployeeAlreadyActiveException(AppException):
+    def __init__(self):
+        super().__init__("Employee is already active")
 
 
 class EmployeeInactiveException(AppException):
