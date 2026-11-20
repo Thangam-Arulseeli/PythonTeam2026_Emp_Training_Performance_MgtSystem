@@ -8,10 +8,7 @@ from app.models.course_content import CourseContent
 from app.models.employee import EmployeeData
 from app.models.employee_document import EmployeeDocument
 from app.models.enrollment import Enrollment
-from app.models.performance_evaluation import (
-    PerformanceEvaluation,
-    PerformanceEvaluationStatus,
-)
+from app.models.performance_evaluation import PerformanceEvaluation
 from app.models.refresh_token import RefreshToken
 from app.models.trainer import Trainer
 from app.models.trainer_resume import TrainerResume
@@ -34,7 +31,6 @@ __all__ = [
     "EmployeeDocument",
     "Enrollment",
     "PerformanceEvaluation",
-    "PerformanceEvaluationStatus",
     "RefreshToken",
     "Trainer",
     "TrainerResume",

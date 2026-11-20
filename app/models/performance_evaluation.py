@@ -1,6 +1,5 @@
 from datetime import datetime
 from decimal import Decimal
-from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
@@ -24,11 +23,6 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class PerformanceEvaluationStatus(StrEnum):
-    DRAFT = "draft"
-    COMPLETED = "completed"
-
-
 class PerformanceEvaluation(Base):
     __tablename__ = "performance_evaluations"
 
@@ -36,10 +30,6 @@ class PerformanceEvaluation(Base):
         UniqueConstraint(
             "enrollment_id",
             name="uq_performance_evaluations_enrollment",
-        ),
-        CheckConstraint(
-            f"status IN {tuple(s.value for s in PerformanceEvaluationStatus)}",
-            name="ck_performance_evaluations_status",
         ),
         CheckConstraint(
             "assessment_score_pct >= 0 AND assessment_score_pct <= 100",
@@ -121,11 +111,6 @@ class PerformanceEvaluation(Base):
         Boolean,
         nullable=False,
         default=False,
-    )
-    status: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False,
-        default=PerformanceEvaluationStatus.DRAFT.value,
     )
     feedback: Mapped[str | None] = mapped_column(
         Text,

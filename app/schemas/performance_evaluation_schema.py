@@ -2,8 +2,6 @@ from datetime import datetime
 from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.performance_evaluation import PerformanceEvaluationStatus
-
 
 class PerformancePreviewResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -54,13 +52,9 @@ class PerformanceEvaluationCreate(BaseModel):
         decimal_places=2,
         description="Score between 0.00 and 100.00 for collaboration and teamwork",
     )
-    status: PerformanceEvaluationStatus = Field(
-        default=PerformanceEvaluationStatus.DRAFT,
-        description="'draft' to save progress or 'completed' to finalize",
-    )
     feedback: str | None = Field(
         default=None,
-        description="review remarks and recommendations",
+        description="Optional qualitative review remarks and recommendations",
     )
 
 
@@ -91,10 +85,6 @@ class PerformanceEvaluationUpdate(BaseModel):
         decimal_places=2,
         description="Score between 0.00 and 100.00",
     )
-    status: PerformanceEvaluationStatus | None = Field(
-        default=None,
-        description="'draft' or 'completed'",
-    )
     feedback: str | None = Field(
         default=None,
         description="Updated remarks and feedback",
@@ -115,7 +105,6 @@ class PerformanceEvaluationResponse(BaseModel):
     final_score: Decimal
     grade: str
     is_certified: bool
-    status: PerformanceEvaluationStatus
     feedback: str | None = None
     evaluated_at: datetime | None = None
     created_at: datetime
@@ -141,7 +130,6 @@ class PerformanceEvaluationDetailResponse(BaseModel):
     final_score: Decimal
     grade: str
     is_certified: bool
-    status: PerformanceEvaluationStatus
     feedback: str | None = None
     evaluated_at: datetime | None = None
     created_at: datetime
