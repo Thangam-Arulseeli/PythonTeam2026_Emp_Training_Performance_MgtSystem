@@ -136,16 +136,17 @@ class EmailService:
         employee_email: str,
         enrollment_id: int,
         batch_name: str,
+        course_name:str,
         old_status: str,
         new_status: str,
         remarks: str | None = None,
     ) -> bool:
 
         subject_mapping = {
-            "enrolled": "Enrollment Resumed",
-            "paused": "Enrollment Paused",
-            "cancelled": "Enrollment Cancelled",
-            "completed": "Training Completed",
+            "Enrolled": "Enrollment Resumed",
+            "Paused": "Enrollment Paused",
+            "Cancelled": "Enrollment Cancelled",
+            "Completed": "Training Completed",
         }
 
         subject = subject_mapping.get(
@@ -159,7 +160,8 @@ class EmailService:
             "ENROLLMENT DETAILS\n"
             f"Enrollment ID: {enrollment_id}\n"
             f"Employee Name: {employee_name}\n"
-            f"Batch Name: {batch_name}\n\n"
+            f"Batch Name: {batch_name}\n"
+            f"Course Name: {course_name}\n\n"
 
             "STATUS UPDATE\n"
             f"Previous Status: {old_status}\n"
@@ -184,6 +186,7 @@ class EmailService:
         employee_email: str,
         enrollment_id: int,
         batch_name: str,
+        course_name: str,
         old_status: str,
         new_status: str,
         remarks: str | None = None,
@@ -195,6 +198,7 @@ class EmailService:
             employee_email,
             enrollment_id,
             batch_name,
+            course_name,
             old_status,
             new_status,
             remarks,

@@ -305,6 +305,7 @@ class EnrollmentService(EnrollmentServiceInterface):
                 employee_email=employee.email,
                 enrollment_id=updated_enrollment.enrollment_id,
                 batch_name=batch.batch_name,
+                course_name=batch.course.course_name,
                 old_status=old_status,
                 new_status=updated_enrollment.status,
                 remarks=updated_enrollment.remarks,
