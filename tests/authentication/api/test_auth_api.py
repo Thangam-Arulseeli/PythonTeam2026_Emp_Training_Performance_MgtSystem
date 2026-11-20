@@ -1,9 +1,12 @@
+from unittest.mock import AsyncMock
+
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
 
 # regsiter endpoint
 # register sucess
-def test_register_success(client):
+def test_register_success(client:TestClient)->None:
     reponse = client.post(
         "/api/auth/register",
         json ={
@@ -18,7 +21,7 @@ def test_register_success(client):
     assert reponse.json()["message"] == "Registration successful. You can now log in."
 
 # registering with admin role - invalid
-def test_register_invalid_role(client):
+def test_register_invalid_role(client:TestClient)->None:
     response = client.post(
         "/api/auth/register",
         json={
@@ -31,7 +34,7 @@ def test_register_invalid_role(client):
     assert response.status_code == 422
 
 # registering with invalid email
-def test_register_invalid_email(client):
+def test_register_invalid_email(client:TestClient)->None:
     response = client.post(
         "/api/auth/register",
         json ={
@@ -45,7 +48,7 @@ def test_register_invalid_email(client):
     assert response.status_code == 422
 
 # regsiter with short password(min length is 8)
-def test_register_short_password(client):
+def test_register_short_password(client:TestClient)->None:
     response = client.post(
         "/api/auth/register",
         json={
@@ -58,7 +61,7 @@ def test_register_short_password(client):
     assert response.status_code == 422
 
 # register with email which doesnot exists in the trainer or employee table
-def test_register_staff_email_not_fount(client,api_service):
+def test_register_staff_email_not_fount(client:TestClient,api_service:AsyncMock)->None:
     api_service.register.side_effect = HTTPException(
         status_code=403,
         detail="Email is not registered as an active trainer"
@@ -76,7 +79,7 @@ def test_register_staff_email_not_fount(client,api_service):
     assert response.status_code ==403
 
 # register with duplicate email
-def test_register_duplicate_email(client,api_service):
+def test_register_duplicate_email(client:TestClient,api_service:AsyncMock)->None:
     api_service.register.side_effect = HTTPException(
         status_code=409,
         detail="Email is aleady registered"
@@ -93,7 +96,7 @@ def test_register_duplicate_email(client,api_service):
     assert response.status_code ==409
 
 # register with duplicate username
-def test_register_duplicate_username(client, api_service):
+def test_register_duplicate_username(client:TestClient, api_service:AsyncMock)->None:
     api_service.register.side_effect = HTTPException(
         status_code=409,
         detail="Username is already taken"
@@ -115,7 +118,7 @@ def test_register_duplicate_username(client, api_service):
 
 # login endpoint
 # login success
-def test_login_success(client,api_service):
+def test_login_success(client:TestClient,api_service:AsyncMock)->None:
     api_service.login.return_value ={
         "access_token":"test-access-token",
         "refresh_token":"test-refresh-token",
@@ -136,7 +139,7 @@ def test_login_success(client,api_service):
 
 
 # login with invalid credentials
-def test_login_invalid_credentials(client,api_service):
+def test_login_invalid_credentials(client:TestClient,api_service:AsyncMock)->None:
     api_service.login.side_effect = HTTPException(
         status_code=401,
         detail="Invalid username or password"
@@ -151,7 +154,7 @@ def test_login_invalid_credentials(client,api_service):
     assert response.status_code == 401
 
 # login with inactive user credentials
-def test_login_inactive_user(client,api_service):
+def test_login_inactive_user(client:TestClient,api_service:AsyncMock)->None:
     api_service.login.side_effect = HTTPException(
         status_code=403,
         detail="User account is inactive"
@@ -167,7 +170,7 @@ def test_login_inactive_user(client,api_service):
 
 
 # login without password
-def test_login_missing_password(client):
+def test_login_missing_password(client:TestClient)->None:
     response = client.post(
         "/api/auth/login",
         data={"username":"ramesh"}
@@ -179,7 +182,7 @@ def test_login_missing_password(client):
 
 # refresh token endpoint
 # refresh success
-def test_refresh_success(client,api_service):
+def test_refresh_success(client:TestClient,api_service:AsyncMock)->None:
     api_service.refresh_tokens.return_value = {
         "access_token" :"new-access-token",
         "refresh_token" :"new-refresh-token",
@@ -194,7 +197,7 @@ def test_refresh_success(client,api_service):
     assert response.json()["refresh_token"] == "new-refresh-token"
 
 # refresh with missing token
-def test_refresh_missing_token(client):
+def test_refresh_missing_token(client:TestClient)->None:
     response = client.post(
         "/api/auth/refresh",
         json={}
@@ -202,7 +205,7 @@ def test_refresh_missing_token(client):
     assert response.status_code == 422
 
 # refresh with invalid token
-def test_refresh_invalid_token(client,api_service):
+def test_refresh_invalid_token(client:TestClient,api_service:AsyncMock)->None:
     api_service.refresh_tokens.side_effect = HTTPException(
         status_code=401,
         detail="Invalid or expired refresh token"
@@ -215,7 +218,7 @@ def test_refresh_invalid_token(client,api_service):
 
 # logout endpoit
 # logout success
-def test_logout_success(client,api_service):
+def test_logout_success(client:TestClient)->None:
     response = client.post(
         "/api/auth/logout",
         json={"refresh_token":"a"*30}
@@ -225,7 +228,7 @@ def test_logout_success(client,api_service):
     assert response.json()["message"] == "Logged out successfully."
 
 # logout with invalid refresh_token
-def test_logout_invalid_refresh_token(client,api_service):
+def test_logout_invalid_refresh_token(client:TestClient,api_service:AsyncMock)->None:
     api_service.logout.side_effect = HTTPException(
         status_code=401,
         detail="Invalid refresh token."
@@ -237,7 +240,7 @@ def test_logout_invalid_refresh_token(client,api_service):
     assert response.status_code == 401
 
 # logout without access token
-def test_logout_without_access_token(unauthenticated_client):
+def test_logout_without_access_token(unauthenticated_client:TestClient)->None:
     response = unauthenticated_client.post(
         "/api/auth/logout",
         json={"refresh_token":"a"*30}
@@ -246,7 +249,7 @@ def test_logout_without_access_token(unauthenticated_client):
 
 # get current user profile endpoint
 # get profile success
-def test_get_profile_success(client):
+def test_get_profile_success(client:TestClient)->None:
     response = client.get("/api/auth/me")
     assert response.status_code == 200
     assert response.json()["username"] == "ramesh"
@@ -255,7 +258,7 @@ def test_get_profile_success(client):
     assert response.json()["is_active"] is True
 
 # get profile without access token
-def test_get_profile_without_access_token(unauthenticated_client):
+def test_get_profile_without_access_token(unauthenticated_client:TestClient)->None:
     response = unauthenticated_client.get("/api/auth/me")
     assert response.status_code == 401
 

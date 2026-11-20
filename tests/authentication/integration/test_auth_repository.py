@@ -1,10 +1,11 @@
+from collections.abc import AsyncIterator
 from datetime import date
 
 import pytest
 import pytest_asyncio
 from fastapi import HTTPException
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine,AsyncSession
 
 from app.core.config import get_settings
 from app.database.base import Base
@@ -19,7 +20,7 @@ from app.services.implementations.auth_service import AuthService
 
 
 @pytest_asyncio.fixture
-async def integration_db():
+async def integration_db()-> AsyncIterator[AsyncSession]:
     settings = get_settings()
     database_url = settings.database_url
 
@@ -67,7 +68,7 @@ async def integration_db():
 
 
 @pytest.fixture
-def real_auth_service():
+def real_auth_service()->AuthService:
     return AuthService(
         user_repository=UserRepository(),
         refresh_token_repository=RefreshTokenRepository()
@@ -77,9 +78,9 @@ def real_auth_service():
 # employee register,login,refresh,logout
 @pytest.mark.asyncio
 async def test_employee_registration_login_refresh_logout(
-    integration_db,
-    real_auth_service
-):
+    integration_db:AsyncSession,
+    real_auth_service:AuthService
+)->None:
     employee = EmployeeData(
         full_name="Ramesh Kumar",
         email="integration.employee@gmail.com",
@@ -146,9 +147,9 @@ async def test_employee_registration_login_refresh_logout(
 # duplicate registration
 @pytest.mark.asyncio
 async def test_duplicate_registration(
-    integration_db,
-    real_auth_service
-):
+    integration_db:AsyncSession,
+    real_auth_service:AuthService
+)->None:
     employee = EmployeeData(
         full_name="Test Employee",
         email="duplicate.employee@gmail.com",
@@ -180,7 +181,7 @@ async def test_duplicate_registration(
 
 # checking with wrong email
 @pytest.mark.asyncio
-async def test_trainer_email_must_match(integration_db):
+async def test_trainer_email_must_match(integration_db:AsyncSession)->None:
     trainer = Trainer(
         trainer_name="Test Trainer",
         dob=date(1990, 5, 15),

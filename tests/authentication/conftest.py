@@ -1,4 +1,5 @@
 import sys
+from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -7,7 +8,7 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.api.dependencies.auth import get_current_user
@@ -18,12 +19,12 @@ from app.services.implementations.auth_service import AuthService
 
 
 @pytest.fixture
-def db_session():
+def db_session()->AsyncMock:
     return AsyncMock()
 
 
 @pytest.fixture
-def auth_service():
+def auth_service()->AuthService:
     return AuthService(
         user_repository=AsyncMock(),
         refresh_token_repository=AsyncMock()
@@ -31,7 +32,7 @@ def auth_service():
 
 
 @pytest.fixture
-def fakeuser():
+def fakeuser()->SimpleNamespace:
     return SimpleNamespace(
         user_id =1,
         username ="ramesh",
@@ -43,12 +44,12 @@ def fakeuser():
     )
 
 @pytest.fixture
-def api_service():
+def api_service()->AsyncMock:
     return AsyncMock(spec=AuthService)
 
 
 @pytest.fixture
-def client(api_service, fakeuser):
+def client(api_service:AsyncMock, fakeuser:SimpleNamespace)->Iterator[TestClient]:
     app.dependency_overrides[get_auth_service] =lambda: api_service
     app.dependency_overrides[get_session] = lambda: AsyncMock()
     app.dependency_overrides[get_current_user] =lambda: fakeuser
@@ -60,7 +61,7 @@ def client(api_service, fakeuser):
 
 
 @pytest.fixture
-def unauthenticated_client(api_service):
+def unauthenticated_client(api_service:AsyncMock)->Iterator[TestClient]:
     app.dependency_overrides[get_auth_service]=api_service
     app.dependency_overrides[get_session]=lambda:AsyncMock
     app.dependency_overrides.pop(get_current_user,None)

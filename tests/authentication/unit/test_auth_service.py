@@ -1,16 +1,18 @@
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
+from typing import NoReturn
+from unittest.mock import AsyncMock
 
 import pytest
 from fastapi import HTTPException
 
 from app.schemas.auth_schema import RegisterRequest
 from app.services.implementations import auth_service as auth_module
-
+from app.services.implementations.auth_service import AuthService
 
 # register success
 @pytest.mark.asyncio
-async def test_register_success(auth_service,db_session):
+async def test_register_success(auth_service:AuthService,db_session:AsyncMock)->None:
     auth_service.user_repository.staff_email_exists.return_value=True
     auth_service.user_repository.get_by_email.return_value=None
     auth_service.user_repository.get_by_username.return_value=None
@@ -30,7 +32,7 @@ async def test_register_success(auth_service,db_session):
 
 # register with invalid role
 @pytest.mark.asyncio
-async def test_register_invalid_role(auth_service,db_session):
+async def test_register_invalid_role(auth_service:AuthService,db_session:AsyncMock)->None:
     data=SimpleNamespace(
         username ="admin",
         email ="admin@gmail.com",
@@ -46,7 +48,7 @@ async def test_register_invalid_role(auth_service,db_session):
 
 # registering user whose email not found existing trainer or employee table
 @pytest.mark.asyncio
-async def test_register_staff_email_not_found(auth_service,db_session):
+async def test_register_staff_email_not_found(auth_service:AuthService,db_session:AsyncMock)->None:
     auth_service.user_repository.staff_email_exists.return_value=False
     data=RegisterRequest(
         username="Unknown",
@@ -62,7 +64,7 @@ async def test_register_staff_email_not_found(auth_service,db_session):
 
 # registering duplicate email
 @pytest.mark.asyncio
-async def test_register_duplicate_email(auth_service,db_session):
+async def test_register_duplicate_email(auth_service:AuthService,db_session:AsyncMock)->None:
     auth_service.user_repository.staff_email_exists.return_value=True
     auth_service.user_repository.get_by_email.return_value = object()
 
@@ -80,7 +82,7 @@ async def test_register_duplicate_email(auth_service,db_session):
 
 # login success
 @pytest.mark.asyncio
-async def test_login_success(auth_service,db_session,monkeypatch):
+async def test_login_success(auth_service:AuthService,db_session:AsyncMock,monkeypatch:pytest.MonkeyPatch)->None:
     user = SimpleNamespace(
         user_id=1,
         username="ramesh",
@@ -111,7 +113,7 @@ async def test_login_success(auth_service,db_session,monkeypatch):
 
 # login with invalid username
 @pytest.mark.asyncio
-async def test_login_unknown_username(auth_service,db_session):
+async def test_login_unknown_username(auth_service:AuthService,db_session:AsyncMock)->None:
     auth_service.user_repository.get_by_username.return_value = None
     with pytest.raises(HTTPException) as err:
         await auth_service.login(db_session,"unknown","password123")
@@ -121,7 +123,7 @@ async def test_login_unknown_username(auth_service,db_session):
 
 # login with inactive user
 @pytest.mark.asyncio
-async def test_login_inactive_user(auth_service,db_session,monkeypatch):
+async def test_login_inactive_user(auth_service:AuthService,db_session:AsyncMock,monkeypatch:pytest.MonkeyPatch)->None:
     user = SimpleNamespace(
         user_id =1,
         username="ramesh",
@@ -137,12 +139,12 @@ async def test_login_inactive_user(auth_service,db_session,monkeypatch):
     assert err.value.status_code == 403
 
 # raise error when decode_token function called
-def mock_invalid_decode_token(token):
+def mock_invalid_decode_token(token:str)->NoReturn:
     raise ValueError("Invalid token")
 
 # refresh invalid token
 @pytest.mark.asyncio
-async def test_refresh_invalid_token(auth_service,db_session,monkeypatch):
+async def test_refresh_invalid_token(auth_service:AuthService,db_session:AsyncMock,monkeypatch:pytest.MonkeyPatch)->None:
     monkeypatch.setattr(
         auth_module,
         "decode_token",
@@ -156,7 +158,7 @@ async def test_refresh_invalid_token(auth_service,db_session,monkeypatch):
 
 # logout using invalid token
 @pytest.mark.asyncio
-async def test_logout_invalid_token(auth_service,db_session,monkeypatch):
+async def test_logout_invalid_token(auth_service:AuthService,db_session:AsyncMock,monkeypatch:pytest.MonkeyPatch)->None:
     monkeypatch.setattr(
         auth_module,
         "decode_token",
