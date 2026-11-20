@@ -1,4 +1,3 @@
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,17 +7,14 @@ from app.repositories.interfaces.employee_document_interface import (
 )
 
 
-class EmployeeDocumentRepositoryImpl( EmployeeDocumentRepositoryInterface ):
-
+class EmployeeDocumentRepositoryImpl(EmployeeDocumentRepositoryInterface):
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    # UPLOAD PROFILE PICTURE OR RESUME RECORDS OR BOTH 
+    # UPLOAD PROFILE PICTURE OR RESUME RECORDS OR BOTH
     async def create_documents(
-        self,
-        documents: list[EmployeeDocument]
+        self, documents: list[EmployeeDocument]
     ) -> list[EmployeeDocument]:
-
         """upload either profile pic or the resume or both"""
 
         self.db.add_all(documents)
@@ -29,17 +25,13 @@ class EmployeeDocumentRepositoryImpl( EmployeeDocumentRepositoryInterface ):
 
     # GET EMPLOYEE DOCUMENTS
     async def get_documents_by_employee_id(
-        self,
-        employee_id: int
+        self, employee_id: int
     ) -> list[EmployeeDocument]:
-
         """Retrieve the uploaded documents of an employee."""
 
         statement = (
             select(EmployeeDocument)
-            .where(
-                EmployeeDocument.employee_id == employee_id
-            )
+            .where(EmployeeDocument.employee_id == employee_id)
             .order_by(EmployeeDocument.document_id)
         )
 

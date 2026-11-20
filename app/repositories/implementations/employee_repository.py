@@ -1,4 +1,3 @@
-
 from typing import Any
 
 from sqlalchemy import select
@@ -11,24 +10,20 @@ from app.repositories.interfaces.employee_repository_interface import (
 
 
 class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
-
     def __init__(self, db: AsyncSession):
         self.db = db
 
     # CREATE EMPLOYEE
-    async def create_employee( self, employee: EmployeeData) -> EmployeeData:
+    async def create_employee(self, employee: EmployeeData) -> EmployeeData:
 
         self.db.add(employee)
         await self.db.flush()
 
         return employee
 
-
     # GET ALL ACTIVE EMPLOYEES
     async def get_all_employees(
-        self,
-        skip: int = 0,
-        limit: int = 10
+        self, skip: int = 0, limit: int = 10
     ) -> list[EmployeeData]:
 
         statement = (
@@ -43,13 +38,10 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return list(result.scalars().all())
 
-
     # GET ALL INACTIVE EMPLOYEES
     async def get_all_employees_inactive(
-            self,
-            skip: int = 0,
-            limit: int = 10
-        ) -> list[EmployeeData]:
+        self, skip: int = 0, limit: int = 10
+    ) -> list[EmployeeData]:
 
         statement = (
             select(EmployeeData)
@@ -63,28 +55,20 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return list(result.scalars().all())
 
-
     # GET EMPLOYEE BY ID
-    async def get_employee_by_id( self, employee_id: int) -> EmployeeData | None:
+    async def get_employee_by_id(self, employee_id: int) -> EmployeeData | None:
 
-        statement = (
-            select(EmployeeData)
-            .where(
-                EmployeeData.employee_id == employee_id,
-                EmployeeData.is_active.is_(True)
-            )
+        statement = select(EmployeeData).where(
+            EmployeeData.employee_id == employee_id, EmployeeData.is_active.is_(True)
         )
 
         result = await self.db.execute(statement)
 
         return result.scalar_one_or_none()
 
-
     # PATCH EMPLOYEE
     async def update_employee(
-        self,
-        employee: EmployeeData,
-        update_data: dict[str, Any]
+        self, employee: EmployeeData, update_data: dict[str, Any]
     ) -> EmployeeData:
 
         for field, value in update_data.items():
@@ -94,28 +78,30 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
 
         return employee
 
-
     # SOFT DELETE EMPLOYEE
-    async def soft_delete_employee(self,employee: EmployeeData) -> EmployeeData:
+    async def soft_delete_employee(self, employee: EmployeeData) -> EmployeeData:
 
         employee.is_active = False
         await self.db.flush()
 
         return employee
 
-        
     # REACTIVATE INACTIVE EMPLOYEE
-    async def reactivate_employee( self,employee: EmployeeData,) -> EmployeeData:
-        
+    async def reactivate_employee(
+        self,
+        employee: EmployeeData,
+    ) -> EmployeeData:
+
         employee.is_active = True
         await self.db.flush()
 
         return employee
 
-
-    #GET ALL INACTIVE EMPLOYEES BY ID 
-    async def get_inactive_employee_by_id( self, employee_id: int,) -> EmployeeData | None:
-       
+    # GET ALL INACTIVE EMPLOYEES BY ID
+    async def get_inactive_employee_by_id(
+        self,
+        employee_id: int,
+    ) -> EmployeeData | None:
 
         result = await self.db.execute(
             select(EmployeeData).where(
@@ -124,4 +110,16 @@ class EmployeeRepositoryImpl(EmployeeRepositoryInterface):
             )
         )
 
+        return result.scalar_one_or_none()
+
+    #get the employee by email id 
+    async def get_employee_by_email(self, email: str) -> EmployeeData | None:
+ 
+        statement = select(EmployeeData).where(
+            EmployeeData.email == email,
+            EmployeeData.is_active.is_(True),
+        )
+ 
+        result = await self.db.execute(statement)
+ 
         return result.scalar_one_or_none()
