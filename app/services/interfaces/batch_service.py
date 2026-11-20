@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.schemas.batchSchema import (
     BatchCreate,
+    BatchEndDateUpdate,
     BatchListResponse,
     BatchResponse,
     BatchStatus,
@@ -29,6 +30,11 @@ class BatchService(ABC):
     @abstractmethod
     async def update_batch(
         self, batch_id: int, payload: BatchUpdate
+    ) -> BatchResponse: ...
+
+    @abstractmethod
+    async def update_batch_end_date(
+        self, batch_id: int, payload: BatchEndDateUpdate
     ) -> BatchResponse: ...
 
     @abstractmethod
