@@ -109,7 +109,7 @@ async def get_enrollments_by_employee(
     "/{enrollment_id}/status",
     response_model=EnrollmentResponse,
     status_code=status.HTTP_200_OK,
-    description="Status value includes 'enrolled','paused','cancelled','completed'"
+    description="Status value includes 'Enrolled','Paused','Cancelled','Completed'"
 )
 async def update_enrollment_status(
     enrollment_id: int,

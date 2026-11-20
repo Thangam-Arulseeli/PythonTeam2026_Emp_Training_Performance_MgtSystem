@@ -147,7 +147,7 @@ class EnrollmentService(EnrollmentServiceInterface):
             {
                 "employee_id": payload.employee_id,
                 "batch_id": payload.batch_id,
-                "status": "enrolled",
+                "status": "Enrolled",
             }
         )
 
@@ -163,7 +163,14 @@ class EnrollmentService(EnrollmentServiceInterface):
             employee_name=employee.full_name,
             employee_email=employee.email,
             enrollment_id=enrollment.enrollment_id,
-            batch_name=batch.batch_name
+            enrollment_date=enrollment.enrollment_date,
+            course_name=batch.course.course_name,
+            batch_name=batch.batch_name,
+            start_date=batch.start_date,
+            end_date=batch.end_date,
+            duration_value=batch.course.duration_value,
+            duration_unit=batch.course.duration_unit,
+            trainer_name=batch.trainer.trainer_name
         )
 
         return EnrollmentResponse.model_validate(enrollment)
@@ -214,8 +221,14 @@ class EnrollmentService(EnrollmentServiceInterface):
             trainer_id=trainer_id,
         )
 
+        enrollment_responses = [
+            EnrollmentResponse.model_validate(enrollment)
+            for enrollment in enrollments
+        ]
+
+
         return EnrollmentListResponse(
-            items=enrollments,
+            items=enrollment_responses,
             total=total,
             page=page,
             size=size,
@@ -254,18 +267,18 @@ class EnrollmentService(EnrollmentServiceInterface):
                 )
 
         # Prevent updating terminal statuses
-        if enrollment.status in ["cancelled", "completed"]:
+        if enrollment.status in ["Cancelled", "Completed"]:
             raise ConflictException(f"Cannot update an enrollment with status '{enrollment.status}'" )
 
         # Validate remarks
-        if payload.status in ["paused", "cancelled"]:
+        if payload.status in ["Paused", "Cancelled"]:
             if not payload.remarks:
                 raise ConflictException(
                     "Remarks are required when pausing or cancelling enrollment"
                 )
 
         # Validate completion
-        if payload.status == "completed":
+        if payload.status == "Completed":
             if batch.status != "completed":
                 raise ConflictException("Enrollment can be completed only after batch completion")
 
@@ -297,7 +310,7 @@ class EnrollmentService(EnrollmentServiceInterface):
                 remarks=updated_enrollment.remarks,
             )
 
-        return updated_enrollment
+        return EnrollmentResponse.model_validate(updated_enrollment)
 
 
     # Get Enrollment by employee_id
@@ -325,6 +338,7 @@ class EnrollmentService(EnrollmentServiceInterface):
             EnrollmentResponse.model_validate(enrollment)
             for enrollment in enrollments
         ]
+
 
     async def get_enrollments_by_batch(
         self, 
