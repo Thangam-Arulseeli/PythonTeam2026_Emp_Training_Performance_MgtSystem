@@ -10,7 +10,7 @@ from app.schemas.batchSchema import BatchResponse, BatchListResponse
 pytestmark = [pytest.mark.api, pytest.mark.asyncio]
 ROOT = '/batches'
 PAYLOAD = {'batch_name': 'Morning Class', 'course_id': 2, 'trainer_id': 3,
-           'start_date': '2026-01-01', 'end_date': '2026-02-01'}
+           'start_date': '2026-01-01'}
 
 @pytest.fixture
 def service():
@@ -23,7 +23,7 @@ def service():
 def batch():
     return BatchResponse(id=1, batch_name='Morning Class', course_id=2,
                          trainer_id=3, start_date=date(2026, 1, 1),
-                         end_date=date(2026, 2, 1), status='not_completed', is_active=True)
+                         end_date=date(2026, 2, 1), status='Not Completed', is_active=True)
 
 
 def listing(batch):
@@ -38,14 +38,14 @@ async def test_create_success(client, service, batch):
 
 
 async def test_create_invalid_payload(client, service):
-    r = await client.post(ROOT + '/', json={**PAYLOAD, 'end_date': '2025-01-01'})
+    r = await client.post(ROOT + '/', json={**PAYLOAD, 'invalid_field': 'value'})
     assert r.status_code == 422
     service.create_batch.assert_not_awaited()
 
 
 async def test_list_success_and_filters(client, service, batch):
     service.list_batches.return_value = listing(batch)
-    r = await client.get(ROOT + '/?page=2&size=5&status=completed&is_active=false')
+    r = await client.get(ROOT + '/?page=2&size=5&status=Completed&is_active=false')
     assert r.status_code == 200 and r.json()['total'] == 1
     service.list_batches.assert_awaited_once()
     assert service.list_batches.await_args.kwargs['page'] == 2
@@ -107,7 +107,7 @@ async def test_update_invalid_payload(client, service):
 
 async def test_update_status_success(client, service, batch):
     service.update_batch_status.return_value = batch
-    r = await client.patch(ROOT + '/1/status', json={'status': 'completed'})
+    r = await client.patch(ROOT + '/1/status', json={'status': 'Completed'})
     assert r.status_code == 200
     service.update_batch_status.assert_awaited_once()
 
@@ -141,7 +141,7 @@ async def test_delete_missing(client, service):
 @pytest.mark.parametrize('method,path,json_data', [
     ('post', '/batches/', PAYLOAD),
     ('put', '/batches/1', {'batch_name': 'Updated'}),
-    ('patch', '/batches/1/status', {'status': 'completed'}),
+    ('patch', '/batches/1/status', {'status': 'Completed'}),
     ('patch', '/batches/1/activate', None),
     ('delete', '/batches/1', None),
     ('get', '/batches/trainer/1', None),

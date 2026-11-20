@@ -13,6 +13,7 @@ import pytest
 import pytest_asyncio
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
@@ -52,6 +53,46 @@ async def test_engine() -> AsyncIterator[AsyncEngine]:
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            # create_all() creates missing tables but does not update existing
+            # tables. Keep the dedicated test database aligned with the current
+            # batch model when it was created by an older test run.
+            await conn.execute(
+                text(
+                    "ALTER TABLE batches "
+                    "ADD COLUMN IF NOT EXISTS end_date_remark TEXT"
+                )
+            )
+            await conn.execute(
+                text("ALTER TABLE batches DROP CONSTRAINT IF EXISTS ck_batch_status")
+            )
+            await conn.execute(
+                text(
+                    "UPDATE batches SET status = CASE status "
+                    "WHEN 'completed' THEN 'Completed' "
+                    "WHEN 'not_completed' THEN 'Not Completed' ELSE status END"
+                )
+            )
+            await conn.execute(
+                text(
+                    "ALTER TABLE batches ALTER COLUMN status "
+                    "SET DEFAULT 'Not Completed'"
+                )
+            )
+            await conn.execute(
+                text(
+                    "ALTER TABLE batches ADD CONSTRAINT ck_batch_status "
+                    "CHECK (status IN ('Completed', 'Not Completed'))"
+                )
+            )
+            await conn.execute(
+                text("ALTER TABLE batches DROP CONSTRAINT IF EXISTS ck_batch_dates")
+            )
+            await conn.execute(
+                text(
+                    "ALTER TABLE batches ADD CONSTRAINT ck_batch_dates "
+                    "CHECK (end_date >= start_date)"
+                )
+            )
         yield engine
     finally:
         await engine.dispose()

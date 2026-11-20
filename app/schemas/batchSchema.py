@@ -5,10 +5,11 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    computed_field,
     field_validator,
 )
 
-BatchStatus = Literal["completed", "not_completed"]
+BatchStatus = Literal["Completed", "Not Completed"]
 
 
 class BatchCreate(BaseModel):
@@ -63,6 +64,12 @@ class BatchResponse(BaseModel):
     end_date_remark: str | None = None
     status: BatchStatus
     is_active: bool
+
+    @computed_field
+    @property
+    def is_active_label(self) -> str:
+        """Return a capitalized display label without changing the Boolean value."""
+        return "True" if self.is_active else "False"
 
 
 class BatchStatusUpdate(BaseModel):

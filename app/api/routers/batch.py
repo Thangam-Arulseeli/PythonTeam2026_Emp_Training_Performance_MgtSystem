@@ -121,7 +121,7 @@ async def update_batch_status(
     current_user: User = Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchResponse:
-    """Set a batch to completed or not_completed; admin access is required."""
+    """Set a batch to Completed or Not Completed; admin access is required."""
     return await service.update_batch_status(batch_id, payload)
 
 

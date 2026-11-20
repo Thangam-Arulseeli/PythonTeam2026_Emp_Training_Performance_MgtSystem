@@ -16,7 +16,7 @@ class Batch(Base):
     __table_args__ = (
         CheckConstraint("end_date >= start_date", name="ck_batch_dates"),
         CheckConstraint(
-            "status IN ('completed', 'not_completed')", name="ck_batch_status"
+            "status IN ('Completed', 'Not Completed')", name="ck_batch_status"
         ),
         Index("ix_batches_course_id", "course_id"),
         Index("ix_batches_trainer_id", "trainer_id"),
@@ -36,8 +36,8 @@ class Batch(Base):
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
-        default="not_completed",
-        server_default="not_completed",
+        default="Not Completed",
+        server_default="Not Completed",
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="true"
