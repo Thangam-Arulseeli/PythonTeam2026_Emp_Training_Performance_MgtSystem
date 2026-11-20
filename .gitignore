@@ -31,11 +31,6 @@ uploads/
 # Alembic configuration and migrations
 alembic.ini
 alembic/
-!alembic/
-alembic/*
-!alembic/versions/
-alembic/versions/*
-!alembic/versions/b72a91fc3d40_batch_end_date_remark.py
 
 pyproject.toml
 .ruff_cache/
