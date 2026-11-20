@@ -38,7 +38,8 @@ class AssessmentCreate(BaseModel):
         description=f"Assement types: {tuple(typ.value for typ in AssessmentType)}"
     )
     scheduled_date_time: datetime = Field(
-        description="Assessment schedule date (must be within the duration of corresponding batch) "
+        description="Assessment schedule date (must be within the duration of corresponding batch)",
+        examples=["2026-11-25 10:00:00"],
     )
     total_mark: Decimal = Field(
         description="Total marks for the assessment",
@@ -54,7 +55,7 @@ class AssessmentCreate(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_mark(self):
+    def validate_mark(self) -> "AssessmentCreate":
         if self.pass_mark > self.total_mark:
             raise ValueError("pass mark cannot be greater than total mark")
 
@@ -65,7 +66,9 @@ class AssessmentPatch(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     batch_id: int | None = Field(description="Active Batch's ID", default=None)
-    title: str | None = Field(description="Title for the Assessment", min_length=5)
+    title: str | None = Field(
+        description="Title for the Assessment", min_length=5, default=None
+    )
     description: str | None = Field(
         description="Description about the Assessment", min_length=5, default=None
     )
@@ -74,8 +77,9 @@ class AssessmentPatch(BaseModel):
         default=None,
     )
     scheduled_date_time: datetime | None = Field(
-        description="Assessment schedule date (must be within the duration of corresponding batch) ",
+        description="Assessment schedule date (must be within the duration of corresponding batch)",
         default=None,
+        examples=["2026-11-25 10:00:00"],
     )
     total_mark: Decimal | None = Field(
         description="Total marks for the assessment",

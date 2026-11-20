@@ -1,3 +1,5 @@
+from typing import Any
+
 from app.exceptions.custom_exceptions import BadRequestException, NotFoundException
 from app.models.assessment import Assessment
 from app.repositories.interfaces.assessment_interface import AssessmentInterface
@@ -20,7 +22,7 @@ class AssessmentService(AssessmentServiceInterface):
         self.assessment_repository = assessment_repository
         self.batch_repository = batch_repository
 
-    async def get_assessment_by_id(self, assessment_id) -> Assessment | None:
+    async def get_assessment_by_id(self, assessment_id: int) -> Assessment:
 
         assessment = await self.assessment_repository.get_assessment_by_id(
             assessment_id
@@ -141,5 +143,5 @@ class AssessmentService(AssessmentServiceInterface):
 
     async def get_all_assessments(
         self, filter_params: AssessmentFilterParams
-    ) -> list[Assessment]:
+    ) -> dict[str, Any]:
         return await self.assessment_repository.get_all_assessments(filter_params)

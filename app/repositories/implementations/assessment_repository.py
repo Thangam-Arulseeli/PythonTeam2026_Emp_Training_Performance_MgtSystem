@@ -85,7 +85,9 @@ class AssessmentRepository(AssessmentInterface):
 
         return assessment
 
-    async def update_assessment_activation(self, assessment: Assessment, status: bool):
+    async def update_assessment_activation(
+        self, assessment: Assessment, status: bool
+    ) -> Assessment:
         assessment.is_active = status
         await self.db.commit()
         await self.db.refresh(assessment)
