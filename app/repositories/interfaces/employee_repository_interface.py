@@ -45,4 +45,3 @@ class EmployeeRepositoryInterface(ABC):
     @abstractmethod
     async def get_employee_by_email(self, email: str) -> EmployeeData | None:
         """display all the active employee using employee email"""
-        pass

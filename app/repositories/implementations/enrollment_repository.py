@@ -12,6 +12,17 @@ class EnrollmentRepository(EnrollmentInterface):
     def __init__(self, db:AsyncSession)-> None:
         self.db = db
 
+    # Method to find is the employee already enrolled in a batch or not
+    async def count_active_by_employee(self, employee_id:int)-> int:    
+        query = select(
+            func.count(Enrollment.enrollment_id)).where(
+                Enrollment.employee_id ==employee_id,
+                Enrollment.status.in_(["enrolled","paused"])
+            )
+        result = await self.db.execute(query)
+        return result.scalar_one()
+
+
     # Method to create enrollment
     async def create(self, data: dict[str, object]) -> Enrollment:
         enrollment = Enrollment(**data)
@@ -94,6 +105,24 @@ class EnrollmentRepository(EnrollmentInterface):
         await self.db.commit()
         await self.db.refresh(enrollment)
         return enrollment
+
+
+    # to get enrollment by batch id
+    async def get_by_batch_id(
+        self, 
+        batch_id : int , 
+        trainer_id : int | None = None
+    )->list[Enrollment]:
+        query = select(Enrollment).where(Enrollment.batch_id==batch_id)
+
+        if trainer_id is not None:
+            query = query.join(Batch,Enrollment.batch_id == Batch.id).where(
+                Batch.trainer_id == trainer_id
+            )
+
+        query = query.order_by(Enrollment.enrollment_date)
+        result = await self.db.execute(query)
+        return list(result.scalars().all())
     
 
 

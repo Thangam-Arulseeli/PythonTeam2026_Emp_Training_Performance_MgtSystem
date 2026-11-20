@@ -1,39 +1,41 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import func, select
-
 from app.models.enrollment import Enrollment
-from app.models.batch import Batch
 
 
 class EnrollmentInterface(ABC):
     @abstractmethod
-    async def create(self, data:dict[str, object]) -> Enrollment:
+    async def count_active_by_employee(self, employee_id: int) -> int:
         pass
 
     @abstractmethod
-    async def get_by_id(self, enrollment_id:int) -> Enrollment | None:
+    async def create(self, data: dict[str, object]) -> Enrollment:
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, enrollment_id: int) -> Enrollment | None:
         pass
 
     @abstractmethod
     async def get_all(
         self,
-        skip:int ,
-        limit:int,
-        status:str|None=None,
-        trainer_id: int |None=None
-    )-> tuple[list[Enrollment],int]:
+        skip: int,
+        limit: int,
+        status: str | None = None,
+        trainer_id: int | None = None,
+    ) -> tuple[list[Enrollment], int]:
         pass
 
     @abstractmethod
     async def get_by_employee_id(
-        self,
-        employee_id:int,
-        trainer_id:int | None = None
-    )->list[Enrollment]:
+        self, employee_id: int, trainer_id: int | None = None
+    ) -> list[Enrollment]:
         pass
 
     @abstractmethod
-    async def update(self, enrollment: Enrollment)-> Enrollment:
+    async def update(self, enrollment: Enrollment) -> Enrollment:
         pass
 
+    @abstractmethod
+    async def get_by_batch_id(self,batch_id : int, trainer_id:int | None = None)-> list[Enrollment]:
+        pass

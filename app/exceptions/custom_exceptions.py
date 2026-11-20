@@ -28,4 +28,7 @@ class PayloadTooLargeException(AppException):
 
 
 class UnprocessableEntityException(AppException):
-    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+class NotAuthorizedException(AppException) :
+    status_code = status.HTTP_403_FORBIDDEN
