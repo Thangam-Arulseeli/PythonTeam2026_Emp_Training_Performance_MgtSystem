@@ -4,20 +4,20 @@ from typing import Literal
 from pydantic import (
     BaseModel,
     ConfigDict,
-    ValidationInfo,
+    Field,
     field_validator,
-    model_validator,
 )
 
 BatchStatus = Literal["completed", "not_completed"]
 
 
 class BatchCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     batch_name: str
     course_id: int
     trainer_id: int
     start_date: date
-    end_date: date
 
     @field_validator("batch_name")
     @classmethod
@@ -29,23 +29,13 @@ class BatchCreate(BaseModel):
 
         return value
 
-    @field_validator("end_date")
-    @classmethod
-    def validate_end_date(cls, value: date, info: ValidationInfo) -> date:
-        start_date = info.data.get("start_date")
-
-        if start_date and value <= start_date:
-            raise ValueError("End date must be after start date")
-
-        return value
-
 
 class BatchUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     batch_name: str | None = None
     course_id: int | None = None
     trainer_id: int | None = None
-    start_date: date | None = None
-    end_date: date | None = None
 
     @field_validator("batch_name")
     @classmethod
@@ -60,12 +50,6 @@ class BatchUpdate(BaseModel):
 
         return value
 
-    @model_validator(mode="after")
-    def validate_dates(self) -> "BatchUpdate":
-        if self.start_date and self.end_date and self.end_date <= self.start_date:
-            raise ValueError("End date must be after start date")
-        return self
-
 
 class BatchResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -76,12 +60,26 @@ class BatchResponse(BaseModel):
     trainer_id: int
     start_date: date
     end_date: date
+    end_date_remark: str | None = None
     status: BatchStatus
     is_active: bool
 
 
 class BatchStatusUpdate(BaseModel):
     status: BatchStatus
+
+
+class BatchEndDateUpdate(BaseModel):
+    end_date: date
+    remark: str = Field(min_length=1, max_length=1000)
+
+    @field_validator("remark")
+    @classmethod
+    def validate_remark(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Remark cannot be empty")
+        return value
 
 
 class BatchListResponse(BaseModel):

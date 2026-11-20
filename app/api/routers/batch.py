@@ -5,6 +5,7 @@ from app.api.dependencies.batch_dependencies import get_batch_service
 from app.models.user import User
 from app.schemas.batchSchema import (
     BatchCreate,
+    BatchEndDateUpdate,
     BatchListResponse,
     BatchResponse,
     BatchStatus,
@@ -137,6 +138,21 @@ async def update_batch(
 ) -> BatchResponse:
     """Update the supplied batch fields; access is restricted to administrators."""
     return await service.update_batch(batch_id, payload)
+
+
+@router.patch(
+    "/{batch_id}/end-date",
+    response_model=BatchResponse,
+    summary="Change a batch end date with a remark",
+)
+async def update_batch_end_date(
+    batch_id: int,
+    payload: BatchEndDateUpdate,
+    current_user: User = Depends(require_roles("admin")),
+    service: BatchService = Depends(get_batch_service),
+) -> BatchResponse:
+    """Change the end date with a required remark; admin access is required."""
+    return await service.update_batch_end_date(batch_id, payload)
 
 
 @router.delete(

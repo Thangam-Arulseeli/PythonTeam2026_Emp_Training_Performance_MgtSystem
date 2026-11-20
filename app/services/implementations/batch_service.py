@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from app.exceptions import (
     NotFoundException,
@@ -9,6 +9,7 @@ from app.repositories.interfaces.batch_interface import BatchInterface
 from app.repositories.interfaces.course_interface import CourseInterface
 from app.schemas.batchSchema import (
     BatchCreate,
+    BatchEndDateUpdate,
     BatchListResponse,
     BatchResponse,
     BatchStatus,
@@ -16,6 +17,7 @@ from app.schemas.batchSchema import (
     BatchUpdate,
 )
 from app.services.interfaces.batch_service import BatchService
+from app.utils.duration import DurationUnit, duration_to_standard_units
 from app.utils.logger import logger
 
 
@@ -59,9 +61,22 @@ class BatchServiceImpl(BatchService):
 
     @staticmethod
     def validate_dates(start_date: date, end_date: date) -> None:
-        """Require the batch end date to be later than its start date."""
-        if end_date <= start_date:
-            raise UnprocessableEntityException("End date must be after start date")
+        """Require the batch end date to be on or after its start date."""
+        if end_date < start_date:
+            raise UnprocessableEntityException(
+                "End date must be on or after start date"
+            )
+
+    @staticmethod
+    def calculate_end_date(
+        start_date: date, duration_value: int, duration_unit: str
+    ) -> date:
+        """Calculate a date-only end date from the course's stated duration."""
+        duration_hours = duration_to_standard_units(
+            duration_value, DurationUnit(duration_unit)
+        )
+        duration_days = duration_hours // 24
+        return start_date + timedelta(days=duration_days)
 
     @staticmethod
     def format_batch_list(
@@ -94,10 +109,21 @@ class BatchServiceImpl(BatchService):
 
     async def create_batch(self, payload: BatchCreate) -> BatchResponse:
         """Validate relationships and dates, then create and return a batch."""
-        await self.validate_relations(payload.course_id, payload.trainer_id)
-        self.validate_dates(payload.start_date, payload.end_date)
+        course = await self.course_repo.get_by_id(payload.course_id)
+        if course is None:
+            logger.warning(
+                "Relation validation failed: Course not found id=%s", payload.course_id
+            )
+            raise NotFoundException("Course not found")
+        await self.validate_relations(trainer_id=payload.trainer_id)
 
-        batch = await self.batch_repo.create(payload.model_dump())
+        end_date = self.calculate_end_date(
+            payload.start_date, course.duration_value, course.duration_unit
+        )
+
+        batch_data = payload.model_dump()
+        batch_data["end_date"] = end_date
+        batch = await self.batch_repo.create(batch_data)
         logger.info(
             "Batch created successfully: id=%s, name='%s'", batch.id, batch.batch_name
         )
@@ -117,13 +143,7 @@ class BatchServiceImpl(BatchService):
         if not data:
             raise UnprocessableEntityException("No fields provided for update")
 
-        for field in (
-            "batch_name",
-            "course_id",
-            "trainer_id",
-            "start_date",
-            "end_date",
-        ):
+        for field in ("batch_name", "course_id", "trainer_id"):
             if field in data and data[field] is None:
                 raise UnprocessableEntityException(f"{field} cannot be null")
 
@@ -132,13 +152,21 @@ class BatchServiceImpl(BatchService):
             data.get("trainer_id"),
         )
 
-        start_date = data.get("start_date", batch.start_date)
-        end_date = data.get("end_date", batch.end_date)
-
-        self.validate_dates(start_date, end_date)
-
         updated_batch = await self.batch_repo.update(batch, data)
         logger.info("Batch updated successfully: id=%s", batch_id)
+        return BatchResponse.model_validate(updated_batch)
+
+    async def update_batch_end_date(
+        self, batch_id: int, payload: BatchEndDateUpdate
+    ) -> BatchResponse:
+        """Change a batch end date and save the required reason for the change."""
+        batch = await self.get_batch_or_404(batch_id)
+        self.validate_dates(batch.start_date, payload.end_date)
+        updated_batch = await self.batch_repo.update(
+            batch,
+            {"end_date": payload.end_date, "end_date_remark": payload.remark},
+        )
+        logger.info("Batch end date updated: id=%s", batch_id)
         return BatchResponse.model_validate(updated_batch)
 
     async def update_batch_status(

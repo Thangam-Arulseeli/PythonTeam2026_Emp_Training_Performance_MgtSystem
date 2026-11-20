@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Batch(Base):
     __tablename__ = "batches"
     __table_args__ = (
-        CheckConstraint("end_date > start_date", name="ck_batch_dates"),
+        CheckConstraint("end_date >= start_date", name="ck_batch_dates"),
         CheckConstraint(
             "status IN ('completed', 'not_completed')", name="ck_batch_status"
         ),
@@ -32,6 +32,7 @@ class Batch(Base):
     )
     start_date: Mapped[date] = mapped_column(Date)
     end_date: Mapped[date] = mapped_column(Date)
+    end_date_remark: Mapped[str | None] = mapped_column(nullable=True)
     status: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
