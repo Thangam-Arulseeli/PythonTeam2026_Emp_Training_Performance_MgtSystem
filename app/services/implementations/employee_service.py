@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exceptions.exceptions import (
+    EmployeeAlreadyActiveException,
     EmployeeAlreadyExistsException,
     EmployeeNotFoundException,
     InvalidEmployeeDataException,
@@ -35,7 +36,7 @@ class EmployeeServiceImpl(EmployeeServiceInterface):
     ) -> EmployeeData:
         """create a new employee"""
 
-        employee = EmployeeData(**data.model_dump())
+        employee = EmployeeData(**data.model_dump(), role="employee")
 
         try:
             employee = await self.repository.create_employee(employee)
@@ -107,7 +108,7 @@ class EmployeeServiceImpl(EmployeeServiceInterface):
         update_data = data.model_dump(exclude_unset=True)
 
         # Define mandatory employee fields that cannot be set to null.
-        required_fields = {"full_name", "email", "department", "role"}
+        required_fields = {"full_name", "email", "department"}
 
         # Validate that any provided mandatory field is not null.
         for field in required_fields:
@@ -184,7 +185,10 @@ class EmployeeServiceImpl(EmployeeServiceInterface):
         employee = await self.repository.get_inactive_employee_by_id(employee_id)
 
         if employee is None:
-            raise EmployeeNotFoundException()
+            active_employee = await self.repository.get_employee_by_id(employee_id)
+            if active_employee is not None:
+                raise EmployeeAlreadyActiveException()
+            raise EmployeeNotFoundException("Employee not found")
 
         try:
             # Find matching user table using email and role

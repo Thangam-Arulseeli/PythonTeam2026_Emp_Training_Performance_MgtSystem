@@ -11,7 +11,7 @@ from app.api.dependencies.course_dependencies import (
     get_course_repository,
     get_course_service,
 )
-from app.api.dependencies.service_dependencies import (
+from app.api.dependencies.auth_service_dependencies import (
     get_auth_service,
 )
 
