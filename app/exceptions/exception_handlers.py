@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.exceptions.exceptions import (
+    EmployeeAlreadyActiveException,
     EmployeeAlreadyExistsException,
     EmployeeInactiveException,
     EmployeeNotFoundException,
@@ -20,6 +21,12 @@ def register_exception_handlers(app: FastAPI):
     @app.exception_handler(EmployeeAlreadyExistsException)
     async def employee_exists_handler(
         request: Request, exc: EmployeeAlreadyExistsException
+    ):
+        return JSONResponse(status_code=409, content={"detail": exc.message})
+
+    @app.exception_handler(EmployeeAlreadyActiveException)
+    async def employee_already_active_handler(
+        request: Request, exc: EmployeeAlreadyActiveException
     ):
         return JSONResponse(status_code=409, content={"detail": exc.message})
 
