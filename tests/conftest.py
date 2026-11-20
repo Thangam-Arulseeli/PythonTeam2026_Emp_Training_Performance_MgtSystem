@@ -84,7 +84,6 @@ def sample_employee_data():
         'full_name': 'Test Employee',
         'email': f'employee_{uuid4().hex[:16]}@example.com',
         'phone': None,
-        'role': 'employee',
         'department': 'Engineering',
         'joining_date': '2024-06-01',
     }

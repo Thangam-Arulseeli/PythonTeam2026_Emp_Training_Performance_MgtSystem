@@ -9,6 +9,7 @@ async def test_create_success(client, sample_employee_data):
     r = await client.post(BASE + "/", json=sample_employee_data)
     assert r.status_code == 201, r.text
     assert r.json()["email"] == sample_employee_data["email"]
+    assert r.json()["role"] == "employee"
 
 
 @pytest.mark.asyncio
@@ -51,14 +52,14 @@ async def test_get_employee_missing(client):
 
 @pytest.mark.asyncio
 async def test_patch_employee_success(client, sample_employee):
-    r = await client.patch(f"{BASE}/{sample_employee.employee_id}", json={"role":"employee", "full_name":"Updated Name"})
+    r = await client.patch(f"{BASE}/{sample_employee.employee_id}", json={"full_name": "Updated Name"})
     assert r.status_code == 200, r.text
     assert r.json()["full_name"] == "Updated Name"
 
 
 @pytest.mark.asyncio
 async def test_patch_employee_invalid(client, sample_employee):
-    r = await client.patch(f"{BASE}/{sample_employee.employee_id}", json={"full_name":"Missing role"})
+    r = await client.patch(f"{BASE}/{sample_employee.employee_id}", json={"role": "admin"})
     assert r.status_code == 422
 
 

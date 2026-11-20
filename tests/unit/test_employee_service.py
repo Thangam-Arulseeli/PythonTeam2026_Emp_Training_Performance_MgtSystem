@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from app.exceptions.exceptions import (EmployeeAlreadyExistsException,
@@ -37,6 +38,7 @@ async def test_create_success(sample_employee_data):
     repo.create_employee.side_effect = create
     result = await svc.create_employee(EmployeeCreate(**sample_employee_data))
     assert result.email == sample_employee_data['email']
+    assert result.role == 'employee'
     repo.create_employee.assert_awaited_once()
     db.commit.assert_awaited_once()
     db.refresh.assert_awaited_once_with(result)
@@ -63,15 +65,29 @@ async def test_update_success():
     item = employee()
     repo.get_employee_by_id.return_value = item
     repo.update_employee.return_value = item
-    await svc.update_employee(100, EmployeeUpdate(role='employee', full_name='Updated'))
+    await svc.update_employee(100, EmployeeUpdate(full_name='Updated'))
     args = repo.update_employee.await_args.args
     assert args[0] is item
-    assert args[1] == {'role': 'employee', 'full_name': 'Updated'}
+    assert args[1] == {'full_name': 'Updated'}
     db.commit.assert_awaited_once()
 
 
 
 
+
+
+@pytest.mark.parametrize('phone', ['7123456789', '612345678', '61234567890', '612345678a'])
+def test_employee_writes_reject_invalid_phone(sample_employee_data, phone):
+    with pytest.raises(ValidationError, match='phone'):
+        EmployeeCreate(**(sample_employee_data | {'phone': phone}))
+    with pytest.raises(ValidationError, match='phone'):
+        EmployeeUpdate(phone=phone)
+
+
+def test_employee_writes_accept_valid_phone(sample_employee_data):
+    phone = '6123456789'
+    assert EmployeeCreate(**(sample_employee_data | {'phone': phone})).phone == phone
+    assert EmployeeUpdate(phone=phone).phone == phone
 
 
 @pytest.mark.asyncio
