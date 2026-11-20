@@ -4,6 +4,7 @@ Create etpms_test_db separately. This suite never connects to the application's
 normal database URL. The same SQLAlchemy schema is created if missing.
 """
 import os
+from collections.abc import AsyncIterator, Callable
 from datetime import date
 from types import SimpleNamespace
 from uuid import uuid4
@@ -13,7 +14,7 @@ import pytest_asyncio
 from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.engine import URL
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
 load_dotenv()
@@ -27,7 +28,7 @@ from app.models.course import Course
 from app.models.trainer import Trainer
 
 
-def _test_database_url():
+def _test_database_url() -> URL:
     name = os.getenv("TEST_DB_NAME", "etpms_test_db")
     if name != "etpms_test_db":
         raise RuntimeError("Refusing unsafe database: TEST_DB_NAME must equal etpms_test_db")
@@ -46,7 +47,7 @@ def _test_database_url():
 
 
 @pytest_asyncio.fixture(scope="function")
-async def test_engine():
+async def test_engine() -> AsyncIterator[AsyncEngine]:
     engine = create_async_engine(_test_database_url(), echo=False, poolclass=NullPool)
     try:
         async with engine.begin() as conn:
@@ -57,7 +58,7 @@ async def test_engine():
 
 
 @pytest_asyncio.fixture
-async def test_session(test_engine):
+async def test_session(test_engine: AsyncEngine) -> AsyncIterator[AsyncSession]:
     async with test_engine.connect() as connection:
         transaction = await connection.begin()
         async with AsyncSession(
@@ -74,18 +75,21 @@ async def test_session(test_engine):
 
 
 @pytest.fixture
-def role_user():
-    def make(role="admin"):
+def role_user() -> Callable[[str], SimpleNamespace]:
+    def make(role: str = "admin") -> SimpleNamespace:
         return SimpleNamespace(role=role, is_active=True, user_id=1)
     return make
 
 
 @pytest_asyncio.fixture
-async def client(test_session, role_user):
-    async def override_get_session():
+async def client(
+    test_session: AsyncSession,
+    role_user: Callable[[str], SimpleNamespace],
+) -> AsyncIterator[AsyncClient]:
+    async def override_get_session() -> AsyncIterator[AsyncSession]:
         yield test_session
 
-    async def override_user():
+    async def override_user() -> SimpleNamespace:
         return role_user("admin")
 
     original = dict(app.dependency_overrides)
@@ -102,16 +106,16 @@ async def client(test_session, role_user):
 
 
 @pytest.fixture
-def as_role(role_user):
-    def switch(role):
-        async def override():
+def as_role(role_user: Callable[[str], SimpleNamespace]) -> Callable[[str], None]:
+    def switch(role: str) -> None:
+        async def override() -> SimpleNamespace:
             return role_user(role)
         app.dependency_overrides[get_current_user] = override
     return switch
 
 
 @pytest_asyncio.fixture
-async def sample_course(test_session):
+async def sample_course(test_session: AsyncSession) -> AsyncIterator[Course]:
     course = Course(
         course_name="Test course " + uuid4().hex[:12],
         description="pytest", duration_value=2, duration_unit="weeks",
@@ -122,7 +126,7 @@ async def sample_course(test_session):
 
 
 @pytest_asyncio.fixture
-async def sample_trainer(test_session):
+async def sample_trainer(test_session: AsyncSession) -> AsyncIterator[Trainer]:
     key = uuid4().hex[:12]
     trainer = Trainer(
         trainer_name="Trainer " + key, dob=date(1990, 1, 1),
