@@ -6,6 +6,7 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
@@ -33,7 +34,7 @@ TEST_DATABASE_URL = URL.create(
 
 
 @pytest_asyncio.fixture
-async def test_engine():
+async def test_engine()  -> AsyncGenerator[AsyncEngine, None]:
     engine = create_async_engine(
         TEST_DATABASE_URL,
         echo=False,
@@ -51,7 +52,7 @@ async def test_engine():
 
 
 @pytest_asyncio.fixture
-async def test_session(test_engine):
+async def test_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
     TestingSessionLocal = async_sessionmaker(
         bind=test_engine,
         class_=AsyncSession,
@@ -63,7 +64,7 @@ async def test_session(test_engine):
 
 
 @pytest_asyncio.fixture
-async def client(test_session):
+async def client(test_session) -> AsyncGenerator[AsyncClient, None]:
     async def override_get_session() -> AsyncGenerator[AsyncSession, None]:
         yield test_session
 
@@ -80,7 +81,7 @@ async def client(test_session):
 
 
 @pytest_asyncio.fixture
-async def admin_user(test_session):
+async def admin_user(test_session) -> User:
     admin = User(
         username="test_admin",
         email="admin_test@example.com",
@@ -97,7 +98,7 @@ async def admin_user(test_session):
 
 
 @pytest_asyncio.fixture
-async def trainer_user(test_session):
+async def trainer_user(test_session) -> User:
     user = User(
         username="test_trainer",
         email="trainer_test@gmail.com",
@@ -114,7 +115,7 @@ async def trainer_user(test_session):
 
 
 @pytest.fixture
-def trainer_data():
+def trainer_data() -> dict[str, str | int | list[str]]:
     return {
         "trainer_name": "testtrainer",
         "dob": "1995-05-10",
@@ -128,9 +129,8 @@ def trainer_data():
     }
 
 
-
 @pytest_asyncio.fixture
-async def trainer_record(test_session, trainer_user):
+async def trainer_record(test_session, trainer_user)  -> Trainer:
     trainer = Trainer(
         trainer_name="Test Trainer",
         dob=date(1990, 5, 10),
@@ -151,14 +151,12 @@ async def trainer_record(test_session, trainer_user):
 
 
 @pytest_asyncio.fixture
-async def admin_headers(admin_user):
+async def admin_headers(admin_user)  -> dict[str, str]:
     token = create_access_token(admin_user.user_id, admin_user.role)
     return {"Authorization": f"Bearer {token}"}
 
 
 @pytest_asyncio.fixture
-async def trainer_headers(trainer_user):
+async def trainer_headers(trainer_user) -> dict[str, str]:
     token = create_access_token(trainer_user.user_id, trainer_user.role)
     return {"Authorization": f"Bearer {token}"}
-
-
