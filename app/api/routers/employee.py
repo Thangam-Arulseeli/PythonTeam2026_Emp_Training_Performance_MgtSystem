@@ -79,7 +79,7 @@ async def get_all_employees(
     "/inactive_employee",
     response_model=list[EmployeeResponse],
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(require_roles("admin", "employee", "trainer"))],
+    dependencies=[Depends(require_roles("admin"))],
 )
 async def get_all_employees_inactive(
     service: EmployeeServiceDep,
