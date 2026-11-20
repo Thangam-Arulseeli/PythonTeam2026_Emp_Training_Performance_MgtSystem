@@ -11,6 +11,7 @@ venv/
 
 # Test cache
 .pytest_cache/
+pytest.ini
 
 # Coverage reports
 .coverage
