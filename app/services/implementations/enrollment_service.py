@@ -21,7 +21,9 @@ from app.schemas.enrollment_schema import (
     EnrollmentResponse,
     EnrollmentListResponse,
     EnrollmentStatus,
-    EnrollmentStatusUpdate
+    EnrollmentStatusUpdate,
+    BatchEnrollmentListResponse,
+    BatchEnrollmentItem
 )
 from app.services.interfaces.enrollment_service import EnrollmentServiceInterface
 from app.utils.logger import logger
@@ -342,19 +344,34 @@ class EnrollmentService(EnrollmentServiceInterface):
 
 
     async def get_enrollments_by_batch(
-        self, 
-        batch_id : int ,
-        current_user: User
-    )->list[EnrollmentResponse]:
-        batch = await self.validate_batch_access(batch_id, current_user)
-        enrollments = await self.enrollment_repo.get_by_batch_id(
-            batch_id= batch_id
+        self,
+        batch_id: int,
+        page: int,
+        size: int,
+        current_user: User,
+    ) -> BatchEnrollmentListResponse:
+
+        batch = await self.validate_batch_access(batch_id,current_user)
+        skip = (page - 1) * size
+        enrollments, total = await self.enrollment_repo.get_by_batch_id(
+            batch_id=batch_id,
+            skip=skip,
+            limit=size,
         )
 
-        return [
-            EnrollmentResponse.model_validate(enrollment)
+        enrollment_items = [
+            BatchEnrollmentItem.model_validate(enrollment)
             for enrollment in enrollments
         ]
+
+        return BatchEnrollmentListResponse(
+            batch=batch,
+            items=enrollment_items,
+            total=total,
+            page=page,
+            size=size,
+        )
+
 
 
 

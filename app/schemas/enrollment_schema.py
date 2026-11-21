@@ -80,5 +80,22 @@ class EnrollmentListResponse(BaseModel):
     total: int
     page: int
     size: int
-        
+
+class BatchEnrollmentItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    enrollment_id: int
+    enrollment_date: datetime
+    status: EnrollmentStatus
+    status_update_date: datetime | None = None
+    remarks: str | None = None
+    employee: EmployeeDetails
+    created_at: datetime
+    updated_at: datetime
+
+class BatchEnrollmentListResponse(BaseModel):
+    batch: BatchDetails
+    items: list[BatchEnrollmentItem]
+    total: int
+    page: int
+    size: int
 

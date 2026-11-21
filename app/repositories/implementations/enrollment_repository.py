@@ -132,22 +132,43 @@ class EnrollmentRepository(EnrollmentInterface):
     # to get enrollment by batch id
     async def get_by_batch_id(
         self, 
-        batch_id : int , 
+        batch_id : int ,
+        skip : int,
+        limit : int, 
         trainer_id : int | None = None
-    )->list[Enrollment]:
+    )->tuple[list[Enrollment],int]:
         query = (select(Enrollment)
                  .options(*self.load_details())
                  .where(Enrollment.batch_id==batch_id)
                 )
+
+        count_query = (
+            select(func.count(Enrollment.enrollment_id))
+            .where(Enrollment.batch_id == batch_id)
+        )
 
         if trainer_id is not None:
             query = query.join(Batch,Enrollment.batch_id == Batch.id).where(
                 Batch.trainer_id == trainer_id
             )
 
-        query = query.order_by(Enrollment.enrollment_date)
+            count_query =count_query.join(
+                Batch, 
+                Enrollment.batch_id == Batch.id
+            ).where(Batch.trainer_id == trainer_id)
+
+        total_result = await self.db.execute(count_query)
+        total = total_result.scalar_one()
+
+        query = (
+            query
+            .order_by(Enrollment.enrollment_date.desc())
+            .offset(skip)
+            .limit(limit)
+        )
         result = await self.db.execute(query)
-        return list(result.scalars().all())
+        enrollments=list(result.scalars().all())
+        return enrollments,total
     
 
 
