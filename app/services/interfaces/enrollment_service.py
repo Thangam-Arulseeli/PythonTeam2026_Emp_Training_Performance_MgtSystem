@@ -6,7 +6,8 @@ from app.schemas.enrollment_schema import (
     EnrollmentResponse,
     EnrollmentStatusUpdate,
     EnrollmentStatus,
-    EnrollmentListResponse
+    EnrollmentListResponse,
+    BatchEnrollmentListResponse
 )
 
 
@@ -49,7 +50,9 @@ class EnrollmentServiceInterface(ABC):
     async def get_enrollments_by_batch(
         self,
         batch_id: int,
+        page: int,
+        size: int,
         current_user: User
-    ) -> list[EnrollmentResponse]:
+    ) -> BatchEnrollmentListResponse:
         pass
 

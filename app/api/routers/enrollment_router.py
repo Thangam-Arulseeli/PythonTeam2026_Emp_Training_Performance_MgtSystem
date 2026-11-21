@@ -11,6 +11,7 @@ from app.schemas.enrollment_schema import (
     EnrollmentResponse,
     EnrollmentStatus,
     EnrollmentStatusUpdate,
+    BatchEnrollmentListResponse
 )
 from app.services.interfaces.enrollment_service import EnrollmentServiceInterface
 
@@ -74,15 +75,19 @@ async def get_all_enrollments(
 # GET ENROLLMENTS BY BATCH ID
 @router.get(
     "/batch/{batch_id}",
-    response_model=list[EnrollmentResponse]
+    response_model=BatchEnrollmentListResponse
 )
 async def get_enrollments_by_batch(
     current_user : Annotated[User, Depends(require_roles("admin","trainer"))],
     service: Annotated[EnrollmentServiceInterface, Depends(get_enrollment_service)],
-    batch_id:int
-)->list[EnrollmentResponse]:
+    batch_id:int,
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+)->BatchEnrollmentListResponse:
     return await service.get_enrollments_by_batch(
         batch_id=batch_id,
+        page=page,
+        size=size,
         current_user=current_user
     )
 
@@ -109,7 +114,7 @@ async def get_enrollments_by_employee(
     "/{enrollment_id}/status",
     response_model=EnrollmentResponse,
     status_code=status.HTTP_200_OK,
-    description="Status value includes 'enrolled','paused','cancelled','completed'"
+    description="Status value includes 'Enrolled','Paused','Cancelled','Completed'"
 )
 async def update_enrollment_status(
     enrollment_id: int,
