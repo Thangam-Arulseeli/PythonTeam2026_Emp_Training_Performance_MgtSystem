@@ -101,10 +101,31 @@ class BatchServiceImpl(BatchService):
         size: int = 10,
         status: BatchStatus | None = None,
         is_active: bool = True,
+        start_date: date | None = None,
+        end_date: date | None = None,
     ) -> BatchListResponse:
-        """Fetch a batch page filtered by completion status and active state."""
+        """Fetch a batch page filtered by dates, completion status, and active state."""
+        if (start_date is None) != (end_date is None):
+            raise UnprocessableEntityException(
+                "Both start_date and end_date must be provided together"
+            )
+        if start_date is not None and end_date is not None:
+            self.validate_dates(start_date, end_date)
+            today = date.today()
+            if start_date > today or end_date > today:
+                raise UnprocessableEntityException(
+                    "Search start_date and end_date cannot be after today"
+                )
+
         skip = max(0, (page - 1) * size)
-        items, total = await self.batch_repo.get_all(skip, size, status, is_active)
+        if start_date is None and end_date is None:
+            items, total = await self.batch_repo.get_all(
+                skip, size, status, is_active
+            )
+        else:
+            items, total = await self.batch_repo.get_all(
+                skip, size, status, is_active, start_date, end_date
+            )
         return self.format_batch_list(items, total=total, page=page, size=size)
 
     async def create_batch(self, payload: BatchCreate) -> BatchResponse:
