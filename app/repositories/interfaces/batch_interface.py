@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import date
 
 from app.models.batch import Batch
 
@@ -19,8 +20,10 @@ class BatchInterface(ABC):
         limit: int,
         status: str | None = None,
         is_active: bool = True,
+        start_date: date | None = None,
+        end_date: date | None = None,
     ) -> tuple[list[Batch], int]:
-        """Return a batch page filtered by completion status and active state."""
+        """Return a batch page filtered by date range, status, and active state."""
 
     @abstractmethod
     async def get_by_course(self, course_id: int) -> list[Batch]:

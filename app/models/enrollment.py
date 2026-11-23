@@ -23,13 +23,13 @@ class Enrollment(Base):
     __tablename__ = "enrollments"
 
     __table_args__ = (
-        UniqueConstraint(
+        UniqueConstraint(       #composite unique constraint
             "employee_id",
             "batch_id",
             name="uq_enrollment_employee_batch",
         ),
         CheckConstraint(
-            "status IN ('enrolled', 'cancelled', 'paused', 'completed')",
+            "status IN ('Enrolled', 'Cancelled', 'Paused', 'Completed')",
             name="ck_enrollment_status",
         ),
     )
@@ -58,8 +58,8 @@ class Enrollment(Base):
     )
     status : Mapped[str] = mapped_column(
         String(15),
-        default="enrolled",
-        server_default="enrolled",
+        default="Enrolled",
+        server_default="Enrolled",
         nullable=False
     )
     status_update_date : Mapped[datetime] = mapped_column(

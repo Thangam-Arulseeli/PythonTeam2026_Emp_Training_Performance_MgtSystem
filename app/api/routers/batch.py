@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query, status
+from datetime import date
 
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.api.dependencies.batch_dependencies import get_batch_service
@@ -45,12 +46,33 @@ async def list_batches(
     size: int = Query(10, ge=1, le=100, description="Items per page"),
     status: BatchStatus | None = Query(None, description="Filter batches by status"),
     is_active: bool = Query(True, description="Filter batches by active state"),
+    start_date: date | None = Query(
+        None,
+        description=(
+            "Inclusive lower bound for the batch start date. "
+            "Use YYYY-MM-DD format, for example 2026-11-20."
+        ),
+        examples=["2026-11-20"],
+    ),
+    end_date: date | None = Query(
+        None,
+        description=(
+            "Inclusive upper bound for the batch start date. "
+            "Use YYYY-MM-DD format, for example 2026-11-21."
+        ),
+        examples=["2026-11-21"],
+    ),
     current_user: User = Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchListResponse:
-    """Return active batches by default, with optional status and active filters."""
+    """Return paginated batches filtered by date range, status, and active state."""
     return await service.list_batches(
-        page=page, size=size, status=status, is_active=is_active
+        page=page,
+        size=size,
+        status=status,
+        is_active=is_active,
+        start_date=start_date,
+        end_date=end_date,
     )
 
 
