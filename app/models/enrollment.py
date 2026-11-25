@@ -51,6 +51,7 @@ class Enrollment(Base):
     )
     enrollment_date: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     status : Mapped[str] = mapped_column(
         String(15),
         default="Enrolled",
