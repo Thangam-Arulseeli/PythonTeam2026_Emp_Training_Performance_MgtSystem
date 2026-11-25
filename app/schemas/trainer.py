@@ -46,8 +46,18 @@ class TrainerCreate(BaseModel):
         if not value.isdigit():
             raise ValueError("Phone number must contain only digits")
 
+        if value[0] not in "6789":
+            raise ValueError("Phone number must start with 6, 7, 8, or 9")
+
         return value
 
+    @field_validator("joining_date")
+    @classmethod
+    def validate_joining_date(cls, value: date) -> date:
+        if value > date.today():
+            raise ValueError("Joining date cannot be in the future")
+
+        return value
 
 class TrainerUpdate(BaseModel):
     trainer_name: str | None = Field(default=None, min_length=2, max_length=100)
@@ -87,6 +97,17 @@ class TrainerUpdate(BaseModel):
     def validate_phone_number(cls, value: str) -> str:
         if not value.isdigit():
             raise ValueError("Phone number must contain only digits")
+
+        if value[0] not in "6789":
+            raise ValueError("Phone number must start with 6, 7, 8, or 9")
+
+        return value
+
+    @field_validator("joining_date")
+    @classmethod
+    def validate_joining_date(cls, value: date) -> date:
+        if value > date.today():
+            raise ValueError("Joining date cannot be in the future")
 
         return value
 

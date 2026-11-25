@@ -10,7 +10,7 @@ from app.repositories.implementations.trainer_repository import (
 from app.services.implementations.trainer_service import TrainerServiceImpl
 
 
-def get_trainer_repository(db: Annotated[AsyncSession, Depends(get_session)]):
+def get_trainer_repository(db: Annotated[AsyncSession, Depends(get_session)]) -> TrainerRepositoryImpl:
     return TrainerRepositoryImpl(db)
 
 
@@ -19,5 +19,5 @@ def get_trainer_service(
         TrainerRepositoryImpl,
         Depends(get_trainer_repository),
     ],
-):
+)->TrainerServiceImpl:
     return TrainerServiceImpl(repository)

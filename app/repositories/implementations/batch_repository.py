@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy import exists, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,11 +31,17 @@ class BatchRepository(BatchInterface):
         limit: int,
         status: str | None = None,
         is_active: bool = True,
+        start_date: date | None = None,
+        end_date: date | None = None,
     ) -> tuple[list[Batch], int]:
         """Return a page and count filtered by completion status and active state."""
         stmt = select(Batch).where(Batch.is_active.is_(is_active))
         if status is not None:
             stmt = stmt.where(Batch.status == status)
+        if start_date is not None:
+            stmt = stmt.where(Batch.start_date >= start_date)
+        if end_date is not None:
+            stmt = stmt.where(Batch.start_date <= end_date)
 
         count_stmt = select(func.count()).select_from(stmt.subquery())
         count_res = await self.db.execute(count_stmt)

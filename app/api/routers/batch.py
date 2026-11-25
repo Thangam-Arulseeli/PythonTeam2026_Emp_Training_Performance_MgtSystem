@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, Query, status
+from datetime import date
 
 from app.api.dependencies.auth import get_current_user, require_roles
 from app.api.dependencies.batch_dependencies import get_batch_service
 from app.models.user import User
 from app.schemas.batchSchema import (
     BatchCreate,
+    BatchEndDateUpdate,
     BatchListResponse,
     BatchResponse,
     BatchStatus,
@@ -44,12 +46,33 @@ async def list_batches(
     size: int = Query(10, ge=1, le=100, description="Items per page"),
     status: BatchStatus | None = Query(None, description="Filter batches by status"),
     is_active: bool = Query(True, description="Filter batches by active state"),
+    start_date: date | None = Query(
+        None,
+        description=(
+            "Inclusive lower bound for the batch start date. "
+            "Use YYYY-MM-DD format, for example 2026-11-20."
+        ),
+        examples=["2026-11-20"],
+    ),
+    end_date: date | None = Query(
+        None,
+        description=(
+            "Inclusive upper bound for the batch start date. "
+            "Use YYYY-MM-DD format, for example 2026-11-21."
+        ),
+        examples=["2026-11-21"],
+    ),
     current_user: User = Depends(get_current_user),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchListResponse:
-    """Return active batches by default, with optional status and active filters."""
+    """Return paginated batches filtered by date range, status, and active state."""
     return await service.list_batches(
-        page=page, size=size, status=status, is_active=is_active
+        page=page,
+        size=size,
+        status=status,
+        is_active=is_active,
+        start_date=start_date,
+        end_date=end_date,
     )
 
 
@@ -120,7 +143,7 @@ async def update_batch_status(
     current_user: User = Depends(require_roles("admin")),
     service: BatchService = Depends(get_batch_service),
 ) -> BatchResponse:
-    """Set a batch to completed or not_completed; admin access is required."""
+    """Set a batch to Completed or Not Completed; admin access is required."""
     return await service.update_batch_status(batch_id, payload)
 
 
@@ -137,6 +160,21 @@ async def update_batch(
 ) -> BatchResponse:
     """Update the supplied batch fields; access is restricted to administrators."""
     return await service.update_batch(batch_id, payload)
+
+
+@router.patch(
+    "/{batch_id}/end-date",
+    response_model=BatchResponse,
+    summary="Change a batch end date with a remark",
+)
+async def update_batch_end_date(
+    batch_id: int,
+    payload: BatchEndDateUpdate,
+    current_user: User = Depends(require_roles("admin")),
+    service: BatchService = Depends(get_batch_service),
+) -> BatchResponse:
+    """Change the end date with a required remark; admin access is required."""
+    return await service.update_batch_end_date(batch_id, payload)
 
 
 @router.delete(

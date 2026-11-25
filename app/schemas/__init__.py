@@ -7,6 +7,7 @@ from app.schemas.auth_schema import (
 )
 from app.schemas.batchSchema import (
     BatchCreate,
+    BatchEndDateUpdate,
     BatchListResponse,
     BatchResponse,
     BatchUpdate,
@@ -57,6 +58,7 @@ __all__ = [
     "CourseListResponse",
     # Batch schemas
     "BatchCreate",
+    "BatchEndDateUpdate",
     "BatchUpdate",
     "BatchResponse",
     "BatchListResponse",
