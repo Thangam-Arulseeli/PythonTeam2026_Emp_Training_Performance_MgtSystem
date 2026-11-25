@@ -36,6 +36,13 @@ from .attendance_session import (
     AttendanceSessionUpdate,
     AttendanceSummaryResponse,
 )
+from .performance_evaluation_schema import (
+    PerformanceEvaluationCreate,
+    PerformanceEvaluationDetailResponse,
+    PerformanceEvaluationResponse,
+    PerformanceEvaluationUpdate,
+    PerformancePreviewResponse,
+)
 
 __all__ = [
     # Auth schemas
@@ -68,4 +75,10 @@ __all__ = [
     "AttendanceRecordUpdate",
     "AttendanceRecordResponse",
     "AttendanceSummaryResponse",
+    # Performance Evaluation schemas
+    "PerformancePreviewResponse",
+    "PerformanceEvaluationCreate",
+    "PerformanceEvaluationUpdate",
+    "PerformanceEvaluationResponse",
+    "PerformanceEvaluationDetailResponse",
 ]
