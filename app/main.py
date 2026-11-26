@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from app.api.routers import (
-    attendance_record_router,
+    assessment_router,
     attendance_session_router,
     auth_router,
     batch_router,
@@ -9,6 +9,8 @@ from app.api.routers import (
     course_router,
     enrollment_router,
     health_router,
+    attendance_record_router,
+    performance_router,
 )
 from app.api.routers.employee import router as employee_router
 from app.api.routers.trainer_resume_router import router as trainer_resume_router
@@ -59,3 +61,6 @@ app.include_router(enrollment_router)
 
 app.include_router(attendance_session_router)
 app.include_router(attendance_record_router)
+
+app.include_router(assessment_router)
+app.include_router(performance_router)
